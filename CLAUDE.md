@@ -91,9 +91,8 @@ tools/      run_tests.sh, balance simulator, debug menu
 ## Milestone status
 
 - [x] M0 – Project and pipeline. Includes the folder layout, autoload stubs, GUT, the Android
-  export preset and a splash screen that shows "Iron Harbor" in portrait. Verified here: tests are
-  green and the headless debug APK export succeeds. Launching it on a phone still has to be checked
-  on the dev machine.
+  export preset and a splash screen that shows "Iron Harbor" in portrait. Tests are green, the
+  headless debug export works, and the APK has been installed and launched on the designer's phone.
 - [ ] M1 – Core combat
 - [ ] M2 – Waves and data
 - [ ] M3 – Loot and salvage
