@@ -1,0 +1,17 @@
+[
+  {
+    "id": "machine_gun",
+    "name_key": "WEAPON_MACHINE_GUN",
+    "domains": ["surface", "air"],
+    "damage_type": "kinetic",
+    "base": {
+      "damage": 6,
+      "fire_rate": 8,
+      "range": 550,
+      "turn_speed": 360,
+      "projectile_speed": 1400,
+      "spread": 4
+    },
+    "projectile": "bullet"
+  }
+]

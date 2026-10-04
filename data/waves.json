@@ -1,0 +1,11 @@
+{
+  "trickle": {
+    "enemy": "raider_skiff",
+    "first_delay": 1.5,
+    "start_interval": 2.2,
+    "min_interval": 0.7,
+    "interval_decay": 0.97,
+    "spawn_margin": 80,
+    "edge_band": 0.8
+  }
+}

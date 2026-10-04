@@ -1,0 +1,13 @@
+{
+  "fortress": { "radius": 140, "base_hp": 100 },
+  "aim": { "fire_tolerance_deg": 4 },
+  "crit": { "chance": 0.05, "multiplier": 2.0 },
+  "armor_multipliers": {
+    "kinetic":   { "light": 1.0, "armored": 0.5,  "shield": 0.75 },
+    "explosive": { "light": 1.0, "armored": 1.25, "shield": 0.75 },
+    "energy":    { "light": 0.9, "armored": 1.0,  "shield": 1.5 }
+  },
+  "steering": { "separation_radius": 60, "separation_strength": 0.6 },
+  "spatial_grid": { "cell_size": 128 },
+  "pools": { "enemies": 32, "projectiles": 256 }
+}

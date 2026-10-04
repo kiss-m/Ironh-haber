@@ -1,0 +1,7 @@
+keys,sk,en
+HUD_KILLS,Zničené: %d,Kills: %d
+GAME_OVER_TITLE,Základňa zničená,Base destroyed
+GAME_OVER_SUMMARY,Zničení nepriatelia: %d\nČas: %s,Enemies destroyed: %d\nTime: %s
+BUTTON_RETRY,Skúsiť znova,Try again
+WEAPON_MACHINE_GUN,Guľomet,Machine Gun
+ENEMY_RAIDER_SKIFF,Pirátsky čln,Raider Skiff

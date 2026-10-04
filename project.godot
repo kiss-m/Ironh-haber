@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Iron Harbor"
 config/description="Portrait naval fortress defense for Android."
-config/version="0.1.0"
+config/version="0.2.0"
 run/main_scene="res://meta/splash/splash.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 boot_splash/bg_color=Color(0.043, 0.165, 0.247, 1)
@@ -39,6 +39,10 @@ window/handheld/orientation=1
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/gut/plugin.cfg")
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://locale/translations.sk.translation", "res://locale/translations.en.translation")
 
 [input_devices]
 

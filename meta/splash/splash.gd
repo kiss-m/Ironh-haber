@@ -1,13 +1,17 @@
 class_name Splash
 extends Control
-## First screen (GAME_DESIGN.md section 12). In M0 it only shows the title in portrait;
-## from M4 it routes to the main menu.
+## First screen (GAME_DESIGN.md section 12): shows the title in portrait, then moves on after a
+## short delay or a tap. Until the main menu exists (M4) it goes straight to the battle.
 
 const BACKGROUND_COLOR := Color("0b2a3f")
 const TITLE_COLOR := Color("e8eef2")
 const SUBTITLE_COLOR := Color("8fa9ba")
 const TITLE_FONT_SIZE := 128
 const SUBTITLE_FONT_SIZE := 40
+const AUTO_ADVANCE_SECONDS := 1.5
+const NEXT_SCENE := Battle.SCENE_PATH
+
+var _advanced := false
 
 
 func _ready() -> void:
@@ -33,6 +37,26 @@ func _ready() -> void:
 	var version: String = ProjectSettings.get_setting("application/config/version", "")
 	var subtitle := _make_label("Version", "v%s" % version, SUBTITLE_FONT_SIZE, SUBTITLE_COLOR)
 	column.add_child(subtitle)
+
+	var timer := Timer.new()
+	timer.name = "AdvanceTimer"
+	timer.one_shot = true
+	timer.wait_time = AUTO_ADVANCE_SECONDS
+	timer.timeout.connect(_advance)
+	add_child(timer)
+	timer.start()
+
+
+func _gui_input(event: InputEvent) -> void:
+	if (event is InputEventScreenTouch or event is InputEventMouseButton) and event.is_pressed():
+		_advance()
+
+
+func _advance() -> void:
+	if _advanced:
+		return
+	_advanced = true
+	SceneRouter.goto(NEXT_SCENE)
 
 
 func _make_label(node_name: String, text: String, font_size: int, color: Color) -> Label:

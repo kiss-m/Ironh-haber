@@ -1,0 +1,17 @@
+[
+  {
+    "id": "raider_skiff",
+    "name_key": "ENEMY_RAIDER_SKIFF",
+    "domain": "surface",
+    "armor": "light",
+    "hp": 20,
+    "shield": 0,
+    "speed": 120,
+    "radius": 24,
+    "behavior": "ram",
+    "behavior_params": { "weave_amplitude": [20, 40], "weave_frequency": 0.3 },
+    "attack": { "type": "contact", "damage": 5 },
+    "budget_cost": 1,
+    "first_wave": 1
+  }
+]

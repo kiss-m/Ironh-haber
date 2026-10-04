@@ -73,18 +73,35 @@ adb install -r build/iron-harbor-debug.apk                  # USB-connected phon
   picks the shape or the sprite. Use only assets with a clear license and record each one in
   `CREDITS.md`.
 
+## Conventions
+
+- **Data files.** `weapons.json` and `enemies.json` are arrays of definitions with unique `id`s;
+  `balance.json` and `waves.json` are objects. Distances are design pixels (1080-wide portrait),
+  times are seconds, rates are per second and angles are degrees (code converts to radians).
+  Fields the design doc does not list yet: enemy `radius` (hit circle), weapon `projectile_speed`
+  and `spread`.
+- **Strings in data, ints at runtime.** Definitions are converted when an entity is set up
+  (`CombatTypes` parses damage types, armor and domains), so per-frame code compares ints.
+- **Battle stepping.** `battle/battle.gd` builds the world, systems and HUD and calls each system's
+  `tick(delta)` in a fixed order: spawn → enemies → grid rebuild → turrets → projectiles → effects.
+  Integration tests turn physics processing off and call `battle.step()` themselves.
+- **Translations.** Add keys to `locale/translations.csv`, run the import, and commit the
+  regenerated `locale/*.translation` files too. They are small and deterministic, and committing
+  them keeps a fresh clone free of "missing translation" errors. A new locale also has to be added
+  to `internationalization/locale/translations` in `project.godot`.
+
 ## Layout
 
 ```
 autoload/   EventBus, DataRegistry, GameState, SceneRouter, AudioManager
 core/       pure rules (unit-tested)
-battle/     battle scene, systems, entities
+battle/     battle.gd (root), entities/, systems/, behaviors/ (enemy AI), layers/ (drawing), hud/
 meta/       splash, main menu, sector select, shipyard, results
 ui/         shared widgets, theme
 data/       JSON configs
 locale/     translations.csv
 assets/     sprites, audio, fonts
-tests/      GUT tests (test_*.gd; config in .gutconfig.json)
+tests/      GUT tests: unit/ for core rules, integration/ for the stepped battle (config in .gutconfig.json)
 tools/      run_tests.sh, balance simulator, debug menu
 ```
 
@@ -93,7 +110,11 @@ tools/      run_tests.sh, balance simulator, debug menu
 - [x] M0 – Project and pipeline. Includes the folder layout, autoload stubs, GUT, the Android
   export preset and a splash screen that shows "Iron Harbor" in portrait. Tests are green, the
   headless debug export works, and the APK has been installed and launched on the designer's phone.
-- [ ] M1 – Core combat
+- [x] M1 – Core combat. Includes the ocean and fortress, one Machine Gun turret with
+  turn-speed aiming, the aim line and fire tolerance, bullets as pooled flat arrays, and Raider
+  Skiffs trickling in from the side edges. Also damage with armor and crits, base HP, a slow-motion
+  game over with retry, and SK/EN translations. `WaveDirector` is a temporary trickle spawner
+  (`waves.json` → `trickle`) that M2 replaces. Waiting for the on-device check.
 - [ ] M2 – Waves and data
 - [ ] M3 – Loot and salvage
 - [ ] M4 – Meta progression and save
