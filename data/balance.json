@@ -1,57 +1,39 @@
 {
-  "fortress": {
-    "radius": 140,
-    "base_hp": 100,
-    "mount_radius": 72
-  },
-  "aim": {
-    "fire_tolerance_deg": 4
-  },
-  "crit": {
-    "chance": 0.05,
-    "multiplier": 2.0
-  },
+  "fortress": { "radius": 140, "base_hp": 100, "mount_radius": 72 },
+  "aim": { "fire_tolerance_deg": 4 },
+  "crit": { "chance": 0.05, "multiplier": 2.0 },
   "armor_multipliers": {
-    "kinetic": {
-      "light": 1.0,
-      "armored": 0.5,
-      "shield": 0.75
-    },
-    "explosive": {
-      "light": 1.0,
-      "armored": 1.25,
-      "shield": 0.75
-    },
-    "energy": {
-      "light": 0.9,
-      "armored": 1.0,
-      "shield": 1.5
-    }
+    "kinetic": { "light": 1.0, "armored": 0.5, "shield": 0.75 },
+    "explosive": { "light": 1.0, "armored": 1.25, "shield": 0.75 },
+    "energy": { "light": 0.9, "armored": 1.0, "shield": 1.5 }
   },
-  "steering": {
-    "separation_radius": 60,
-    "separation_strength": 0.6
-  },
-  "spatial_grid": {
-    "cell_size": 128
-  },
-  "pools": {
-    "enemies": 64,
-    "projectiles": 256
-  },
-  "starting_loadout": [
-    "machine_gun",
-    "naval_cannon"
-  ],
+  "steering": { "separation_radius": 60, "separation_strength": 0.6 },
+  "spatial_grid": { "cell_size": 128 },
+  "pools": { "enemies": 64, "projectiles": 256 },
+  "starting_loadout": ["machine_gun", "naval_cannon"],
   "stat_caps": {
-    "weapon.fire_rate": {
-      "max_mul": 2.5
-    },
-    "weapon.range": {
-      "max_mul": 1.5
-    },
-    "weapon.turn_speed": {
-      "max_mul": 2.0
-    }
+    "weapon.fire_rate": { "max_mul": 2.5 },
+    "weapon.range": { "max_mul": 1.5 },
+    "weapon.turn_speed": { "max_mul": 2.0 }
+  },
+  "loot": {
+    "float_time": 10,
+    "blink_time": 3,
+    "scatter": 30,
+    "merge_radius": 30,
+    "current_direction_deg": 20,
+    "current_speed": [8, 15],
+    "mark_radius": 120,
+    "spill_float_time": 4
+  },
+  "salvage_boat": {
+    "speed": 160,
+    "cargo": 8,
+    "pickup_radius": 30,
+    "hp": 50,
+    "respawn": 12,
+    "unload_time": 0.8,
+    "radius": 24,
+    "dock_tap_radius": 90
   }
 }

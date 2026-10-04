@@ -35,6 +35,9 @@ var attack_timer := 0.0
 var attack_ready := false
 var projectile_id := ""
 var projectile_hp := 0.0
+## Damage to the salvage boat on contact (hunters); 0 means the enemy ignores the boat.
+var boat_damage := 0.0
+var loot_table := ""
 var velocity := Vector2.ZERO
 var behavior: EnemyBehavior
 ## Per-enemy movement state rolled by the behavior on spawn.
@@ -69,6 +72,8 @@ func setup(def: Dictionary, p_behavior: EnemyBehavior, p_wave: int, hp_scale: fl
 	projectile_id = str(attack.get("projectile", ""))
 	projectile_hp = float(attack.get("projectile_hp", 0.0)) * hp_scale
 	contact_damage = attack_damage
+	boat_damage = float(attack.get("boat_damage", 0.0)) * damage_scale
+	loot_table = str(def.get("loot_table", ""))
 	behavior = p_behavior
 	state = State.SPAWN
 	alive = true

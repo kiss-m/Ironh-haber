@@ -29,6 +29,8 @@ var ocean: ColorRect
 var fortress: Fortress
 var turrets: Array[Turret] = []
 var enemy_layer: Node2D
+var loot_layer: Node2D
+var boat_layer: Node2D
 var projectile_layer: ProjectileLayer
 var fx_layer: FxLayer
 var systems: Node
@@ -38,6 +40,8 @@ var input_controller: InputController
 var wave_director: WaveDirector
 var enemy_system: EnemySystem
 var projectile_system: ProjectileSystem
+var loot_system: LootSystem
+var salvage_system: SalvageSystem
 var grid: SpatialGrid
 var hud: Hud
 
@@ -57,6 +61,7 @@ func _ready() -> void:
 	for turret in turrets:
 		slot_names.append(tr(turret.name_key))
 	hud.setup(run_state.max_hp, slot_names)
+	salvage_system.refresh_status()
 	input_controller.select(0)
 	wave_director.start(first_wave)
 
@@ -83,7 +88,8 @@ func _physics_process(delta: float) -> void:
 
 
 ## Advances the battle by one physics tick. Order matters: spawn, move enemies, re-bucket the
-## grid, turn and fire turrets, then move projectiles and resolve hits against the fresh grid.
+## grid, turn and fire turrets, move projectiles and resolve hits against the fresh grid (kills
+## drop loot), then drift loot and run the salvage boat.
 func step(delta: float) -> void:
 	if phase == Phase.ENDED:
 		return
@@ -95,6 +101,8 @@ func step(delta: float) -> void:
 	for turret in turrets:
 		turret.tick(delta)
 	projectile_system.tick(delta)
+	loot_system.tick(delta)
+	salvage_system.tick(delta)
 	fx_layer.tick(delta)
 	projectile_layer.queue_redraw()
 	if phase == Phase.RUNNING and run_state.base_hp <= 0.0:
@@ -125,6 +133,10 @@ func _build_world(balance: Dictionary) -> void:
 	ocean.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	world.add_child(ocean)
 
+	loot_layer = Node2D.new()
+	loot_layer.name = "LootLayer"
+	world.add_child(loot_layer)
+
 	fortress = Fortress.new()
 	fortress.name = "Fortress"
 	fortress.setup(float(balance["fortress"]["radius"]))
@@ -141,6 +153,9 @@ func _build_world(balance: Dictionary) -> void:
 		fortress.add_mount(mount_offset(slot, loadout.size(), mount_radius)).add_child(turret)
 		turrets.append(turret)
 
+	boat_layer = Node2D.new()
+	boat_layer.name = "BoatLayer"
+	world.add_child(boat_layer)
 	enemy_layer = Node2D.new()
 	enemy_layer.name = "EnemyLayer"
 	world.add_child(enemy_layer)
@@ -171,12 +186,30 @@ func _build_systems(balance: Dictionary) -> void:
 	grid = SpatialGrid.new(Rect2(), float(balance["spatial_grid"]["cell_size"]))
 	var generator := WaveGenerator.new(DataRegistry.enemies, DataRegistry.waves)
 
+	loot_system = LootSystem.new()
+	loot_system.name = "LootSystem"
+	loot_system.run_state = run_state
+	loot_system.scaling = generator.scaling
+	loot_system.stats = stats
+	loot_system.setup(loot_layer, DataRegistry.loot_tables, balance["loot"])
+	systems.add_child(loot_system)
+
+	salvage_system = SalvageSystem.new()
+	salvage_system.name = "SalvageSystem"
+	salvage_system.loot = loot_system
+	salvage_system.run_state = run_state
+	salvage_system.stats = stats
+	salvage_system.fx = fx_layer
+	salvage_system.setup(boat_layer, balance["salvage_boat"], fortress.radius, float(balance["loot"]["spill_float_time"]))
+	systems.add_child(salvage_system)
+
 	enemy_system = EnemySystem.new()
 	enemy_system.name = "EnemySystem"
 	enemy_system.grid = grid
 	enemy_system.run_state = run_state
 	enemy_system.fx = fx_layer
 	enemy_system.scaling = generator.scaling
+	enemy_system.salvage = salvage_system
 	enemy_system.setup(enemy_layer, DataRegistry.enemies, balance, int(balance["pools"]["enemies"]))
 	systems.add_child(enemy_system)
 
@@ -206,6 +239,8 @@ func _build_systems(balance: Dictionary) -> void:
 	input_controller = InputController.new()
 	input_controller.name = "InputController"
 	input_controller.turrets = turrets
+	input_controller.loot = loot_system
+	input_controller.salvage = salvage_system
 	systems.add_child(input_controller)
 
 

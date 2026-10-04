@@ -1,14 +1,19 @@
 class_name InputController
 extends Node
 ## Classifies every touch on touch-down (GAME_DESIGN.md section 3), in this order:
-## UI controls handle their own touches (those never reach _unhandled_input, and the bottom-bar
-## buttons select turrets through select()); a touch on a turret on the fortress selects it, with
-## no firing; anything else becomes the aim touch for the selected turret. Only the first aim
+## 1. UI controls handle their own touches (those never reach _unhandled_input; the bottom-bar
+##    buttons select turrets through select()).
+## 2. A touch near floating loot marks it, and all loot near it, for salvage.
+## 3. A touch on the dock recalls the salvage boat (section 3, "Other input").
+## 4. A touch on a turret on the fortress selects it, with no firing.
+## 5. Anything else becomes the aim touch for the selected turret. Only the first aim
 ## touch is tracked, because Dual Command arrives in M5. On desktop, the mouse arrives as touch.
 
 const NO_TOUCH := -1
 
 var turrets: Array[Turret] = []
+var loot: LootSystem
+var salvage: SalvageSystem
 var selected_slot := -1
 ## A touch-down within this world distance of a turret selects it instead of aiming.
 var select_radius := Turret.BASE_RADIUS + 14.0
@@ -54,6 +59,11 @@ func select(slot: int) -> void:
 func press(index: int, world_point: Vector2) -> bool:
 	if not enabled:
 		return false
+	if loot != null and loot.is_near_loot(world_point, loot.mark_radius):
+		loot.mark_near(world_point, loot.mark_radius)
+		return true
+	if salvage != null and salvage.tap(world_point):
+		return true
 	for turret in turrets:
 		if world_point.distance_to(turret.global_position) <= select_radius:
 			if _aim_index == NO_TOUCH:

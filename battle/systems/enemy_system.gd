@@ -4,7 +4,8 @@ extends Node
 ## contact (GAME_DESIGN.md sections 5 and 9). Any enemy touching the fortress radius deals its
 ## contact damage and is destroyed; enemies destroyed by weapons count as kills unless their
 ## definition says otherwise (launched torpedoes). Gun and cannon attacks cannot be dodged and hit
-## the base directly; torpedo attacks launch a torpedo enemy that can be shot down.
+## the base directly; torpedo attacks launch a torpedo enemy that can be shot down. Enemies with
+## boat damage (Salvage Hunters) also ram the salvage boat while it is on the water.
 
 const KILL_BURST_COLOR := Color("ffb347")
 const RAM_BURST_COLOR := Color("ff6b57")
@@ -17,6 +18,7 @@ var grid: SpatialGrid
 var run_state: RunState
 var fx: FxLayer
 var scaling: WaveScaling
+var salvage: SalvageSystem
 var fortress_center := Vector2.ZERO
 var fortress_radius := 0.0
 var separation_radius := 0.0
@@ -120,6 +122,12 @@ func _move(enemy: Enemy, delta: float) -> void:
 	if enemy.velocity.length_squared() > 1.0:
 		enemy.rotation = enemy.velocity.angle()
 	enemy.tick_visual(delta)
+	if enemy.boat_damage > 0.0 and salvage != null and salvage.boat_hittable() \
+			and enemy.position.distance_to(salvage.boat.position) <= salvage.boat.radius + enemy.radius:
+		salvage.damage_boat(enemy.boat_damage)
+		fx.burst(enemy.position, enemy.radius * 2.2, RAM_BURST_COLOR)
+		_remove(enemy)
+		return
 	if enemy.position.distance_to(fortress_center) <= fortress_radius + enemy.radius:
 		enemy.state = Enemy.State.RAM
 		run_state.damage_base(enemy.contact_damage)
@@ -152,7 +160,14 @@ func _make_behavior(behavior_id: String, params: Dictionary) -> EnemyBehavior:
 			return BehaviorRam.new(params, fortress_center)
 		"ranged_stop":
 			return BehaviorRangedStop.new(params, fortress_center)
+		"hunter":
+			return BehaviorHunter.new(params, fortress_center, _hunted_boat_position)
 	return null
+
+
+## The salvage boat's position while hunters can go for it, else null.
+func _hunted_boat_position() -> Variant:
+	return salvage.boat.position if salvage != null and salvage.boat_hittable() else null
 
 
 ## Takes the enemy out of play now; tick() returns it to the pool.

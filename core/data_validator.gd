@@ -3,17 +3,21 @@ extends RefCounted
 ## Checks the loaded data files (GAME_DESIGN.md section 10: missing ids, unknown references,
 ## negative numbers) and returns readable messages. An empty result means the data is valid.
 
-const BEHAVIORS: PackedStringArray = ["ram", "ranged_stop"]
+const BEHAVIORS: PackedStringArray = ["ram", "ranged_stop", "hunter"]
 const ATTACK_TYPES: PackedStringArray = ["contact", "gun", "cannon", "torpedo"]
 const RANGED_ATTACKS: PackedStringArray = ["gun", "cannon", "torpedo"]
 const PROJECTILES: PackedStringArray = ["bullet", "shell"]
-const VISUALS: PackedStringArray = ["skiff", "patrol_boat", "drone", "torpedo_boat", "gunboat", "torpedo"]
+const VISUALS: PackedStringArray = ["skiff", "patrol_boat", "drone", "torpedo_boat", "gunboat", "torpedo", "hunter"]
 const WEAPON_STATS: PackedStringArray = ["damage", "fire_rate", "range", "turn_speed", "projectile_speed"]
 const WAVE_SECTIONS: PackedStringArray = ["scaling", "featured", "edges", "timeline", "formations", "lifecycle", "spawn"]
 
 
-static func validate(weapons: Dictionary, enemies: Dictionary, balance: Dictionary, waves: Dictionary) -> PackedStringArray:
+static func validate(weapons: Dictionary, enemies: Dictionary, balance: Dictionary, waves: Dictionary,
+		loot_tables: Dictionary) -> PackedStringArray:
 	var problems := PackedStringArray()
+	_check_negative(loot_tables, "loot_tables.json", problems)
+	for table_id: String in loot_tables:
+		_check_loot_table(table_id, loot_tables[table_id], problems)
 	_check_negative(weapons, "weapons.json", problems)
 	_check_negative(enemies, "enemies.json", problems)
 	_check_negative(balance, "balance.json", problems)
@@ -21,7 +25,7 @@ static func validate(weapons: Dictionary, enemies: Dictionary, balance: Dictiona
 	for id: String in weapons:
 		_check_weapon(id, weapons[id], problems)
 	for id: String in enemies:
-		_check_enemy(id, enemies[id], enemies, problems)
+		_check_enemy(id, enemies[id], enemies, loot_tables, problems)
 	for weapon_id: Variant in balance.get("starting_loadout", []):
 		if not weapons.has(str(weapon_id)):
 			problems.append("balance.json: starting_loadout references unknown weapon '%s'" % weapon_id)
@@ -47,7 +51,8 @@ static func _check_weapon(id: String, def: Dictionary, problems: PackedStringArr
 			problems.append("%s: base.%s must be greater than 0" % [where, stat])
 
 
-static func _check_enemy(id: String, def: Dictionary, enemies: Dictionary, problems: PackedStringArray) -> void:
+static func _check_enemy(id: String, def: Dictionary, enemies: Dictionary, loot_tables: Dictionary,
+		problems: PackedStringArray) -> void:
 	var where := "enemies.json '%s'" % id
 	_require(def, ["name_key", "visual", "domain", "armor", "hp", "speed", "radius", "behavior", "attack"], where, problems)
 	if not str(def.get("visual", "")) in VISUALS:
@@ -73,12 +78,27 @@ static func _check_enemy(id: String, def: Dictionary, enemies: Dictionary, probl
 		problems.append("%s: torpedo attack references unknown enemy '%s'" % [where, attack.get("projectile")])
 	if def.has("first_wave") != def.has("budget_cost"):
 		problems.append("%s: wave enemies need both first_wave and budget_cost" % where)
+	if def.has("loot_table") and not loot_tables.has(str(def["loot_table"])):
+		problems.append("%s: unknown loot_table '%s'" % [where, def["loot_table"]])
 	if def.has("first_wave"):
+		if not def.has("loot_table"):
+			problems.append("%s: wave enemies need a loot_table" % where)
 		if float(def["budget_cost"]) <= 0.0 or int(def["first_wave"]) < 1:
 			problems.append("%s: budget_cost must be > 0 and first_wave ≥ 1" % where)
 		var size: Variant = def.get("group_size")
 		if not size is Array or (size as Array).size() != 2 or int(size[0]) < 1 or int(size[0]) > int(size[1]):
 			problems.append("%s: group_size must be [min, max] with 1 ≤ min ≤ max" % where)
+
+
+static func _check_loot_table(table_id: String, table: Dictionary, problems: PackedStringArray) -> void:
+	var where := "loot_tables.json '%s'" % table_id
+	if not table.has("credits"):
+		problems.append("%s: missing \"credits\"" % where)
+	for key: String in table:
+		if LootRoller.resource_from_name(key) < 0:
+			problems.append("%s: unknown resource '%s'" % [where, key])
+		elif table[key] is Dictionary and float(table[key].get("chance", 1.0)) > 1.0:
+			problems.append("%s: %s chance must be at most 1" % [where, key])
 
 
 static func _require(def: Dictionary, keys: Array, where: String, problems: PackedStringArray) -> void:

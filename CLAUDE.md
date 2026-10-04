@@ -84,6 +84,15 @@ adb install -r build/iron-harbor-debug.apk                  # USB-connected phon
   (e.g. `enemy_torpedo`) are only spawned by other enemies. `"counts_as_kill": false` keeps
   shot-down projectiles out of the kill count. Attack Drones cost 0.4 each with groups of exactly
   5, which is the design's "2 per group".
+- **Loot.** `loot_tables.json` is an object of tables; `credits` is a flat base amount, other
+  resources are `{ "chance", "amount" }`. Wave enemies need a `loot_table`. Resources are named
+  credits, steel, electronics and cores everywhere (`LootRoller.NAMES`).
+- **Only `SalvageSystem._unload()` banks resources** (GameState and RunState.banked). Nothing else may
+  add to GameState.resources.
+- **Touch radius for loot** is `balance.json` → loot.mark_radius = 120 design px, about 48 dp on a
+  typical phone. Taps near loot mark it instead of aiming (section 3, rule 2).
+- **Salvage Hunter numbers the design leaves open:** contact damage 5 to the base and
+  `boat_damage` 25 to the salvage boat (2 rams sink a fresh boat).
 - **New behaviors** go into both `EnemySystem._make_behavior()` and `DataValidator.BEHAVIORS`.
 - **Ranges are measured from the fortress center**, like every distance in the design (engage
   distances, weapon ranges). Turrets sit off center, so shots and the aim line end on the range
@@ -136,8 +145,13 @@ tools/      run_tests.sh, balance simulator, debug menu
   comes with M3. Also the Naval Cannon with splash, turret selection via the bottom bar or by
   touching a turret, the wave banner and countdown, and pause. Not in yet: boss waves (M6), perk
   breaks (M6) and elites (M5). Balance is untuned: a naive auto-aim bot dies around wave 3 against
-  the design's target of wave 8–10 on a fresh save, which M8 tunes. Waiting for the on-device check.
-- [ ] M3 – Loot and salvage
+  the design's target of wave 8–10 on a fresh save, which M8 tunes. Checked on the designer's phone.
+- [x] M3 – Loot and salvage. Includes LootRoller, loot tables, floating crates that drift, blink,
+  sink and merge, tap-to-mark, and the salvage boat state machine (outbound, collecting with
+  nearest-neighbor re-planning, returning around the fortress, 0.8 s unloading, recall by tapping
+  the dock, destruction with cargo spill and respawn). Also the Salvage Hunter, HUD resource
+  counters and boat status, and banked resources in the game over summary. Resources live in
+  GameState for the app session until saving arrives in M4. Waiting for the on-device check.
 - [ ] M4 – Meta progression and save
 - [ ] M5 – Full arsenal and bestiary
 - [ ] M6 – Bosses, perks, sectors

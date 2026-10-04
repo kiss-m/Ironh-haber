@@ -21,6 +21,8 @@ const HULLS := {
 			Vector2(-0.6, 1.0), Vector2(-0.2, 1.0)],
 	"torpedo": [Vector2(1.2, 0.0), Vector2(0.8, -0.3), Vector2(-1.2, -0.3), Vector2(-1.2, 0.3),
 			Vector2(0.8, 0.3)],
+	"hunter": [Vector2(1.4, 0.0), Vector2(0.4, -0.55), Vector2(-0.6, -0.4), Vector2(-1.1, -0.55),
+			Vector2(-0.9, 0.0), Vector2(-1.1, 0.55), Vector2(-0.6, 0.4), Vector2(0.4, 0.55)],
 }
 
 ## Accent drawn on deck: [offset along the hull in radius units, size in radius units, color].
@@ -31,6 +33,7 @@ const ACCENTS := {
 	"gunboat": [0.15, 0.42, Color("4b5966")],
 	"drone": [-0.2, 0.25, Color("7a3b10")],
 	"torpedo": [0.9, 0.2, Color("e0664f")],
+	"hunter": [0.0, 0.3, Color("8e24aa")],
 }
 
 

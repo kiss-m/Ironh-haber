@@ -1,8 +1,8 @@
 class_name Hud
 extends CanvasLayer
-## Battle HUD (GAME_DESIGN.md section 12): top bar with base HP, wave and kills; a center banner
-## for the wave countdown and cleared waves; bottom bar with one button per turret slot and a pause
-## button; pause and game over overlays (the results screen replaces game over in M4). Gameplay
+## Battle HUD (GAME_DESIGN.md section 12): top bar with base HP, wave, kills and the resources
+## banked this run; a center banner for the wave countdown and cleared waves; bottom bar with one
+## button per turret slot, the salvage boat status and a pause button; pause and game over overlays (the results screen replaces game over in M4). Gameplay
 ## state comes from EventBus; button presses leave through the signals below, which the Battle root
 ## wires up. Runs while the tree is paused so the pause overlay works.
 
@@ -11,7 +11,10 @@ signal pause_pressed
 signal resume_pressed
 signal restart_pressed
 
-const TOP_BAR_HEIGHT := 190.0
+const TOP_BAR_HEIGHT := 240.0
+const RESOURCE_ICON_SIZE := Vector2(26, 26)
+## Banked resources shown in the top bar, in this order (cores join with bosses in M6).
+const SHOWN_RESOURCES: PackedStringArray = ["credits", "steel", "electronics"]
 const BOTTOM_BAR_HEIGHT := 200.0
 const SIDE_MARGIN := 32.0
 const FONT_SIZE := 40
@@ -40,6 +43,9 @@ var _hp_label: Label
 var _wave_label: Label
 var _kills_label: Label
 var _banner: Label
+var _resource_labels: Dictionary = {}
+var _banked: Dictionary = {}
+var _boat_label: Label
 var _slot_row: HBoxContainer
 var _slot_buttons: Array[Button] = []
 var _pause_overlay: Control
@@ -75,6 +81,8 @@ func _ready() -> void:
 	EventBus.wave_phase_changed.connect(_on_wave_phase_changed)
 	EventBus.wave_countdown.connect(_on_wave_countdown)
 	EventBus.turret_selected.connect(_on_turret_selected)
+	EventBus.resources_banked.connect(_on_resources_banked)
+	EventBus.boat_status.connect(_on_boat_status)
 
 
 ## `slot_names` are the translated weapon names of the turret slots, in slot order.
@@ -83,6 +91,9 @@ func setup(max_hp: float, slot_names: PackedStringArray) -> void:
 	_hp_bar.max_value = max_hp
 	_set_hp(max_hp)
 	_set_kills(0)
+	_banked.clear()
+	for resource_name: String in _resource_labels:
+		(_resource_labels[resource_name] as Label).text = "0"
 	_wave_label.text = ""
 	_banner.visible = false
 	_game_over.visible = false
@@ -146,6 +157,22 @@ func _build_top_bar(root: Control, top_inset: float) -> void:
 	_kills_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(_kills_label)
 
+	var resources := HBoxContainer.new()
+	resources.name = "Resources"
+	resources.add_theme_constant_override("separation", 14)
+	column.add_child(resources)
+	for resource_name in SHOWN_RESOURCES:
+		var icon := ColorRect.new()
+		icon.color = LootDrop.COLORS[LootRoller.resource_from_name(resource_name)]
+		icon.custom_minimum_size = RESOURCE_ICON_SIZE
+		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		resources.add_child(icon)
+		var label := _make_label("Resource_" + resource_name, SMALL_FONT_SIZE, "0")
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		label.custom_minimum_size.x = 120.0
+		resources.add_child(label)
+		_resource_labels[resource_name] = label
+
 
 func _build_banner(root: Control) -> void:
 	_banner = _make_label("Banner", BANNER_FONT_SIZE)
@@ -173,6 +200,12 @@ func _build_bottom_bar(root: Control, bottom_inset: float) -> void:
 	_slot_row.add_theme_constant_override("separation", 20)
 	_slot_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(_slot_row)
+
+	_boat_label = _make_label("BoatStatus", SMALL_FONT_SIZE)
+	_boat_label.custom_minimum_size.x = 210.0
+	_boat_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_boat_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	row.add_child(_boat_label)
 
 	var pause := Button.new()
 	pause.name = "PauseButton"
@@ -292,10 +325,31 @@ func _on_turret_selected(slot: int) -> void:
 		_style_button(_slot_buttons[i], i == slot)
 
 
+func _on_resources_banked(delta: Dictionary) -> void:
+	for resource_name: String in delta:
+		_banked[resource_name] = int(_banked.get(resource_name, 0)) + int(delta[resource_name])
+		if _resource_labels.has(resource_name):
+			(_resource_labels[resource_name] as Label).text = str(_banked[resource_name])
+
+
+func _on_boat_status(state: int, cargo: int, capacity: int, respawn_left: int) -> void:
+	match state:
+		SalvageBoat.State.DOCKED:
+			_boat_label.text = tr("HUD_BOAT_DOCKED")
+		SalvageBoat.State.UNLOADING:
+			_boat_label.text = tr("HUD_BOAT_UNLOADING")
+		SalvageBoat.State.DESTROYED:
+			_boat_label.text = tr("HUD_BOAT_RESPAWN") % respawn_left
+		_:
+			_boat_label.text = tr("HUD_BOAT_CARGO") % [cargo, capacity]
+
+
 func _on_run_ended(summary: Dictionary) -> void:
 	var seconds := int(summary.get("time", 0.0))
 	var time_text := "%d:%02d" % [floori(seconds / 60.0), seconds % 60]
-	_summary_label.text = tr("GAME_OVER_SUMMARY") % [int(summary.get("wave", 0)), int(summary.get("kills", 0)), time_text]
+	var banked: Dictionary = summary.get("banked", {})
+	_summary_label.text = tr("GAME_OVER_SUMMARY") % [int(summary.get("wave", 0)), int(summary.get("kills", 0)),
+			time_text, int(banked.get("credits", 0)), int(banked.get("steel", 0)), int(banked.get("electronics", 0))]
 	_banner.visible = false
 	_pause_overlay.visible = false
 	_game_over.visible = true

@@ -4,7 +4,7 @@ HUD_WAVE,Vlna %d,Wave %d
 BANNER_WAVE_INCOMING,Vlna %d\n%d,Wave %d\n%d
 BANNER_WAVE_CLEARED,Vlna %d odrazená,Wave %d cleared
 GAME_OVER_TITLE,Základňa zničená,Base destroyed
-GAME_OVER_SUMMARY,Dosiahnutá vlna: %d\nZničení nepriatelia: %d\nČas: %s,Wave reached: %d\nEnemies destroyed: %d\nTime: %s
+GAME_OVER_SUMMARY,Dosiahnutá vlna: %d\nZničení nepriatelia: %d\nČas: %s\nVyložené: %d kreditov · %d ocele · %d elektroniky,Wave reached: %d\nEnemies destroyed: %d\nTime: %s\nBanked: %d credits · %d steel · %d electronics
 PAUSE_TITLE,Pauza,Paused
 BUTTON_RETRY,Skúsiť znova,Try again
 BUTTON_RESUME,Pokračovať,Resume
@@ -17,3 +17,8 @@ ENEMY_ATTACK_DRONE,Útočný dron,Attack Drone
 ENEMY_TORPEDO_BOAT,Torpédový čln,Torpedo Boat
 ENEMY_ARMORED_GUNBOAT,Obrnený delový čln,Armored Gunboat
 ENEMY_TORPEDO,Torpédo,Torpedo
+ENEMY_SALVAGE_HUNTER,Lovec koristi,Salvage Hunter
+HUD_BOAT_DOCKED,Čln v prístave,Boat docked
+HUD_BOAT_UNLOADING,Vykladá…,Unloading…
+HUD_BOAT_CARGO,Čln %d/%d,Boat %d/%d
+HUD_BOAT_RESPAWN,Nový čln o %d s,New boat in %d s

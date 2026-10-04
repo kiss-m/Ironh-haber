@@ -26,3 +26,6 @@ signal upgrade_purchased(track: StringName, level: int)
 signal wave_phase_changed(n: int, phase: int)
 signal wave_countdown(n: int, seconds_left: int)
 signal turret_selected(slot: int)
+## M3: what the HUD shows about the salvage boat. `state` is a SalvageBoat.State value;
+## `respawn_left` is whole seconds until a destroyed boat returns.
+signal boat_status(state: int, cargo: int, capacity: int, respawn_left: int)

@@ -8,11 +8,13 @@ func _data() -> Dictionary:
 		"enemies": DataRegistry.enemies.duplicate(true),
 		"balance": DataRegistry.balance.duplicate(true),
 		"waves": DataRegistry.waves.duplicate(true),
+		"loot_tables": DataRegistry.loot_tables.duplicate(true),
 	}
 
 
 func _problems(data: Dictionary) -> String:
-	return "\n".join(DataValidator.validate(data["weapons"], data["enemies"], data["balance"], data["waves"]))
+	return "\n".join(DataValidator.validate(data["weapons"], data["enemies"], data["balance"], data["waves"],
+			data["loot_tables"]))
 
 
 func test_shipped_data_is_valid() -> void:
@@ -44,6 +46,15 @@ func test_missing_field_and_bad_group_size() -> void:
 	var problems := _problems(data)
 	assert_string_contains(problems, "'attack_drone': missing \"radius\"")
 	assert_string_contains(problems, "group_size must be [min, max]")
+
+
+func test_unknown_loot_table_and_resource() -> void:
+	var data := _data()
+	data["enemies"]["raider_skiff"]["loot_table"] = "treasure"
+	data["loot_tables"]["armored"]["gold"] = 5
+	var problems := _problems(data)
+	assert_string_contains(problems, "unknown loot_table 'treasure'")
+	assert_string_contains(problems, "unknown resource 'gold'")
 
 
 func test_unknown_loadout_weapon() -> void:
