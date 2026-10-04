@@ -1,0 +1,104 @@
+# Iron Harbor — rules for Claude Code
+
+Portrait-mode Android naval fortress defense game. The full spec is `docs/GAME_DESIGN.md`. It is
+the source of truth: read the relevant sections before you start a task, and **ask before changing
+anything in it**.
+
+## Stack
+
+- Godot **4.7** (standard build, not .NET) with statically typed GDScript. The project currently
+  targets 4.7.2-stable.
+- GUT 9.7.1 (the Godot 4.7 line) is vendored in `addons/gut/`. Do not edit it; upgrade it by
+  replacing the whole folder.
+- Android: arm64-v8a, Mobile renderer with Compatibility (OpenGL) fallback. Portrait design
+  resolution 1080 × 2400, stretch `canvas_items`, aspect `expand`.
+
+## Commands
+
+```sh
+tools/run_tests.sh                                          # import + GUT suite; non-zero on failure or load error
+godot --headless --export-debug "Android" build/iron-harbor-debug.apk
+adb install -r build/iron-harbor-debug.apk                  # USB-connected phone
+```
+
+- Use `tools/run_tests.sh`, not the bare `gut_cmdln.gd` command. GUT skips a test script that fails
+  to parse and can still report "All tests passed!" with exit code 0; the wrapper catches that.
+- Set `GODOT=/path/to/godot` if the binary is not on `PATH` as `godot`.
+- Run `godot --headless --import` after cloning, after adding assets, and after adding or renaming a
+  `class_name`. Headless runs do not rescan the global class cache, so a new class is undefined
+  until the next import. `run_tests.sh` imports for you.
+- Export needs the Android export templates for the exact Godot version, the Android SDK path
+  (`ANDROID_HOME` set before Godot first creates its editor settings, or Editor Settings → Export →
+  Android → Android SDK Path), and JDK 17 (`JAVA_HOME`).
+- Signing: Godot creates and uses its own debug keystore, or you can override it with
+  `GODOT_ANDROID_KEYSTORE_DEBUG_PATH` / `_USER` / `_PASSWORD`. Release builds use
+  `GODOT_ANDROID_KEYSTORE_RELEASE_PATH` / `_USER` / `_PASSWORD`. Never commit keystores or
+  passwords. `export_presets.cfg` stays free of secrets, because Godot stores those in
+  `.godot/export_credentials.cfg`.
+- The non-Gradle export uses the template's `minSdk` 24, which covers the API 26 target. Enforcing a
+  hard floor of 26 would need a Gradle build (`gradle_build/min_sdk`).
+
+## Workflow
+
+- Do one milestone per session (GAME_DESIGN.md section 16). Plan first, then implement. Never start
+  the next milestone while the previous one is broken.
+- After every task, run `tools/run_tests.sh` and a debug export, and keep the suite green.
+- Commit after each finished step, with clear messages.
+- When the user should check a milestone on a device, say exactly what to look for.
+
+## Code rules
+
+- **Code-first scenes.** A `.tscn` holds only the root node and its script. Build children in
+  `_ready()` from code or data, so no change ever needs the visual editor.
+- **Pure rules in `core/`.** Gameplay math (damage, stats, wave budget, economy, loot) lives in
+  `RefCounted` classes with no node dependencies. Every rule has GUT tests in `tests/`.
+- **Static typing everywhere** (`var hp: float`, typed arrays, return types). Give every reusable
+  script a `class_name`, except autoloads, whose autoload name is already the global.
+- **No hard-coded tunables.** Every balance number lives in `data/*.json` and is read through
+  `DataRegistry`. Presentation constants such as colors and font sizes may stay in scripts until
+  the shared `Theme` exists.
+- **Decoupled systems.** Systems never call each other's internals. They talk through `EventBus`
+  signals or through dependencies the Battle root injects in `_ready()`.
+- **Thin entities, behavior in systems.** Enemy AI is a strategy `RefCounted` chosen by the
+  `behavior` id in data. `RunState` holds run-only data and `GameState` holds permanent data. Only
+  `SalvageSystem` writes resources into `GameState`.
+- **Performance.** Anything spawned repeatedly comes from `ObjectPool` (`acquire()` / `release()`
+  and `reset()`). Projectiles are not physics bodies; they use `SpatialGrid`. Avoid per-frame
+  allocations, `get_nodes_in_group()` in hot loops and string-keyed dictionaries in per-frame code.
+- **Determinism.** One run seed feeds separate RNG streams for waves, loot, elites and perks.
+- **UI.** All player-facing strings go through translation keys in `locale/translations.csv`
+  (columns `keys,sk,en`; Slovak is the default). Touch targets are at least 48 dp, and layouts
+  respect `DisplayServer.get_display_safe_area()`.
+- **Art.** Use placeholder shapes drawn in code until final art arrives. A `visual` field in the data
+  picks the shape or the sprite. Use only assets with a clear license and record each one in
+  `CREDITS.md`.
+
+## Layout
+
+```
+autoload/   EventBus, DataRegistry, GameState, SceneRouter, AudioManager
+core/       pure rules (unit-tested)
+battle/     battle scene, systems, entities
+meta/       splash, main menu, sector select, shipyard, results
+ui/         shared widgets, theme
+data/       JSON configs
+locale/     translations.csv
+assets/     sprites, audio, fonts
+tests/      GUT tests (test_*.gd; config in .gutconfig.json)
+tools/      run_tests.sh, balance simulator, debug menu
+```
+
+## Milestone status
+
+- [x] M0 – Project and pipeline. Includes the folder layout, autoload stubs, GUT, the Android
+  export preset and a splash screen that shows "Iron Harbor" in portrait. Verified here: tests are
+  green and the headless debug APK export succeeds. Launching it on a phone still has to be checked
+  on the dev machine.
+- [ ] M1 – Core combat
+- [ ] M2 – Waves and data
+- [ ] M3 – Loot and salvage
+- [ ] M4 – Meta progression and save
+- [ ] M5 – Full arsenal and bestiary
+- [ ] M6 – Bosses, perks, sectors
+- [ ] M7 – Polish
+- [ ] M8 – Balance and release

@@ -1,0 +1,16 @@
+# Godot editor and import cache
+.godot/
+# Gradle build template (only used if Gradle builds get enabled)
+/android/
+
+# Export output (the folder itself is kept: Godot will not create it on export)
+/build/*
+!/build/.gdignore
+
+# Signing keys never go into the repo (section 2)
+*.keystore
+*.jks
+
+# OS / editor noise
+.DS_Store
+Thumbs.db

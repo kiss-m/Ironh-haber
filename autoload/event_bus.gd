@@ -1,0 +1,23 @@
+extends Node
+## Global signal hub (GAME_DESIGN.md section 9).
+##
+## Systems never call each other's internals; they emit and listen here. Signals are only
+## declared in this file and emitted by the systems that own the event. Entity parameters
+## are typed as Node2D until the entity classes exist (M1+).
+
+@warning_ignore_start("unused_signal")
+
+signal enemy_spawned(enemy: Node2D)
+signal enemy_killed(enemy: Node2D, position: Vector2)
+signal base_damaged(amount: float, hp_left: float)
+signal loot_dropped(loot: Node2D)
+signal loot_marked(loot: Node2D)
+signal loot_sunk(loot: Node2D)
+signal boat_state_changed(boat: Node2D, state: int)
+signal resources_banked(delta: Dictionary)
+signal wave_started(n: int)
+signal wave_cleared(n: int)
+signal perk_offered(perks: Array)
+signal perk_picked(id: StringName)
+signal run_ended(summary: Dictionary)
+signal upgrade_purchased(track: StringName, level: int)

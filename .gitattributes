@@ -1,0 +1,9 @@
+# Normalize line endings; Godot writes LF everywhere.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ogg binary
+*.wav binary
+*.ttf binary
+*.otf binary
