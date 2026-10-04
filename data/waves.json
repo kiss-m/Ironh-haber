@@ -1,11 +1,27 @@
 {
-  "trickle": {
-    "enemy": "raider_skiff",
-    "first_delay": 1.5,
-    "start_interval": 2.2,
-    "min_interval": 0.7,
-    "interval_decay": 0.97,
-    "spawn_margin": 80,
-    "edge_band": 0.8
-  }
+  "scaling": {
+    "budget": { "base": 8, "linear": 5, "quadratic": 0.12 },
+    "hp_growth": 1.085,
+    "damage_per_wave": 0.04,
+    "speed_per_wave": 0.004,
+    "speed_max": 1.3,
+    "loot_growth": 1.06
+  },
+  "featured": { "waves": 3, "weight": 3 },
+  "edges": { "side_share_early": 0.8, "all_edges_from_wave": 20, "pincer_every": 5 },
+  "timeline": {
+    "min_duration": 20,
+    "max_duration": 30,
+    "full_duration_at_wave": 30,
+    "first_gap": 4.0,
+    "last_gap": 1.5
+  },
+  "formations": {
+    "line": { "spacing": 60 },
+    "v": { "spacing": 60 },
+    "cluster": { "radius": 80 },
+    "wide_spread": { "spacing": 160 }
+  },
+  "lifecycle": { "prepare": 3, "break": 6 },
+  "spawn": { "margin": 80, "edge_band": 0.8 }
 }

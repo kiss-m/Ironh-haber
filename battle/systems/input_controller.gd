@@ -1,14 +1,16 @@
 class_name InputController
 extends Node
-## Classifies every touch on touch-down (GAME_DESIGN.md section 3). M1 applies these rules in order:
-## UI controls handle their own touches (those never reach _unhandled_input); a touch on the turret
-## only selects it, with no firing; anything else becomes the aim touch. Only the first aim touch
-## is tracked, because Dual Command arrives in M5. On desktop, the mouse arrives as emulated touch.
+## Classifies every touch on touch-down (GAME_DESIGN.md section 3), in this order:
+## UI controls handle their own touches (those never reach _unhandled_input, and the bottom-bar
+## buttons select turrets through select()); a touch on a turret on the fortress selects it, with
+## no firing; anything else becomes the aim touch for the selected turret. Only the first aim
+## touch is tracked, because Dual Command arrives in M5. On desktop, the mouse arrives as touch.
 
 const NO_TOUCH := -1
 
-var turret: Turret
-## A touch-down within this world distance of the turret selects it instead of aiming.
+var turrets: Array[Turret] = []
+var selected_slot := -1
+## A touch-down within this world distance of a turret selects it instead of aiming.
 var select_radius := Turret.BASE_RADIUS + 14.0
 var enabled := true
 
@@ -33,11 +35,32 @@ func _input(event: InputEvent) -> void:
 		drag_to(drag.index, _to_world(drag.position))
 
 
-## Handles a touch-down at a world position. Returns true if it became the aim touch.
+func selected_turret() -> Turret:
+	return turrets[selected_slot] if selected_slot >= 0 and selected_slot < turrets.size() else null
+
+
+## Makes `slot` the selected turret; any aim in progress ends.
+func select(slot: int) -> void:
+	if slot < 0 or slot >= turrets.size():
+		return
+	cancel()
+	selected_slot = slot
+	for turret in turrets:
+		turret.set_selected(turret.slot == slot)
+	EventBus.turret_selected.emit(slot)
+
+
+## Handles a touch-down at a world position. Returns true if it was used.
 func press(index: int, world_point: Vector2) -> bool:
-	if not enabled or _aim_index != NO_TOUCH:
+	if not enabled:
 		return false
-	if world_point.distance_to(turret.global_position) <= select_radius:
+	for turret in turrets:
+		if world_point.distance_to(turret.global_position) <= select_radius:
+			if _aim_index == NO_TOUCH:
+				select(turret.slot)
+			return true
+	var turret := selected_turret()
+	if _aim_index != NO_TOUCH or turret == null:
 		return false
 	_aim_index = index
 	turret.aim_at(world_point)
@@ -45,7 +68,8 @@ func press(index: int, world_point: Vector2) -> bool:
 
 
 func drag_to(index: int, world_point: Vector2) -> void:
-	if enabled and index == _aim_index:
+	var turret := selected_turret()
+	if enabled and index == _aim_index and turret != null:
 		turret.aim_at(world_point)
 
 
@@ -56,7 +80,9 @@ func release(index: int) -> void:
 
 func cancel() -> void:
 	_aim_index = NO_TOUCH
-	turret.release_aim()
+	var turret := selected_turret()
+	if turret != null:
+		turret.release_aim()
 
 
 func _to_world(screen_point: Vector2) -> Vector2:

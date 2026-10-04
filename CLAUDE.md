@@ -78,13 +78,27 @@ adb install -r build/iron-harbor-debug.apk                  # USB-connected phon
 - **Data files.** `weapons.json` and `enemies.json` are arrays of definitions with unique `id`s;
   `balance.json` and `waves.json` are objects. Distances are design pixels (1080-wide portrait),
   times are seconds, rates are per second and angles are degrees (code converts to radians).
-  Fields the design doc does not list yet: enemy `radius` (hit circle), weapon `projectile_speed`
-  and `spread`.
+  Fields the design doc does not list yet: enemy `radius` (hit circle) and `visual` (placeholder
+  shape id), weapon `projectile_speed`, `spread` and `splash_radius`.
+- **Wave enemies** need `first_wave`, `budget_cost` and `group_size`; definitions without them
+  (e.g. `enemy_torpedo`) are only spawned by other enemies. `"counts_as_kill": false` keeps
+  shot-down projectiles out of the kill count. Attack Drones cost 0.4 each with groups of exactly
+  5, which is the design's "2 per group".
+- **New behaviors** go into both `EnemySystem._make_behavior()` and `DataValidator.BEHAVIORS`.
+- **Ranges are measured from the fortress center**, like every distance in the design (engage
+  distances, weapon ranges). Turrets sit off center, so shots and the aim line end on the range
+  circle around the center (`Turret.reach()`).
+- **StatResolver.** A stat is (base + Σ add) × Π mul; a `set` modifier replaces the result; caps from
+  `balance.json` → `stat_caps` (`max_mul`, `max`, `min`) apply last. Turrets re-read their stats on
+  `changed`.
 - **Strings in data, ints at runtime.** Definitions are converted when an entity is set up
   (`CombatTypes` parses damage types, armor and domains), so per-frame code compares ints.
 - **Battle stepping.** `battle/battle.gd` builds the world, systems and HUD and calls each system's
-  `tick(delta)` in a fixed order: spawn → enemies → grid rebuild → turrets → projectiles → effects.
-  Integration tests turn physics processing off and call `battle.step()` themselves.
+  `tick(delta)` in a fixed order: waves → enemies → grid rebuild → turrets → projectiles → effects.
+  Integration tests turn physics processing off and call `battle.step()` themselves; set
+  `run_seed` and `first_wave` before adding the battle to the tree.
+- **Pause.** The HUD runs while the tree is paused. Android back toggles the pause overlay
+  (`quit_on_go_back` is off) and leaving the app pauses the battle.
 - **Translations.** Add keys to `locale/translations.csv`, run the import, and commit the
   regenerated `locale/*.translation` files too. They are small and deterministic, and committing
   them keeps a fresh clone free of "missing translation" errors. A new locale also has to be added
@@ -114,8 +128,15 @@ tools/      run_tests.sh, balance simulator, debug menu
   turn-speed aiming, the aim line and fire tolerance, bullets as pooled flat arrays, and Raider
   Skiffs trickling in from the side edges. Also damage with armor and crits, base HP, a slow-motion
   game over with retry, and SK/EN translations. `WaveDirector` is a temporary trickle spawner
-  (`waves.json` → `trickle`) that M2 replaces. Waiting for the on-device check.
-- [ ] M2 – Waves and data
+  (`waves.json` → `trickle`) that M2 replaces. Checked on the designer's phone.
+- [x] M2 – Waves and data. Includes DataRegistry with DataValidator, StatResolver, WaveGenerator
+  (budget, featured types, formations, edges, pincers, timeline) and the WaveDirector lifecycle
+  (PREPARE → ACTIVE → CLEANUP → BREAK). The first five wave enemies are Raider Skiff, Patrol Boat,
+  Attack Drone, Torpedo Boat (with shootable torpedoes) and Armored Gunboat; the Salvage Hunter
+  comes with M3. Also the Naval Cannon with splash, turret selection via the bottom bar or by
+  touching a turret, the wave banner and countdown, and pause. Not in yet: boss waves (M6), perk
+  breaks (M6) and elites (M5). Balance is untuned: a naive auto-aim bot dies around wave 3 against
+  the design's target of wave 8–10 on a fresh save, which M8 tunes. Waiting for the on-device check.
 - [ ] M3 – Loot and salvage
 - [ ] M4 – Meta progression and save
 - [ ] M5 – Full arsenal and bestiary

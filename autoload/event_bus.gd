@@ -21,3 +21,8 @@ signal perk_offered(perks: Array)
 signal perk_picked(id: StringName)
 signal run_ended(summary: Dictionary)
 signal upgrade_purchased(track: StringName, level: int)
+## M2 additions: wave lifecycle for the HUD and turret selection.
+## `phase` is a WaveDirector.Phase value.
+signal wave_phase_changed(n: int, phase: int)
+signal wave_countdown(n: int, seconds_left: int)
+signal turret_selected(slot: int)

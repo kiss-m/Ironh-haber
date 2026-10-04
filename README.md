@@ -37,5 +37,5 @@ variables. Keystores never go into the repository.
 
 ## Status
 
-Milestones M0 (project and pipeline) and M1 (core combat) are done. See the milestone list in
+Milestones M0 (project and pipeline), M1 (core combat) and M2 (waves and data) are done. See the milestone list in
 [`CLAUDE.md`](CLAUDE.md).

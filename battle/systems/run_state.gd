@@ -1,9 +1,10 @@
 class_name RunState
 extends Node
-## Run-only data (GAME_DESIGN.md section 9): seed, base HP, kills, elapsed time and the RNG
+## Run-only data (GAME_DESIGN.md section 9): seed, wave, base HP, kills, elapsed time and the RNG
 ## streams. Permanent data lives in GameState.
 
 var run_seed := 0
+var wave := 0
 var max_hp := 0.0
 var base_hp := 0.0
 var kills := 0
@@ -21,6 +22,7 @@ func start(p_seed: int, p_max_hp: float) -> void:
 	rng_combat.seed = hash([p_seed, "combat"])
 	max_hp = p_max_hp
 	base_hp = p_max_hp
+	wave = 0
 	kills = 0
 	elapsed = 0.0
 	is_over = false
@@ -34,4 +36,4 @@ func damage_base(amount: float) -> void:
 
 
 func summary() -> Dictionary:
-	return { "seed": run_seed, "kills": kills, "time": elapsed }
+	return { "seed": run_seed, "wave": wave, "kills": kills, "time": elapsed }

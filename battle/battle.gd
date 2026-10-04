@@ -16,7 +16,10 @@ enum Phase { RUNNING, ENDING, ENDED }
 
 ## Seed for the next run; -1 picks a random one. Tests set it before adding the battle to the tree.
 var run_seed := -1
+## Wave the run starts at; tests and the debug menu (M7) can jump ahead.
+var first_wave := 1
 var phase := Phase.RUNNING
+var paused := false
 ## Visible world rectangle, centered on the fortress.
 var play_area := Rect2()
 
@@ -24,12 +27,13 @@ var world: Node2D
 var camera: Camera2D
 var ocean: ColorRect
 var fortress: Fortress
-var turret: Turret
+var turrets: Array[Turret] = []
 var enemy_layer: Node2D
 var projectile_layer: ProjectileLayer
 var fx_layer: FxLayer
 var systems: Node
 var run_state: RunState
+var stats: StatResolver
 var input_controller: InputController
 var wave_director: WaveDirector
 var enemy_system: EnemySystem
@@ -42,20 +46,36 @@ func _ready() -> void:
 	Engine.time_scale = 1.0
 	DisplayServer.screen_set_keep_on(true)
 	var balance := DataRegistry.balance
+	stats = StatResolver.new(balance["stat_caps"])
 	_build_world(balance)
 	_build_systems(balance)
-	hud = Hud.new()
-	hud.name = "HUD"
-	add_child(hud)
+	_build_hud()
 	_layout()
 	get_viewport().size_changed.connect(_layout)
 	run_state.start(run_seed if run_seed >= 0 else randi(), float(balance["fortress"]["base_hp"]))
-	hud.setup(run_state.max_hp)
+	var slot_names := PackedStringArray()
+	for turret in turrets:
+		slot_names.append(tr(turret.name_key))
+	hud.setup(run_state.max_hp, slot_names)
+	input_controller.select(0)
+	wave_director.start(first_wave)
 
 
 func _exit_tree() -> void:
 	Engine.time_scale = 1.0
 	DisplayServer.screen_set_keep_on(false)
+	if paused:
+		get_tree().paused = false
+
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_WM_GO_BACK_REQUEST:
+			# Android back: closes the pause overlay or opens it (section 14).
+			set_paused(not paused)
+		NOTIFICATION_APPLICATION_PAUSED:
+			# Home button or a call: pause now; the player resumes from the pause menu.
+			set_paused(true)
 
 
 func _physics_process(delta: float) -> void:
@@ -72,12 +92,22 @@ func step(delta: float) -> void:
 	wave_director.tick(delta)
 	enemy_system.tick(delta)
 	grid.rebuild(enemy_system.active)
-	turret.tick(delta)
+	for turret in turrets:
+		turret.tick(delta)
 	projectile_system.tick(delta)
 	fx_layer.tick(delta)
 	projectile_layer.queue_redraw()
 	if phase == Phase.RUNNING and run_state.base_hp <= 0.0:
 		_begin_end()
+
+
+func set_paused(value: bool) -> void:
+	if phase != Phase.RUNNING or not is_inside_tree():
+		return
+	paused = value
+	input_controller.cancel()
+	get_tree().paused = value
+	hud.set_paused(value)
 
 
 func _build_world(balance: Dictionary) -> void:
@@ -100,13 +130,20 @@ func _build_world(balance: Dictionary) -> void:
 	fortress.setup(float(balance["fortress"]["radius"]))
 	world.add_child(fortress)
 
-	turret = Turret.new()
-	turret.name = "Turret"
-	turret.rotation = -PI / 2.0
-	turret.setup(DataRegistry.weapon("machine_gun"), float(balance["aim"]["fire_tolerance_deg"]))
-	fortress.add_mount(Vector2.ZERO).add_child(turret)
+	var loadout: Array = balance["starting_loadout"]
+	var mount_radius := float(balance["fortress"]["mount_radius"])
+	for slot in loadout.size():
+		var turret := Turret.new()
+		turret.name = "Turret%d" % slot
+		turret.slot = slot
+		turret.rotation = -PI / 2.0
+		turret.setup(DataRegistry.weapon(str(loadout[slot])), stats, float(balance["aim"]["fire_tolerance_deg"]))
+		fortress.add_mount(mount_offset(slot, loadout.size(), mount_radius)).add_child(turret)
+		turrets.append(turret)
 
-	enemy_layer = _add_layer("EnemyLayer")
+	enemy_layer = Node2D.new()
+	enemy_layer.name = "EnemyLayer"
+	world.add_child(enemy_layer)
 	projectile_layer = ProjectileLayer.new()
 	projectile_layer.name = "ProjectileLayer"
 	world.add_child(projectile_layer)
@@ -115,11 +152,11 @@ func _build_world(balance: Dictionary) -> void:
 	world.add_child(fx_layer)
 
 
-func _add_layer(layer_name: String) -> Node2D:
-	var layer := Node2D.new()
-	layer.name = layer_name
-	world.add_child(layer)
-	return layer
+## Turret mounts sit on a ring inside the fortress, the first one on the left.
+static func mount_offset(slot: int, slot_count: int, radius: float) -> Vector2:
+	if slot_count <= 1:
+		return Vector2.ZERO
+	return Vector2.from_angle(PI + TAU * slot / slot_count) * radius
 
 
 func _build_systems(balance: Dictionary) -> void:
@@ -132,12 +169,14 @@ func _build_systems(balance: Dictionary) -> void:
 	systems.add_child(run_state)
 
 	grid = SpatialGrid.new(Rect2(), float(balance["spatial_grid"]["cell_size"]))
+	var generator := WaveGenerator.new(DataRegistry.enemies, DataRegistry.waves)
 
 	enemy_system = EnemySystem.new()
 	enemy_system.name = "EnemySystem"
 	enemy_system.grid = grid
 	enemy_system.run_state = run_state
 	enemy_system.fx = fx_layer
+	enemy_system.scaling = generator.scaling
 	enemy_system.setup(enemy_layer, DataRegistry.enemies, balance, int(balance["pools"]["enemies"]))
 	systems.add_child(enemy_system)
 
@@ -145,27 +184,39 @@ func _build_systems(balance: Dictionary) -> void:
 	projectile_system.name = "ProjectileSystem"
 	projectile_system.grid = grid
 	projectile_system.enemies = enemy_system
+	projectile_system.fx = fx_layer
 	projectile_system.damage_calc = DamageCalc.new(balance["armor_multipliers"], balance["crit"])
 	projectile_system.rng = run_state.rng_combat
 	projectile_system.reserve(int(balance["pools"]["projectiles"]))
 	systems.add_child(projectile_system)
 	projectile_layer.system = projectile_system
 
-	turret.projectiles = projectile_system
-	turret.rng = run_state.rng_combat
-	turret.aim_origin = fortress.position
+	for turret in turrets:
+		turret.projectiles = projectile_system
+		turret.rng = run_state.rng_combat
+		turret.aim_origin = fortress.position
 
 	wave_director = WaveDirector.new()
 	wave_director.name = "WaveDirector"
 	wave_director.enemies = enemy_system
-	wave_director.rng = run_state.rng_waves
-	wave_director.setup(DataRegistry.waves["trickle"])
+	wave_director.run_state = run_state
+	wave_director.setup(generator, DataRegistry.waves)
 	systems.add_child(wave_director)
 
 	input_controller = InputController.new()
 	input_controller.name = "InputController"
-	input_controller.turret = turret
+	input_controller.turrets = turrets
 	systems.add_child(input_controller)
+
+
+func _build_hud() -> void:
+	hud = Hud.new()
+	hud.name = "HUD"
+	add_child(hud)
+	hud.slot_pressed.connect(input_controller.select)
+	hud.pause_pressed.connect(set_paused.bind(true))
+	hud.resume_pressed.connect(set_paused.bind(false))
+	hud.restart_pressed.connect(_restart)
 
 
 ## Sizes everything that depends on the visible area (portrait phones differ in aspect ratio).
@@ -179,11 +230,17 @@ func _layout() -> void:
 	wave_director.play_area = play_area
 
 
+func _restart() -> void:
+	get_tree().paused = false
+	SceneRouter.goto(SCENE_PATH)
+
+
 func _begin_end() -> void:
 	phase = Phase.ENDING
 	run_state.is_over = true
 	wave_director.enabled = false
-	turret.enabled = false
+	for turret in turrets:
+		turret.enabled = false
 	input_controller.enabled = false
 	input_controller.cancel()
 	fortress.set_destroyed(true)

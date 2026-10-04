@@ -2,8 +2,9 @@ extends Node
 ## Loads the JSON files under res://data/ once at startup (GAME_DESIGN.md section 10).
 ##
 ## Entity files (weapons, enemies) are arrays of definitions with unique "id"s and are indexed by
-## id. Other files are single objects. M1 reports parse errors and duplicate or missing ids; full
-## reference validation and the remaining files arrive in M2.
+## id. Other files are single objects. Parse errors, duplicate or missing ids and everything
+## DataValidator finds (unknown references, negative numbers, missing fields) end up in `errors`
+## and are reported with push_error(), which fails the GUT suite.
 
 const DATA_DIR := "res://data/"
 
@@ -25,6 +26,8 @@ func load_all() -> void:
 	enemies = _load_definitions("enemies.json")
 	balance = _load_object("balance.json")
 	waves = _load_object("waves.json")
+	if errors.is_empty():
+		errors.append_array(DataValidator.validate(weapons, enemies, balance, waves))
 	for message in errors:
 		push_error(message)
 
