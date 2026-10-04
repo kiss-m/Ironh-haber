@@ -3,12 +3,10 @@ HUD_KILLS,Zničené: %d,Kills: %d
 HUD_WAVE,Vlna %d,Wave %d
 BANNER_WAVE_INCOMING,Vlna %d\n%d,Wave %d\n%d
 BANNER_WAVE_CLEARED,Vlna %d odrazená,Wave %d cleared
-GAME_OVER_TITLE,Základňa zničená,Base destroyed
-GAME_OVER_SUMMARY,Dosiahnutá vlna: %d\nZničení nepriatelia: %d\nČas: %s\nVyložené: %d kreditov · %d ocele · %d elektroniky,Wave reached: %d\nEnemies destroyed: %d\nTime: %s\nBanked: %d credits · %d steel · %d electronics
 PAUSE_TITLE,Pauza,Paused
 BUTTON_RETRY,Skúsiť znova,Try again
 BUTTON_RESUME,Pokračovať,Resume
-BUTTON_RESTART,Reštartovať,Restart
+BUTTON_ABANDON,Opustiť beh,Abandon run
 WEAPON_MACHINE_GUN,Guľomet,Machine Gun
 WEAPON_NAVAL_CANNON,Lodné delo,Naval Cannon
 ENEMY_RAIDER_SKIFF,Pirátsky čln,Raider Skiff
@@ -22,3 +20,58 @@ HUD_BOAT_DOCKED,Čln v prístave,Boat docked
 HUD_BOAT_UNLOADING,Vykladá…,Unloading…
 HUD_BOAT_CARGO,Čln %d/%d,Boat %d/%d
 HUD_BOAT_RESPAWN,Nový čln o %d s,New boat in %d s
+MENU_PLAY,Hrať,Play
+MENU_CONTINUE,Pokračovať v behu (vlna %d),Continue run (wave %d)
+MENU_SHIPYARD,Lodenica,Shipyard
+MENU_LANGUAGE,Jazyk: slovenčina,Language: English
+MENU_BEST_WAVE,Najlepšia vlna: %d,Best wave: %d
+MENU_QUIT_QUESTION,Ukončiť hru?,Quit the game?
+BUTTON_QUIT,Ukončiť,Quit
+BUTTON_CANCEL,Zrušiť,Cancel
+BUTTON_BACK,Späť,Back
+BUTTON_MENU,Menu,Menu
+BUTTON_BUY,Kúpiť,Buy
+SECTOR_SELECT_TITLE,Vyber sektor,Choose a sector
+SECTOR_MULTIPLIERS,Životy nepriateľov ×%.0f · Korisť ×%.0f,Enemy HP ×%.0f · Loot ×%.0f
+SECTOR_BEST_WAVE,Najlepšia vlna: %d,Best wave: %d
+SECTOR_LOCKED,Odomkne sa vlnou %d v sektore %s,Unlocks at wave %d in %s
+SECTOR_COASTAL,1 · Pobrežné vody,1 · Coastal Waters
+SECTOR_STRAIT,2 · Úzky prieliv,2 · Narrow Strait
+SECTOR_OCEAN,3 · Otvorený oceán,3 · Open Ocean
+SECTOR_ARCTIC,4 · Arktický front,4 · Arctic Front
+TWIST_COASTAL,"Mierny prúd, tipy pre začiatočníkov","Gentle current, tutorial hints"
+TWIST_STRAIT,Hmla: nepriatelia nad 900 px sú skrytí bez radaru 3,Fog: enemies beyond 900 px hidden unless Radar 3
+TWIST_OCEAN,"Búrky každé 4 vlny unášajú korisť; bossovia dávajú 3 jadrá","Storms every 4 waves push loot; bosses drop 3 Cores"
+TWIST_ARCTIC,Ľadové kryhy blokujú strely,Ice floes drift across and block shots
+RESULTS_TITLE,Výsledky behu,Run results
+RESULTS_WAVE,Dosiahnutá vlna: %d,Wave reached: %d
+RESULTS_NEW_BEST,Nový rekord!,New best!
+RESULTS_KILLS_TIME,Zničení nepriatelia: %d · Čas: %s,Enemies destroyed: %d · Time: %s
+RESULTS_BANKED,Vyložené suroviny:,Resources banked:
+TAB_ARSENAL,Zbrane,Arsenal
+TAB_LOADOUT,Výzbroj,Loadout
+TAB_FORTRESS,Pevnosť,Fortress
+TAB_SALVAGE,Záchrana,Salvage
+UPGRADE_LEVEL,Úroveň %d / %d,Level %d / %d
+UPGRADE_MAXED,Maximum,Maxed
+UPGRADE_LOCKED,Od vlny %d,From wave %d
+UPGRADE_NEEDS_TIER,Treba vyšší tier,Needs tier-up
+UPGRADE_DAMAGE,Poškodenie,Damage
+UPGRADE_FIRE_RATE,Kadencia,Fire rate
+UPGRADE_RANGE,Dostrel,Range
+UPGRADE_TURN_SPEED,Rýchlosť otáčania,Turn speed
+UPGRADE_TIER,Tier-up (×1.25 poškodenie),Tier-up (×1.25 damage)
+UPGRADE_MG_SPREAD,Presnosť (rozptyl),Accuracy (spread)
+UPGRADE_CANNON_SPLASH,Polomer výbuchu,Splash radius
+UPGRADE_HULL,Trup pevnosti,Hull
+UPGRADE_ARMOR_PLATING,Pancierovanie,Armor plating
+UPGRADE_REPAIR_CREWS,Opravárske čaty,Repair crews
+UPGRADE_TURRET_SLOTS,Miesta pre veže,Turret slots
+UPGRADE_ENGINE,Motor člna,Boat engine
+UPGRADE_HOLD,Nákladný priestor,Cargo hold
+UPGRADE_MAGNET,Magnet,Magnet
+UPGRADE_BOAT_HULL,Trup člna,Boat hull
+UPGRADE_FLOTATION,Plaváky koristi,Flotation foam
+LOADOUT_HINT,Každú zbraň možno namontovať najviac %d×. Ďalšie miesta pre veže kúpiš v záložke Pevnosť.,Each weapon can be mounted at most %d times. Buy more turret slots in the Fortress tab.
+LOADOUT_SLOT,Miesto %d: %s,Slot %d: %s
+LOADOUT_EMPTY,prázdne,empty

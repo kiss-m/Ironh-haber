@@ -13,6 +13,8 @@ var enemies: Dictionary = {}
 var balance: Dictionary = {}
 var waves: Dictionary = {}
 var loot_tables: Dictionary = {}
+var upgrades: Dictionary = {}
+var sectors: Dictionary = {}
 ## Problems found by the last load_all(); each one is also reported with push_error().
 var errors: PackedStringArray = []
 
@@ -28,8 +30,11 @@ func load_all() -> void:
 	balance = _load_object("balance.json")
 	waves = _load_object("waves.json")
 	loot_tables = _load_object("loot_tables.json")
+	upgrades = _load_object("upgrades.json")
+	sectors = _load_definitions("sectors.json")
 	if errors.is_empty():
 		errors.append_array(DataValidator.validate(weapons, enemies, balance, waves, loot_tables))
+		errors.append_array(DataValidator.validate_meta(upgrades, sectors, weapons))
 	for message in errors:
 		push_error(message)
 

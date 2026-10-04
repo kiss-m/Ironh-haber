@@ -3,6 +3,10 @@ extends Node2D
 ## Battle root (GAME_DESIGN.md section 9). Builds the world, systems and HUD in _ready(), injects
 ## their dependencies and steps the systems in a fixed order every physics tick. The camera is
 ## centered on the fortress, so world (0, 0) is the fortress center.
+##
+## A battle starts from GameState: the loadout and upgrades of the save, and either a new run
+## (GameState.pending_run = {"sector": id}) or a run snapshot to continue. It saves a snapshot at
+## every wave break, records the run in GameState when it ends and then opens the results screen.
 
 const SCENE_PATH := "res://battle/battle.tscn"
 const OCEAN_COLOR := Color("11425f")
@@ -18,6 +22,9 @@ enum Phase { RUNNING, ENDING, ENDED }
 var run_seed := -1
 ## Wave the run starts at; tests and the debug menu (M7) can jump ahead.
 var first_wave := 1
+var sector_id := GameState.DEFAULT_SECTOR
+## Open the results screen when the run ends. Tests turn this off.
+var leave_on_end := true
 var phase := Phase.RUNNING
 var paused := false
 ## Visible world rectangle, centered on the fortress.
@@ -51,18 +58,30 @@ func _ready() -> void:
 	DisplayServer.screen_set_keep_on(true)
 	var balance := DataRegistry.balance
 	stats = StatResolver.new(balance["stat_caps"])
+	stats.set_modifiers(GameState.upgrades.modifiers(GameState.upgrade_levels()))
+	var resume := _take_pending_run()
 	_build_world(balance)
 	_build_systems(balance)
 	_build_hud()
 	_layout()
 	get_viewport().size_changed.connect(_layout)
-	run_state.start(run_seed if run_seed >= 0 else randi(), float(balance["fortress"]["base_hp"]))
+	var max_hp := stats.resolve("fortress.max_hp", float(balance["fortress"]["base_hp"]))
+	run_state.start(run_seed if run_seed >= 0 else randi(), max_hp)
+	run_state.damage_taken = stats.resolve("fortress.damage_taken", 1.0)
+	run_state.regen = stats.resolve("fortress.regen", float(balance["fortress"]["regen"]))
+	if not resume.is_empty():
+		run_state.base_hp = clampf(float(resume.get("base_hp", max_hp)), 1.0, max_hp)
+		run_state.kills = int(resume.get("kills", 0))
+		run_state.elapsed = float(resume.get("time", 0.0))
+		run_state.add_banked(resume.get("banked", {}))
+	EventBus.wave_cleared.connect(_on_wave_cleared)
 	var slot_names := PackedStringArray()
 	for turret in turrets:
 		slot_names.append(tr(turret.name_key))
 	hud.setup(run_state.max_hp, slot_names)
+	hud.show_state(run_state.base_hp, run_state.kills, run_state.banked)
 	salvage_system.refresh_status()
-	input_controller.select(0)
+	input_controller.select(clampi(int(resume.get("selected_slot", 0)), 0, maxi(turrets.size() - 1, 0)))
 	wave_director.start(first_wave)
 
 
@@ -79,8 +98,9 @@ func _notification(what: int) -> void:
 			# Android back: closes the pause overlay or opens it (section 14).
 			set_paused(not paused)
 		NOTIFICATION_APPLICATION_PAUSED:
-			# Home button or a call: pause now; the player resumes from the pause menu.
+			# Home button or a call: pause now and save; the player resumes from the pause menu.
 			set_paused(true)
+			GameState.save_game()
 
 
 func _physics_process(delta: float) -> void:
@@ -95,6 +115,7 @@ func step(delta: float) -> void:
 		return
 	if phase == Phase.RUNNING:
 		run_state.elapsed += delta
+		run_state.tick_regen(delta)
 	wave_director.tick(delta)
 	enemy_system.tick(delta)
 	grid.rebuild(enemy_system.active)
@@ -142,15 +163,17 @@ func _build_world(balance: Dictionary) -> void:
 	fortress.setup(float(balance["fortress"]["radius"]))
 	world.add_child(fortress)
 
-	var loadout: Array = balance["starting_loadout"]
+	var loadout := GameState.loadout()
 	var mount_radius := float(balance["fortress"]["mount_radius"])
-	for slot in loadout.size():
+	for mount in loadout.size():
+		if loadout[mount] == "":
+			continue
 		var turret := Turret.new()
-		turret.name = "Turret%d" % slot
-		turret.slot = slot
+		turret.slot = turrets.size()
+		turret.name = "Turret%d" % turret.slot
 		turret.rotation = -PI / 2.0
-		turret.setup(DataRegistry.weapon(str(loadout[slot])), stats, float(balance["aim"]["fire_tolerance_deg"]))
-		fortress.add_mount(mount_offset(slot, loadout.size(), mount_radius)).add_child(turret)
+		turret.setup(DataRegistry.weapon(loadout[mount]), stats, float(balance["aim"]["fire_tolerance_deg"]))
+		fortress.add_mount(mount_offset(mount, loadout.size(), mount_radius)).add_child(turret)
 		turrets.append(turret)
 
 	boat_layer = Node2D.new()
@@ -251,7 +274,7 @@ func _build_hud() -> void:
 	hud.slot_pressed.connect(input_controller.select)
 	hud.pause_pressed.connect(set_paused.bind(true))
 	hud.resume_pressed.connect(set_paused.bind(false))
-	hud.restart_pressed.connect(_restart)
+	hud.abandon_pressed.connect(abandon)
 
 
 ## Sizes everything that depends on the visible area (portrait phones differ in aspect ratio).
@@ -265,9 +288,42 @@ func _layout() -> void:
 	wave_director.play_area = play_area
 
 
-func _restart() -> void:
-	get_tree().paused = false
-	SceneRouter.goto(SCENE_PATH)
+## Ends the run from the pause menu ("abandon run"): it counts like losing the base.
+func abandon() -> void:
+	if phase != Phase.RUNNING:
+		return
+	set_paused(false)
+	_begin_end()
+
+
+## Snapshot at every wave break, so an app kill never costs more than one wave (section 11).
+## The run continues from the start of the next wave.
+func _on_wave_cleared(wave: int) -> void:
+	if phase != Phase.RUNNING:
+		return
+	GameState.snapshot_run({
+		"seed": run_state.run_seed,
+		"sector": sector_id,
+		"wave": wave + 1,
+		"base_hp": run_state.base_hp,
+		"kills": run_state.kills,
+		"time": run_state.elapsed,
+		"banked": run_state.banked.duplicate(),
+		"perks": [],
+		"selected_slot": input_controller.selected_slot,
+	})
+
+
+## Applies GameState.pending_run (and clears it). Returns the snapshot to continue, or {}.
+func _take_pending_run() -> Dictionary:
+	var pending := GameState.pending_run
+	GameState.pending_run = {}
+	sector_id = str(pending.get("sector", sector_id))
+	if not pending.has("wave"):
+		return {}
+	run_seed = int(pending["seed"])
+	first_wave = int(pending["wave"])
+	return pending
 
 
 func _begin_end() -> void:
@@ -287,4 +343,9 @@ func _begin_end() -> void:
 func _finish_end() -> void:
 	Engine.time_scale = 1.0
 	phase = Phase.ENDED
-	EventBus.run_ended.emit(run_state.summary())
+	var summary := run_state.summary()
+	summary["sector"] = sector_id
+	summary = GameState.finish_run(summary)
+	EventBus.run_ended.emit(summary)
+	if leave_on_end and is_inside_tree():
+		SceneRouter.goto(SceneRouter.RESULTS)

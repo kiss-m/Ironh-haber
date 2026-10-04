@@ -1,0 +1,6 @@
+[
+  { "id": "coastal", "name_key": "SECTOR_COASTAL", "twist_key": "TWIST_COASTAL", "enemy_hp": 1, "loot": 1, "unlock": { "sector": "", "wave": 0 } },
+  { "id": "strait", "name_key": "SECTOR_STRAIT", "twist_key": "TWIST_STRAIT", "enemy_hp": 4, "loot": 3, "unlock": { "sector": "coastal", "wave": 30 } },
+  { "id": "ocean", "name_key": "SECTOR_OCEAN", "twist_key": "TWIST_OCEAN", "enemy_hp": 15, "loot": 9, "unlock": { "sector": "strait", "wave": 30 } },
+  { "id": "arctic", "name_key": "SECTOR_ARCTIC", "twist_key": "TWIST_ARCTIC", "enemy_hp": 50, "loot": 25, "unlock": { "sector": "ocean", "wave": 30 } }
+]

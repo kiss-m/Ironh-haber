@@ -1,0 +1,93 @@
+{
+  "weapon_tracks": {
+    "dmg": {
+      "name_key": "UPGRADE_DAMAGE", "max_level": 50,
+      "costs": { "credits": { "c0": 20, "g": 1.17 }, "steel": { "c0": 3, "g": 1.13, "start": 5 }, "electronics": { "c0": 2, "g": 1.12, "start": 15 } },
+      "modifiers": [ { "stat": "weapon.damage", "op": "mul", "per_level": 1.12, "compound": true } ],
+      "gate": { "track": "tier", "levels_per_tier": 10 }
+    },
+    "rate": {
+      "name_key": "UPGRADE_FIRE_RATE", "max_level": 38,
+      "costs": { "credits": { "c0": 20, "g": 1.17 }, "steel": { "c0": 3, "g": 1.13, "start": 5 }, "electronics": { "c0": 2, "g": 1.12, "start": 15 } },
+      "modifiers": [ { "stat": "weapon.fire_rate", "op": "mul", "per_level": 1.04 } ]
+    },
+    "range": {
+      "name_key": "UPGRADE_RANGE", "max_level": 17,
+      "costs": { "credits": { "c0": 15, "g": 1.17 }, "steel": { "c0": 3, "g": 1.13, "start": 5 }, "electronics": { "c0": 2, "g": 1.12, "start": 15 } },
+      "modifiers": [ { "stat": "weapon.range", "op": "mul", "per_level": 1.03 } ]
+    },
+    "turn": {
+      "name_key": "UPGRADE_TURN_SPEED", "max_level": 17,
+      "costs": { "credits": { "c0": 15, "g": 1.17 }, "steel": { "c0": 3, "g": 1.13, "start": 5 }, "electronics": { "c0": 2, "g": 1.12, "start": 15 } },
+      "modifiers": [ { "stat": "weapon.turn_speed", "op": "mul", "per_level": 1.06 } ]
+    },
+    "tier": {
+      "name_key": "UPGRADE_TIER", "max_level": 4,
+      "costs": { "electronics": { "c0": 3, "g": 1.8 }, "credits": { "c0": 150, "g": 1.6 } },
+      "modifiers": [ { "stat": "weapon.damage", "op": "mul", "per_level": 1.25, "compound": true } ]
+    }
+  },
+  "weapon_specials": {
+    "machine_gun": {
+      "name_key": "UPGRADE_MG_SPREAD", "max_level": 5,
+      "costs": { "credits": { "c0": 40, "g": 1.35 }, "steel": { "c0": 4, "g": 1.25 } },
+      "modifiers": [ { "stat": "weapon.spread", "op": "mul", "per_level": 0.85, "compound": true } ]
+    },
+    "naval_cannon": {
+      "name_key": "UPGRADE_CANNON_SPLASH", "max_level": 5,
+      "costs": { "credits": { "c0": 40, "g": 1.35 }, "steel": { "c0": 4, "g": 1.25 } },
+      "modifiers": [ { "stat": "weapon.splash_radius", "op": "add", "per_level": 10 } ]
+    }
+  },
+  "tracks": {
+    "fortress.hull": {
+      "name_key": "UPGRADE_HULL", "tab": "fortress", "max_level": 100,
+      "costs": { "credits": { "c0": 30, "g": 1.17 }, "steel": { "c0": 3, "g": 1.13, "start": 5 } },
+      "modifiers": [ { "stat": "fortress.max_hp", "op": "mul", "per_level": 1.08, "compound": true } ]
+    },
+    "fortress.armor": {
+      "name_key": "UPGRADE_ARMOR_PLATING", "tab": "fortress", "max_level": 50,
+      "costs": { "steel": { "c0": 3, "g": 1.13 }, "credits": { "c0": 20, "g": 1.15 } },
+      "modifiers": [ { "stat": "fortress.damage_taken", "op": "add", "per_level": -0.01 } ]
+    },
+    "fortress.repair": {
+      "name_key": "UPGRADE_REPAIR_CREWS", "tab": "fortress", "max_level": 40,
+      "costs": { "credits": { "c0": 25, "g": 1.16 } },
+      "modifiers": [ { "stat": "fortress.regen", "op": "add", "per_level": 0.25 } ]
+    },
+    "fortress.slots": {
+      "name_key": "UPGRADE_TURRET_SLOTS", "tab": "fortress", "max_level": 6,
+      "costs_by_level": [
+        { "credits": 150, "steel": 10 },
+        { "credits": 400, "steel": 30 },
+        { "cores": 1 }, { "cores": 2 }, { "cores": 3 }, { "cores": 4 }
+      ],
+      "modifiers": [ { "stat": "fortress.turret_slots", "op": "add", "per_level": 1 } ]
+    },
+    "salvage.engine": {
+      "name_key": "UPGRADE_ENGINE", "tab": "salvage", "max_level": 10,
+      "costs": { "credits": { "c0": 25, "g": 1.17 }, "steel": { "c0": 2, "g": 1.13, "start": 5 } },
+      "modifiers": [ { "stat": "boat.speed", "op": "mul", "per_level": 1.08 } ]
+    },
+    "salvage.hold": {
+      "name_key": "UPGRADE_HOLD", "tab": "salvage", "max_level": 8,
+      "costs": { "credits": { "c0": 40, "g": 1.25 }, "steel": { "c0": 3, "g": 1.2 } },
+      "modifiers": [ { "stat": "boat.cargo", "op": "add", "per_level": 1 } ]
+    },
+    "salvage.magnet": {
+      "name_key": "UPGRADE_MAGNET", "tab": "salvage", "max_level": 9,
+      "costs": { "credits": { "c0": 30, "g": 1.2 }, "electronics": { "c0": 1, "g": 1.15, "start": 4 } },
+      "modifiers": [ { "stat": "boat.pickup_radius", "op": "add", "per_level": 10 } ]
+    },
+    "salvage.hull": {
+      "name_key": "UPGRADE_BOAT_HULL", "tab": "salvage", "max_level": 10,
+      "costs": { "credits": { "c0": 25, "g": 1.17 }, "steel": { "c0": 2, "g": 1.13 } },
+      "modifiers": [ { "stat": "boat.hp", "op": "mul", "per_level": 1.2 } ]
+    },
+    "salvage.flotation": {
+      "name_key": "UPGRADE_FLOTATION", "tab": "salvage", "max_level": 10,
+      "costs": { "credits": { "c0": 30, "g": 1.2 } },
+      "modifiers": [ { "stat": "loot.float_time", "op": "add", "per_level": 1 } ]
+    }
+  }
+}

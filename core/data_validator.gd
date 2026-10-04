@@ -35,6 +35,50 @@ static func validate(weapons: Dictionary, enemies: Dictionary, balance: Dictiona
 	return problems
 
 
+## Checks upgrades.json and sectors.json.
+static func validate_meta(upgrades: Dictionary, sectors: Dictionary, weapons: Dictionary) -> PackedStringArray:
+	var problems := PackedStringArray()
+	_check_negative(sectors, "sectors.json", problems)
+	for section in ["weapon_tracks", "weapon_specials", "tracks"]:
+		if not upgrades.has(section):
+			problems.append("upgrades.json: missing section '%s'" % section)
+			return problems
+	for id: String in upgrades["weapon_tracks"]:
+		_check_track("upgrades.json weapon_tracks.%s" % id, upgrades["weapon_tracks"][id], false, problems)
+	for id: String in upgrades["weapon_specials"]:
+		if not weapons.has(id):
+			problems.append("upgrades.json: weapon_specials references unknown weapon '%s'" % id)
+		_check_track("upgrades.json weapon_specials.%s" % id, upgrades["weapon_specials"][id], false, problems)
+	for key: String in upgrades["tracks"]:
+		_check_track("upgrades.json tracks.%s" % key, upgrades["tracks"][key], true, problems)
+	if not sectors.has("coastal"):
+		problems.append("sectors.json: the first sector 'coastal' is missing")
+	for id: String in sectors:
+		var unlock: Dictionary = sectors[id].get("unlock", {})
+		var after := str(unlock.get("sector", ""))
+		if after != "" and not sectors.has(after):
+			problems.append("sectors.json '%s': unlock references unknown sector '%s'" % [id, after])
+	return problems
+
+
+static func _check_track(where: String, def: Dictionary, needs_tab: bool, problems: PackedStringArray) -> void:
+	_require(def, ["name_key", "max_level", "modifiers"], where, problems)
+	if needs_tab and not str(def.get("tab", "")) in ["fortress", "salvage"]:
+		problems.append("%s: tab must be fortress or salvage" % where)
+	if int(def.get("max_level", 0)) < 1:
+		problems.append("%s: max_level must be at least 1" % where)
+	if not def.has("costs") and not def.has("costs_by_level"):
+		problems.append("%s: needs costs or costs_by_level" % where)
+	if def.has("costs_by_level") and (def["costs_by_level"] as Array).size() < int(def.get("max_level", 0)):
+		problems.append("%s: costs_by_level needs one entry per level" % where)
+	for resource: String in def.get("costs", {}):
+		if LootRoller.resource_from_name(resource) < 0:
+			problems.append("%s: unknown resource '%s'" % [where, resource])
+	for modifier: Dictionary in def.get("modifiers", []):
+		if not str(modifier.get("op", "")) in ["add", "mul"] or not modifier.has("stat") or not modifier.has("per_level"):
+			problems.append("%s: modifiers need stat, op (add or mul) and per_level" % where)
+
+
 static func _check_weapon(id: String, def: Dictionary, problems: PackedStringArray) -> void:
 	var where := "weapons.json '%s'" % id
 	_require(def, ["name_key", "domains", "damage_type", "base", "projectile"], where, problems)

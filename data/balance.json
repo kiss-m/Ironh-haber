@@ -1,20 +1,60 @@
 {
-  "fortress": { "radius": 140, "base_hp": 100, "mount_radius": 72 },
-  "aim": { "fire_tolerance_deg": 4 },
-  "crit": { "chance": 0.05, "multiplier": 2.0 },
-  "armor_multipliers": {
-    "kinetic": { "light": 1.0, "armored": 0.5, "shield": 0.75 },
-    "explosive": { "light": 1.0, "armored": 1.25, "shield": 0.75 },
-    "energy": { "light": 0.9, "armored": 1.0, "shield": 1.5 }
+  "fortress": {
+    "radius": 140,
+    "base_hp": 100,
+    "mount_radius": 72,
+    "regen": 0.5,
+    "turret_slots": 2
   },
-  "steering": { "separation_radius": 60, "separation_strength": 0.6 },
-  "spatial_grid": { "cell_size": 128 },
-  "pools": { "enemies": 64, "projectiles": 256 },
+  "aim": {
+    "fire_tolerance_deg": 4
+  },
+  "crit": {
+    "chance": 0.05,
+    "multiplier": 2.0
+  },
+  "armor_multipliers": {
+    "kinetic": {
+      "light": 1.0,
+      "armored": 0.5,
+      "shield": 0.75
+    },
+    "explosive": {
+      "light": 1.0,
+      "armored": 1.25,
+      "shield": 0.75
+    },
+    "energy": {
+      "light": 0.9,
+      "armored": 1.0,
+      "shield": 1.5
+    }
+  },
+  "steering": {
+    "separation_radius": 60,
+    "separation_strength": 0.6
+  },
+  "spatial_grid": {
+    "cell_size": 128
+  },
+  "pools": {
+    "enemies": 64,
+    "projectiles": 256
+  },
   "starting_loadout": ["machine_gun", "naval_cannon"],
   "stat_caps": {
-    "weapon.fire_rate": { "max_mul": 2.5 },
-    "weapon.range": { "max_mul": 1.5 },
-    "weapon.turn_speed": { "max_mul": 2.0 }
+    "weapon.fire_rate": {
+      "max_mul": 2.5
+    },
+    "weapon.range": {
+      "max_mul": 1.5
+    },
+    "weapon.turn_speed": {
+      "max_mul": 2.0
+    },
+    "fortress.damage_taken": {
+      "min": 0.5
+    }
   },
   "loot": {
     "float_time": 10,
@@ -35,5 +75,6 @@
     "unload_time": 0.8,
     "radius": 24,
     "dock_tap_radius": 90
-  }
+  },
+  "max_mounts_per_weapon": 2
 }

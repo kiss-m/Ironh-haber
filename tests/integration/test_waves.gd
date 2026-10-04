@@ -10,8 +10,10 @@ var spawned_by_wave: Dictionary = {}
 
 
 func before_each() -> void:
+	GameState.reset()
 	battle = (load(Battle.SCENE_PATH) as PackedScene).instantiate()
 	battle.run_seed = 42
+	battle.leave_on_end = false
 	add_child_autofree(battle)
 	battle.set_physics_process(false)
 	spawned_by_wave.clear()

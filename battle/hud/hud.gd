@@ -2,14 +2,15 @@ class_name Hud
 extends CanvasLayer
 ## Battle HUD (GAME_DESIGN.md section 12): top bar with base HP, wave, kills and the resources
 ## banked this run; a center banner for the wave countdown and cleared waves; bottom bar with one
-## button per turret slot, the salvage boat status and a pause button; pause and game over overlays (the results screen replaces game over in M4). Gameplay
+## button per turret slot, the salvage boat status and a pause button; the pause overlay
+## (resume, abandon run). The results screen follows a finished run. Gameplay
 ## state comes from EventBus; button presses leave through the signals below, which the Battle root
 ## wires up. Runs while the tree is paused so the pause overlay works.
 
 signal slot_pressed(slot: int)
 signal pause_pressed
 signal resume_pressed
-signal restart_pressed
+signal abandon_pressed
 
 const TOP_BAR_HEIGHT := 240.0
 const RESOURCE_ICON_SIZE := Vector2(26, 26)
@@ -22,7 +23,7 @@ const SMALL_FONT_SIZE := 34
 const TITLE_FONT_SIZE := 76
 const BANNER_FONT_SIZE := 72
 const BUTTON_SIZE := Vector2(520, 150)
-const SLOT_BUTTON_SIZE := Vector2(260, 150)
+const SLOT_BUTTON_SIZE := Vector2(130, 150)
 const PAUSE_BUTTON_SIZE := Vector2(150, 150)
 const PANEL_COLOR := Color(0.043, 0.165, 0.247, 0.88)
 const BAR_BACK_COLOR := Color("23394a")
@@ -49,8 +50,6 @@ var _boat_label: Label
 var _slot_row: HBoxContainer
 var _slot_buttons: Array[Button] = []
 var _pause_overlay: Control
-var _game_over: Control
-var _summary_label: Label
 
 
 func _ready() -> void:
@@ -66,16 +65,10 @@ func _ready() -> void:
 	_build_bottom_bar(root, insets.y)
 	_pause_overlay = _build_overlay(root, "Pause", tr("PAUSE_TITLE"), [
 		[tr("BUTTON_RESUME"), resume_pressed.emit],
-		[tr("BUTTON_RESTART"), restart_pressed.emit],
+		[tr("BUTTON_ABANDON"), abandon_pressed.emit],
 	])
-	_game_over = _build_overlay(root, "GameOver", tr("GAME_OVER_TITLE"), [
-		[tr("BUTTON_RETRY"), restart_pressed.emit],
-	])
-	_summary_label = _make_label("Summary", FONT_SIZE)
-	var column := _game_over.find_child("Column", true, false)
-	column.add_child(_summary_label)
-	column.move_child(_summary_label, 1)
 	EventBus.base_damaged.connect(_on_base_damaged)
+	EventBus.base_repaired.connect(_set_hp)
 	EventBus.enemy_killed.connect(_on_enemy_killed)
 	EventBus.run_ended.connect(_on_run_ended)
 	EventBus.wave_phase_changed.connect(_on_wave_phase_changed)
@@ -96,7 +89,6 @@ func setup(max_hp: float, slot_names: PackedStringArray) -> void:
 		(_resource_labels[resource_name] as Label).text = "0"
 	_wave_label.text = ""
 	_banner.visible = false
-	_game_over.visible = false
 	_pause_overlay.visible = false
 	for button in _slot_buttons:
 		button.queue_free()
@@ -106,11 +98,20 @@ func setup(max_hp: float, slot_names: PackedStringArray) -> void:
 		button.name = "Slot%d" % slot
 		button.text = slot_names[slot]
 		button.custom_minimum_size = SLOT_BUTTON_SIZE
-		button.add_theme_font_size_override("font_size", SMALL_FONT_SIZE)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		button.add_theme_font_size_override("font_size", SMALL_FONT_SIZE if slot_names.size() <= 2 else 28)
 		button.pressed.connect(slot_pressed.emit.bind(slot))
 		_slot_row.add_child(button)
 		_slot_buttons.append(button)
 		_style_button(button, false)
+
+
+## Shows a continued run's state: base HP, kills and resources banked so far.
+func show_state(hp: float, kills: int, banked: Dictionary) -> void:
+	_set_hp(hp)
+	_set_kills(kills)
+	_on_resources_banked(banked)
 
 
 func set_paused(paused: bool) -> void:
@@ -344,12 +345,6 @@ func _on_boat_status(state: int, cargo: int, capacity: int, respawn_left: int) -
 			_boat_label.text = tr("HUD_BOAT_CARGO") % [cargo, capacity]
 
 
-func _on_run_ended(summary: Dictionary) -> void:
-	var seconds := int(summary.get("time", 0.0))
-	var time_text := "%d:%02d" % [floori(seconds / 60.0), seconds % 60]
-	var banked: Dictionary = summary.get("banked", {})
-	_summary_label.text = tr("GAME_OVER_SUMMARY") % [int(summary.get("wave", 0)), int(summary.get("kills", 0)),
-			time_text, int(banked.get("credits", 0)), int(banked.get("steel", 0)), int(banked.get("electronics", 0))]
+func _on_run_ended(_summary: Dictionary) -> void:
 	_banner.visible = false
 	_pause_overlay.visible = false
-	_game_over.visible = true

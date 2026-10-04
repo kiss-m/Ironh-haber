@@ -10,6 +10,10 @@ var base_hp := 0.0
 var kills := 0
 var elapsed := 0.0
 var is_over := false
+## Incoming damage multiplier from Armor Plating (1.0 = full damage).
+var damage_taken := 1.0
+## Base HP regenerated per second (Repair Crews).
+var regen := 0.0
 ## Resources unloaded by the salvage boat this run, by name.
 var banked: Dictionary = {}
 ## One stream per feature, all derived from the run seed, so a change in one feature never shifts
@@ -36,8 +40,19 @@ func start(p_seed: int, p_max_hp: float) -> void:
 func damage_base(amount: float) -> void:
 	if is_over or base_hp <= 0.0:
 		return
-	base_hp = maxf(base_hp - amount, 0.0)
-	EventBus.base_damaged.emit(amount, base_hp)
+	var taken := amount * damage_taken
+	base_hp = maxf(base_hp - taken, 0.0)
+	EventBus.base_damaged.emit(taken, base_hp)
+
+
+## Repair Crews: heals `regen` HP per second up to max HP.
+func tick_regen(delta: float) -> void:
+	if regen <= 0.0 or is_over or base_hp <= 0.0 or base_hp >= max_hp:
+		return
+	var before := ceili(base_hp)
+	base_hp = minf(base_hp + regen * delta, max_hp)
+	if ceili(base_hp) != before:
+		EventBus.base_repaired.emit(base_hp)
 
 
 func add_banked(delta: Dictionary) -> void:

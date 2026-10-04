@@ -9,8 +9,10 @@ var battle: Battle
 
 
 func before_each() -> void:
+	GameState.reset()
 	battle = (load(Battle.SCENE_PATH) as PackedScene).instantiate()
 	battle.run_seed = 42
+	battle.leave_on_end = false
 	add_child_autofree(battle)
 	battle.set_physics_process(false)
 	battle.wave_director.enabled = false
@@ -216,16 +218,18 @@ func test_pause_freezes_the_tree_and_shows_the_overlay() -> void:
 func test_raider_skiffs_destroy_the_base_and_end_the_run() -> void:
 	watch_signals(EventBus)
 	var contact_damage := float(DataRegistry.enemy("raider_skiff")["attack"]["damage"])
-	var needed := ceili(battle.run_state.max_hp / contact_damage)
-	for i in needed:
-		battle.enemy_system.spawn("raider_skiff", Vector2.from_angle(TAU * i / needed) * 420.0)
+	# A few extra boats make up for the base's 0.5 HP/s repair while they close in.
+	var count := ceili(battle.run_state.max_hp / contact_damage) + 4
+	for i in count:
+		battle.enemy_system.spawn("raider_skiff", Vector2.from_angle(TAU * i / count) * 420.0)
 	_ticks(600)
 	assert_eq(battle.run_state.base_hp, 0.0)
-	assert_signal_emit_count(EventBus, "base_damaged", needed)
+	assert_signal_emitted(EventBus, "base_damaged")
 	assert_eq(battle.run_state.kills, 0, "rams are not kills")
 	assert_eq(battle.phase, Battle.Phase.ENDING)
 
 	await wait_for_signal(EventBus.run_ended, 5.0)
 	assert_eq(battle.phase, Battle.Phase.ENDED)
 	assert_eq(Engine.time_scale, 1.0, "slow motion is over")
-	assert_true(battle.hud.get_node("Root/GameOver").visible, "game over overlay is shown")
+	assert_eq(int(GameState.last_run.get("wave", -1)), battle.run_state.wave, "the run was recorded")
+	assert_eq(int(GameState.data["stats"]["runs"]), 1)

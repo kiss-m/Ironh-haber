@@ -93,6 +93,23 @@ adb install -r build/iron-harbor-debug.apk                  # USB-connected phon
   typical phone. Taps near loot mark it instead of aiming (section 3, rule 2).
 - **Salvage Hunter numbers the design leaves open:** contact damage 5 to the base and
   `boat_damage` 25 to the salvage boat (2 rams sink a fresh boat).
+- **Save file.** `GameState.data` is the save layout of section 11 (`SaveMigrator.defaults()`).
+  When the layout changes, bump `SaveMigrator.CURRENT_VERSION` and add a migration step with its
+  own test. `SaveStore` writes atomically (`.tmp` → rename, previous file kept as `.bak`).
+- **Tests and the save.** `tests/pre_run.gd` points GameState at `user://test_save.json`.
+  Integration tests call `GameState.reset()` in `before_each` and set `battle.leave_on_end = false`,
+  so a finished run does not switch scenes under GUT.
+- **Upgrades.** `upgrades.json` has `weapon_tracks` (applied to every weapon as
+  `weapon.<id>.<track>`), `weapon_specials` and `tracks`. Levels become StatResolver modifiers
+  (`mul` with `compound` = per_level^n, `mul` without it = 1 + (per_level − 1)·n, `add` = per_level·n).
+  Stats in use: weapon.damage/fire_rate/range/turn_speed/spread/splash_radius,
+  fortress.max_hp/damage_taken/regen/turret_slots, boat.speed/cargo/pickup_radius/hp and
+  loot.float_time. Repair Crews are read as a base 0.5 HP/s plus 0.25 HP/s per level. The machine
+  gun's special track (spread) and all cost constants are first guesses for M8 to tune. Shield
+  Generator, Auto-Targeting, Radar, Dual Command, Auto-Salvage, Fleet and the Salvage Drone are added
+  together with their mechanics in M5/M6.
+- **Screens** switch only through `SceneRouter` (paths are constants there); battles start with
+  `SceneRouter.start_battle(sector, resume)`, which fills `GameState.pending_run`.
 - **New behaviors** go into both `EnemySystem._make_behavior()` and `DataValidator.BEHAVIORS`.
 - **Ranges are measured from the fortress center**, like every distance in the design (engage
   distances, weapon ranges). Turrets sit off center, so shots and the aim line end on the range
@@ -151,8 +168,15 @@ tools/      run_tests.sh, balance simulator, debug menu
   nearest-neighbor re-planning, returning around the fortress, 0.8 s unloading, recall by tapping
   the dock, destruction with cargo spill and respawn). Also the Salvage Hunter, HUD resource
   counters and boat status, and banked resources in the game over summary. Resources live in
-  GameState for the app session until saving arrives in M4. Waiting for the on-device check.
-- [ ] M4 – Meta progression and save
+  GameState for the app session until saving arrives in M4. Checked on the designer's phone.
+- [x] M4 – Meta progression and save. Includes SaveStore (atomic write, backup fallback), the
+  SaveMigrator framework, GameState saving after purchases, at wave breaks (run snapshot with
+  continue from the next wave), at run end and on app pause/close. Also the Upgrades catalog with
+  the cost formula, tier gates and listed slot costs; the Shipyard (Arsenal, Loadout, Fortress,
+  Salvage) with effect now → next; and the main menu (continue, play, Shipyard, SK/EN toggle,
+  quit confirm on back), sector select (sector 1 playable, 2–4 shown locked) and results screens.
+  The pause menu offers resume / abandon run. The Loadout tab uses ◀ ▶ buttons instead of drag and
+  drop. Waiting for the on-device check.
 - [ ] M5 – Full arsenal and bestiary
 - [ ] M6 – Bosses, perks, sectors
 - [ ] M7 – Polish
