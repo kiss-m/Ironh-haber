@@ -14,6 +14,13 @@ var is_over := false
 var damage_taken := 1.0
 ## Base HP regenerated per second (Repair Crews).
 var regen := 0.0
+## Shield Generator: a separate pool on top of base HP, absorbed first; it regenerates
+## `shield_regen_rate` of its maximum per second after `shield_regen_delay` seconds without hits.
+var shield := 0.0
+var max_shield := 0.0
+var shield_regen_delay := 3.0
+var shield_regen_rate := 0.1
+var since_hit := 0.0
 ## Resources unloaded by the salvage boat this run, by name.
 var banked: Dictionary = {}
 ## One stream per feature, all derived from the run seed, so a change in one feature never shifts
@@ -43,12 +50,30 @@ func damage_base(amount: float) -> void:
 	if is_over or base_hp <= 0.0:
 		return
 	var taken := amount * damage_taken
+	since_hit = 0.0
+	if shield > 0.0:
+		var absorbed := minf(shield, taken)
+		shield -= absorbed
+		taken -= absorbed
+		EventBus.base_shield_changed.emit(shield, max_shield)
 	base_hp = maxf(base_hp - taken, 0.0)
 	EventBus.base_damaged.emit(taken, base_hp)
 
 
-## Repair Crews: heals `regen` HP per second up to max HP.
+func set_max_shield(value: float) -> void:
+	max_shield = value
+	shield = value
+	EventBus.base_shield_changed.emit(shield, max_shield)
+
+
+## Repair Crews heal `regen` HP per second up to max HP; the base shield recharges.
 func tick_regen(delta: float) -> void:
+	since_hit += delta
+	if max_shield > 0.0 and shield < max_shield and since_hit >= shield_regen_delay and not is_over:
+		var before_shield := ceili(shield)
+		shield = minf(shield + max_shield * shield_regen_rate * delta, max_shield)
+		if ceili(shield) != before_shield:
+			EventBus.base_shield_changed.emit(shield, max_shield)
 	if regen <= 0.0 or is_over or base_hp <= 0.0 or base_hp >= max_hp:
 		return
 	var before := ceili(base_hp)

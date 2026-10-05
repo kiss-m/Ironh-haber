@@ -63,5 +63,14 @@ func test_blocks_for_max_level_price_and_unlock_wave() -> void:
 
 func test_every_weapon_gets_its_tracks() -> void:
 	for weapon_id: String in DataRegistry.weapons:
-		for track in ["dmg", "rate", "range", "turn", "tier", "special"]:
+		for track in ["dmg", "range", "turn", "tier", "special"]:
 			assert_true(upgrades.tracks.has("weapon.%s.%s" % [weapon_id, track]), "%s %s" % [weapon_id, track])
+		var has_rate: bool = DataRegistry.weapon(weapon_id)["base"].has("fire_rate")
+		assert_eq(upgrades.tracks.has("weapon.%s.rate" % weapon_id), has_rate, "%s rate" % weapon_id)
+	assert_false(upgrades.tracks.has("weapon.laser.rate"), "the laser has no fire rate to upgrade")
+
+
+func test_boss_unlocks() -> void:
+	var key := "fortress.dual_command"
+	assert_eq(upgrades.block(key, {}, {"cores": 9}, 99, 0), Upgrades.Block.LOCKED)
+	assert_eq(upgrades.block(key, {}, {"cores": 9}, 99, 1), Upgrades.Block.NONE)

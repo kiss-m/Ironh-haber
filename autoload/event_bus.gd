@@ -33,3 +33,7 @@ signal boat_status(state: int, cargo: int, capacity: int, respawn_left: int)
 signal base_repaired(hp_left: float)
 ## M5: a Landing Craft reached the base and knocks out a random turret for `seconds`.
 signal turret_disable_requested(seconds: float)
+## Turret state for the bottom bar: laser heat 0 .. 1 and whether it is knocked out.
+signal turret_status(slot: int, heat: float, disabled: bool)
+## Base shield (Shield Generator) for the HUD.
+signal base_shield_changed(shield: float, max_shield: float)

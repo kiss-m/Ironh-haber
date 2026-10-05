@@ -7,7 +7,8 @@
     "turret_slots": 2
   },
   "aim": {
-    "fire_tolerance_deg": 4
+    "fire_tolerance_deg": 4,
+    "assist_deg": 6
   },
   "crit": {
     "chance": 0.05,
@@ -92,5 +93,13 @@
     "shield_fraction": 0.5,
     "split_into": "raider_skiff",
     "split_count": 2
+  },
+  "auto_targeting": {
+    "min_share": 0.2,
+    "max_share": 0.7,
+    "max_level": 10
+  },
+  "radar": {
+    "lookahead": 3
   }
 }

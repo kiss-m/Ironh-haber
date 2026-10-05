@@ -91,7 +91,8 @@ func best_wave_overall() -> int:
 
 
 func purchase_block(key: String) -> Upgrades.Block:
-	return upgrades.block(key, upgrade_levels(), data["resources"], best_wave_overall())
+	return upgrades.block(key, upgrade_levels(), data["resources"], best_wave_overall(),
+			int(data["stats"].get("bosses", 0)))
 
 
 ## Buys the next level of `key`. Returns true on success; saves immediately.
@@ -134,6 +135,38 @@ func turret_slots() -> int:
 
 func unlocked_weapons() -> Array:
 	return data["unlocked_weapons"]
+
+
+## Resources needed to unlock `weapon_id` (weapons.json → unlock.cost).
+func weapon_unlock_cost(weapon_id: String) -> Dictionary:
+	return DataRegistry.weapon(weapon_id).get("unlock", {}).get("cost", {})
+
+
+## Why `weapon_id` cannot be unlocked now (Block.MAX_LEVEL when it already is), or Block.NONE.
+func weapon_unlock_block(weapon_id: String) -> Upgrades.Block:
+	if weapon_id in unlocked_weapons():
+		return Upgrades.Block.MAX_LEVEL
+	var unlock: Dictionary = DataRegistry.weapon(weapon_id).get("unlock", {})
+	if best_wave_overall() < int(unlock.get("best_wave", 0)):
+		return Upgrades.Block.LOCKED
+	var price := weapon_unlock_cost(weapon_id)
+	for resource_name: String in price:
+		if resource(resource_name) < int(price[resource_name]):
+			return Upgrades.Block.TOO_EXPENSIVE
+	return Upgrades.Block.NONE
+
+
+## Pays for and unlocks a weapon so it can go into the loadout. Saves immediately.
+func unlock_weapon(weapon_id: String) -> bool:
+	if weapon_unlock_block(weapon_id) != Upgrades.Block.NONE:
+		return false
+	var price := weapon_unlock_cost(weapon_id)
+	for resource_name: String in price:
+		data["resources"][resource_name] = resource(resource_name) - int(price[resource_name])
+	data["unlocked_weapons"].append(weapon_id)
+	EventBus.upgrade_purchased.emit(StringName("weapon.%s.unlock" % weapon_id), 1)
+	save_game()
+	return true
 
 
 ## Weapon id per slot ("" for an empty slot), sized to the current slot count.

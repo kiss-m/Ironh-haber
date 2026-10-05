@@ -47,6 +47,10 @@ var _banner: Label
 var _resource_labels: Dictionary = {}
 var _banked: Dictionary = {}
 var _boat_label: Label
+var _shield_bar: ProgressBar
+var _radar: RadarOverlay
+var _preview := ""
+var _heat_bars: Array[ProgressBar] = []
 var _slot_row: HBoxContainer
 var _slot_buttons: Array[Button] = []
 var _pause_overlay: Control
@@ -63,6 +67,13 @@ func _ready() -> void:
 	_build_top_bar(root, insets.x)
 	_build_banner(root)
 	_build_bottom_bar(root, insets.y)
+	_radar = RadarOverlay.new()
+	_radar.name = "Radar"
+	_radar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_radar.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_radar.top_margin = insets.x + TOP_BAR_HEIGHT
+	_radar.bottom_margin = insets.y + BOTTOM_BAR_HEIGHT
+	root.add_child(_radar)
 	_pause_overlay = _build_overlay(root, "Pause", tr("PAUSE_TITLE"), [
 		[tr("BUTTON_RESUME"), resume_pressed.emit],
 		[tr("BUTTON_ABANDON"), abandon_pressed.emit],
@@ -76,6 +87,8 @@ func _ready() -> void:
 	EventBus.turret_selected.connect(_on_turret_selected)
 	EventBus.resources_banked.connect(_on_resources_banked)
 	EventBus.boat_status.connect(_on_boat_status)
+	EventBus.base_shield_changed.connect(set_shield)
+	EventBus.turret_status.connect(_on_turret_status)
 
 
 ## `slot_names` are the translated weapon names of the turret slots, in slot order.
@@ -93,6 +106,7 @@ func setup(max_hp: float, slot_names: PackedStringArray) -> void:
 	for button in _slot_buttons:
 		button.queue_free()
 	_slot_buttons.clear()
+	_heat_bars.clear()
 	for slot in slot_names.size():
 		var button := Button.new()
 		button.name = "Slot%d" % slot
@@ -104,6 +118,23 @@ func setup(max_hp: float, slot_names: PackedStringArray) -> void:
 		button.pressed.connect(slot_pressed.emit.bind(slot))
 		_slot_row.add_child(button)
 		_slot_buttons.append(button)
+		var heat := ProgressBar.new()
+		heat.name = "Heat"
+		heat.show_percentage = false
+		heat.max_value = 1.0
+		heat.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		heat.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+		heat.offset_top = -14.0
+		heat.offset_left = 12.0
+		heat.offset_right = -12.0
+		heat.offset_bottom = -6.0
+		var heat_fill := StyleBoxFlat.new()
+		heat_fill.bg_color = BAR_LOW_COLOR
+		heat.add_theme_stylebox_override("fill", heat_fill)
+		heat.add_theme_stylebox_override("background", StyleBoxEmpty.new())
+		heat.visible = false
+		button.add_child(heat)
+		_heat_bars.append(heat)
 		_style_button(button, false)
 
 
@@ -141,6 +172,19 @@ func _build_top_bar(root: Control, top_inset: float) -> void:
 	_hp_bar.add_theme_stylebox_override("background", back)
 	_hp_bar.add_theme_stylebox_override("fill", _hp_fill)
 	column.add_child(_hp_bar)
+	_shield_bar = ProgressBar.new()
+	_shield_bar.name = "BaseShield"
+	_shield_bar.show_percentage = false
+	_shield_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_shield_bar.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	_shield_bar.offset_bottom = 12.0
+	var shield_fill := StyleBoxFlat.new()
+	shield_fill.bg_color = Color("4dd0e1")
+	shield_fill.set_corner_radius_all(6)
+	_shield_bar.add_theme_stylebox_override("fill", shield_fill)
+	_shield_bar.add_theme_stylebox_override("background", StyleBoxEmpty.new())
+	_shield_bar.visible = false
+	_hp_bar.add_child(_shield_bar)
 
 	_hp_label = _make_label("BaseHpValue", FONT_SIZE)
 	_hp_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -286,6 +330,33 @@ func _style_button(button: Button, selected: bool) -> void:
 	button.add_theme_color_override("font_color", SELECTED_COLOR if selected else TEXT_COLOR)
 
 
+## Base shield overlay on the HP bar (Shield Generator).
+func set_shield(shield: float, max_shield: float) -> void:
+	_shield_bar.visible = max_shield > 0.0
+	_shield_bar.max_value = maxf(max_shield, 0.001)
+	_shield_bar.value = shield
+
+
+## Radar arrows; see RadarOverlay.
+func set_radar_contacts(contacts: Array[Vector2i]) -> void:
+	_radar.set_contacts(contacts)
+
+
+## Radar preview of the next wave, shown under the "wave cleared" banner.
+func show_preview(text: String) -> void:
+	_preview = text
+	if _banner.visible:
+		_banner.text += "\n" + tr("BANNER_NEXT_WAVE") % text
+
+
+func _on_turret_status(slot: int, heat: float, disabled: bool) -> void:
+	if slot >= _slot_buttons.size():
+		return
+	_heat_bars[slot].visible = heat > 0.0
+	_heat_bars[slot].value = heat
+	_slot_buttons[slot].modulate = Color(1, 0.55, 0.55) if disabled else Color.WHITE
+
+
 func _set_hp(hp: float) -> void:
 	_hp_bar.value = hp
 	_hp_label.text = "%d / %d" % [ceili(hp), ceili(_max_hp)]
@@ -312,6 +383,7 @@ func _on_wave_phase_changed(wave: int, phase: int) -> void:
 			_banner.visible = true
 		WaveDirector.Phase.BREAK:
 			_banner.text = tr("BANNER_WAVE_CLEARED") % wave
+			_preview = ""
 			_banner.visible = true
 		_:
 			_banner.visible = false

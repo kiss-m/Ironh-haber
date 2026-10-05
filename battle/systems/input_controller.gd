@@ -6,8 +6,9 @@ extends Node
 ## 2. A touch near floating loot marks it, and all loot near it, for salvage.
 ## 3. A touch on the dock recalls the salvage boat (section 3, "Other input").
 ## 4. A touch on a turret on the fortress selects it, with no firing.
-## 5. Anything else becomes the aim touch for the selected turret. Only the first aim
-## touch is tracked, because Dual Command arrives in M5. On desktop, the mouse arrives as touch.
+## 5. Anything else becomes the aim touch for the selected turret. With Dual Command a second
+##    simultaneous aim touch controls the turret selected before it; otherwise only the first
+##    aim touch counts. Touches are tracked by index. On desktop, the mouse arrives as touch.
 
 const NO_TOUCH := -1
 
@@ -15,11 +16,15 @@ var turrets: Array[Turret] = []
 var loot: LootSystem
 var salvage: SalvageSystem
 var selected_slot := -1
+## The slot selected before the current one: the Dual Command turret.
+var previous_slot := -1
+var dual_command := false
 ## A touch-down within this world distance of a turret selects it instead of aiming.
 var select_radius := Turret.BASE_RADIUS + 14.0
 var enabled := true
 
 var _aim_index := NO_TOUCH
+var _second_index := NO_TOUCH
 
 
 ## Touch-down goes through _unhandled_input so UI controls get the first chance at it.
@@ -49,6 +54,8 @@ func select(slot: int) -> void:
 	if slot < 0 or slot >= turrets.size():
 		return
 	cancel()
+	if slot != selected_slot:
+		previous_slot = selected_slot
 	selected_slot = slot
 	for turret in turrets:
 		turret.set_selected(turret.slot == slot)
@@ -70,29 +77,52 @@ func press(index: int, world_point: Vector2) -> bool:
 				select(turret.slot)
 			return true
 	var turret := selected_turret()
-	if _aim_index != NO_TOUCH or turret == null:
+	if turret == null:
 		return false
-	_aim_index = index
-	turret.aim_at(world_point)
-	return true
+	if _aim_index == NO_TOUCH:
+		_aim_index = index
+		turret.aim_at(world_point)
+		return true
+	var second := second_turret()
+	if dual_command and _second_index == NO_TOUCH and second != null:
+		_second_index = index
+		second.aim_at(world_point)
+		return true
+	return false
+
+
+## The Dual Command turret: the previously selected one, if it still exists.
+func second_turret() -> Turret:
+	if previous_slot < 0 or previous_slot >= turrets.size() or previous_slot == selected_slot:
+		return null
+	return turrets[previous_slot]
 
 
 func drag_to(index: int, world_point: Vector2) -> void:
-	var turret := selected_turret()
-	if enabled and index == _aim_index and turret != null:
-		turret.aim_at(world_point)
+	if not enabled:
+		return
+	if index == _aim_index and selected_turret() != null:
+		selected_turret().aim_at(world_point)
+	elif index == _second_index and second_turret() != null:
+		second_turret().aim_at(world_point)
 
 
 func release(index: int) -> void:
 	if index == _aim_index:
-		cancel()
+		_aim_index = NO_TOUCH
+		if selected_turret() != null:
+			selected_turret().release_aim()
+	elif index == _second_index:
+		_second_index = NO_TOUCH
+		if second_turret() != null:
+			second_turret().release_aim()
 
 
 func cancel() -> void:
+	release(_aim_index)
+	release(_second_index)
 	_aim_index = NO_TOUCH
-	var turret := selected_turret()
-	if turret != null:
-		turret.release_aim()
+	_second_index = NO_TOUCH
 
 
 func _to_world(screen_point: Vector2) -> Vector2:

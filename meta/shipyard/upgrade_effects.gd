@@ -40,6 +40,8 @@ static func base_value(stat: String, weapon_id: String) -> float:
 			return float(balance["fortress"]["turret_slots"])
 		"loot.float_time":
 			return float(balance["loot"]["float_time"])
+		"fortress.shield", "fortress.auto_targeting", "fortress.radar", "fortress.dual_command":
+			return 0.0
 	push_error("No base value for stat '%s'" % stat)
 	return 0.0
 
@@ -66,4 +68,14 @@ static func format(stat: String, value: float) -> String:
 			return "%d px/s" % roundi(value)
 		"loot.float_time":
 			return "%d s" % roundi(value)
+		"fortress.shield":
+			return "%d %% HP" % roundi(value * 100.0)
+		"fortress.auto_targeting":
+			return "%d %%" % roundi(AutoTargeting.share(roundi(value), DataRegistry.balance["auto_targeting"]) * 100.0)
+		"fortress.dual_command":
+			return TranslationServer.translate("EFFECT_ON") if value >= 1.0 else TranslationServer.translate("EFFECT_OFF")
+		"weapon.charge_time":
+			return "%.2f s" % value
+		"weapon.heat_capacity", "weapon.cooldown":
+			return "%.1f s" % value
 	return str(roundi(value))

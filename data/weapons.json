@@ -13,7 +13,11 @@
       "spread": 4,
       "splash_radius": 0
     },
-    "projectile": "bullet"
+    "projectile": "bullet",
+    "unlock": {
+      "best_wave": 0,
+      "cost": {}
+    }
   },
   {
     "id": "naval_cannon",
@@ -29,6 +33,105 @@
       "spread": 0,
       "splash_radius": 60
     },
-    "projectile": "shell"
+    "projectile": "shell",
+    "unlock": {
+      "best_wave": 0,
+      "cost": {}
+    }
+  },
+  {
+    "id": "missile_launcher",
+    "name_key": "WEAPON_MISSILE_LAUNCHER",
+    "domains": ["surface", "air"],
+    "damage_type": "explosive",
+    "base": {
+      "damage": 30,
+      "fire_rate": 0.6,
+      "range": 900,
+      "turn_speed": 180,
+      "projectile_speed": 600,
+      "projectile_turn": 240,
+      "spread": 12,
+      "salvo": 2
+    },
+    "projectile": "missile",
+    "unlock": {
+      "best_wave": 8,
+      "cost": { "credits": 300, "steel": 20 }
+    }
+  },
+  {
+    "id": "torpedo_tube",
+    "name_key": "WEAPON_TORPEDO_TUBE",
+    "domains": ["surface", "submerged"],
+    "damage_type": "explosive",
+    "base": {
+      "damage": 80,
+      "fire_rate": 0.35,
+      "range": 1000,
+      "turn_speed": 60,
+      "projectile_speed": 450,
+      "pierce": 2
+    },
+    "projectile": "torpedo",
+    "unlock": {
+      "best_wave": 15,
+      "cost": { "credits": 800, "steel": 50, "electronics": 5 }
+    }
+  },
+  {
+    "id": "depth_charge_mortar",
+    "name_key": "WEAPON_DEPTH_CHARGE_MORTAR",
+    "domains": ["submerged", "surface"],
+    "damage_type": "explosive",
+    "base": {
+      "damage": 60,
+      "fire_rate": 0.5,
+      "range": 450,
+      "turn_speed": 120,
+      "projectile_speed": 500,
+      "splash_radius": 90
+    },
+    "projectile": "lob",
+    "unlock": {
+      "best_wave": 20,
+      "cost": { "credits": 1200, "steel": 80, "electronics": 8 }
+    }
+  },
+  {
+    "id": "laser",
+    "name_key": "WEAPON_LASER",
+    "domains": ["surface", "air"],
+    "damage_type": "energy",
+    "base": {
+      "damage": 40,
+      "range": 700,
+      "turn_speed": 200,
+      "heat_capacity": 5,
+      "cooldown": 3
+    },
+    "projectile": "beam",
+    "unlock": {
+      "best_wave": 30,
+      "cost": { "credits": 2500, "steel": 150, "electronics": 20 }
+    }
+  },
+  {
+    "id": "railgun",
+    "name_key": "WEAPON_RAILGUN",
+    "domains": ["surface", "air"],
+    "damage_type": "energy",
+    "base": {
+      "damage": 220,
+      "fire_rate": 0.25,
+      "range": 1400,
+      "turn_speed": 45,
+      "charge_time": 1
+    },
+    "projectile": "rail",
+    "unlock": {
+      "best_wave": 45,
+      "cost": { "credits": 5000, "steel": 300, "electronics": 40 }
+    }
   }
 ]

@@ -13,10 +13,19 @@ const BEHAVIOR_PARAMS := {
 	"submarine": ["engage_distance", "submerged_time", "surfaced_time"],
 	"fly_over": ["bomb_distance"],
 }
-const PROJECTILES: PackedStringArray = ["bullet", "shell"]
+const PROJECTILES: PackedStringArray = ["bullet", "shell", "missile", "torpedo", "lob", "beam", "rail"]
 const VISUALS: PackedStringArray = ["skiff", "patrol_boat", "drone", "torpedo_boat", "gunboat", "torpedo", "hunter",
 		"submarine", "bomber", "minelayer", "frigate", "landing_craft", "corvette", "mine", "missile"]
-const WEAPON_STATS: PackedStringArray = ["damage", "fire_rate", "range", "turn_speed", "projectile_speed"]
+
+## Base stats each projectile kind needs on top of damage, range and turn_speed.
+const KIND_STATS := {
+	"beam": ["heat_capacity", "cooldown"],
+	"rail": ["fire_rate", "charge_time"],
+	"missile": ["fire_rate", "projectile_speed", "projectile_turn"],
+	"torpedo": ["fire_rate", "projectile_speed"],
+	"lob": ["fire_rate", "projectile_speed", "splash_radius"],
+}
+const RESOURCES: PackedStringArray = ["credits", "steel", "electronics", "cores"]
 const WAVE_SECTIONS: PackedStringArray = ["scaling", "featured", "edges", "timeline", "formations", "lifecycle", "spawn"]
 
 
@@ -98,9 +107,15 @@ static func _check_weapon(id: String, def: Dictionary, problems: PackedStringArr
 	if not str(def.get("projectile", "")) in PROJECTILES:
 		problems.append("%s: unknown projectile '%s'" % [where, def.get("projectile")])
 	var base: Dictionary = def.get("base", {})
-	for stat in WEAPON_STATS:
+	var needed: Array = ["damage", "range", "turn_speed"]
+	needed.append_array(KIND_STATS.get(str(def.get("projectile", "")), ["fire_rate", "projectile_speed"]))
+	for stat: String in needed:
 		if float(base.get(stat, 0.0)) <= 0.0:
 			problems.append("%s: base.%s must be greater than 0" % [where, stat])
+	var unlock: Dictionary = def.get("unlock", {})
+	for resource: String in unlock.get("cost", {}):
+		if not resource in RESOURCES:
+			problems.append("%s: unlock cost uses unknown resource '%s'" % [where, resource])
 
 
 static func _check_enemy(id: String, def: Dictionary, enemies: Dictionary, loot_tables: Dictionary,

@@ -10,8 +10,9 @@ extends RefCounted
 ## Each level adds stat modifiers in the StatResolver format: "mul" multiplies by per_level^n when
 ## "compound" is set and by 1 + (per_level − 1)·n otherwise; "add" adds per_level·n.
 ## Weapon tracks are built per weapon from "weapon_tracks" plus its "weapon_specials" entry, keyed
-## "weapon.<weapon id>.<track>". The Damage track is gated by Tier-ups: every levels_per_tier
-## Damage levels need one more Tier level.
+## "weapon.<weapon id>.<track>"; a weapon only gets the tracks whose stats it has (the laser has no
+## fire rate). The Damage track is gated by Tier-ups: every levels_per_tier Damage levels need one
+## more Tier level. Unlock conditions are a best wave and/or a number of boss kills.
 
 enum Block { NONE, MAX_LEVEL, LOCKED, NEEDS_TIER, TOO_EXPENSIVE }
 
@@ -30,6 +31,7 @@ class Track:
 	## [{ "stat", "op", "per_level", "compound" }]
 	var modifiers: Array[Dictionary] = []
 	var unlock_wave := 0
+	var unlock_bosses := 0
 	var gate_track := ""
 	var levels_per_tier := 0
 
@@ -40,7 +42,10 @@ var tracks: Dictionary = {}
 
 func _init(upgrades: Dictionary, weapons: Dictionary) -> void:
 	for weapon_id: String in weapons:
+		var base: Dictionary = weapons[weapon_id]["base"]
 		for track_id: String in upgrades["weapon_tracks"]:
+			if not _weapon_has_stats(upgrades["weapon_tracks"][track_id], base):
+				continue
 			_add("weapon.%s.%s" % [weapon_id, track_id], upgrades["weapon_tracks"][track_id], "arsenal", weapon_id)
 		var specials: Dictionary = upgrades.get("weapon_specials", {})
 		if specials.has(weapon_id):
@@ -75,12 +80,12 @@ func cost(key: String, level: int) -> Dictionary:
 
 ## Why the next level of `key` cannot be bought now, or Block.NONE.
 ## `levels` maps track keys to owned levels; `resources` maps resource names to amounts.
-func block(key: String, levels: Dictionary, resources: Dictionary, best_wave: int) -> Block:
+func block(key: String, levels: Dictionary, resources: Dictionary, best_wave: int, bosses := 0) -> Block:
 	var t := track(key)
 	var level := int(levels.get(key, 0))
 	if level >= t.max_level:
 		return Block.MAX_LEVEL
-	if best_wave < t.unlock_wave:
+	if best_wave < t.unlock_wave or bosses < t.unlock_bosses:
 		return Block.LOCKED
 	if t.gate_track != "":
 		var tier_key := "weapon.%s.%s" % [t.weapon_id, t.gate_track]
@@ -138,8 +143,16 @@ func _add(key: String, def: Dictionary, tab: String, weapon_id: String) -> void:
 	for spec: Dictionary in def["modifiers"]:
 		t.modifiers.append(spec)
 	t.unlock_wave = int(def.get("unlock", {}).get("best_wave", 0))
+	t.unlock_bosses = int(def.get("unlock", {}).get("bosses", 0))
 	if def.has("gate"):
 		t.gate_track = str(def["gate"]["track"])
 		t.levels_per_tier = int(def["gate"]["levels_per_tier"])
 	tracks[key] = t
 	order.append(key)
+
+
+static func _weapon_has_stats(def: Dictionary, base: Dictionary) -> bool:
+	for spec: Dictionary in def["modifiers"]:
+		if not base.has(str(spec["stat"]).trim_prefix("weapon.")):
+			return false
+	return true

@@ -49,6 +49,9 @@ var enemy_system: EnemySystem
 var projectile_system: ProjectileSystem
 var loot_system: LootSystem
 var salvage_system: SalvageSystem
+var targeting_system: TargetingSystem
+## Radar upgrade level: 1+ shows edge warnings and the next wave preview (section 8).
+var radar_level := 0
 var grid: SpatialGrid
 var hud: Hud
 
@@ -69,6 +72,16 @@ func _ready() -> void:
 	run_state.start(run_seed if run_seed >= 0 else randi(), max_hp)
 	run_state.damage_taken = stats.resolve("fortress.damage_taken", 1.0)
 	run_state.regen = stats.resolve("fortress.regen", float(balance["fortress"]["regen"]))
+	run_state.shield_regen_delay = float(balance["shields"]["regen_delay"])
+	run_state.shield_regen_rate = float(balance["shields"]["regen_rate"])
+	run_state.set_max_shield(max_hp * stats.resolve("fortress.shield", 0.0))
+	targeting_system.auto_share = AutoTargeting.share(int(stats.resolve("fortress.auto_targeting", 0.0)),
+			balance["auto_targeting"])
+	var settings: Dictionary = GameState.data["settings"]
+	if bool(settings.get("aim_assist", true)):
+		targeting_system.assist_angle = deg_to_rad(float(balance["aim"]["assist_deg"]))
+	input_controller.dual_command = stats.resolve("fortress.dual_command", 0.0) >= 1.0
+	radar_level = int(stats.resolve("fortress.radar", 0.0))
 	if not resume.is_empty():
 		run_state.base_hp = clampf(float(resume.get("base_hp", max_hp)), 1.0, max_hp)
 		run_state.kills = int(resume.get("kills", 0))
@@ -76,11 +89,13 @@ func _ready() -> void:
 		run_state.add_banked(resume.get("banked", {}))
 	EventBus.wave_cleared.connect(_on_wave_cleared)
 	EventBus.turret_disable_requested.connect(_on_turret_disable_requested)
+	EventBus.wave_phase_changed.connect(_on_wave_phase_changed)
 	var slot_names := PackedStringArray()
 	for turret in turrets:
 		slot_names.append(tr(turret.name_key))
 	hud.setup(run_state.max_hp, slot_names)
 	hud.show_state(run_state.base_hp, run_state.kills, run_state.banked)
+	hud.set_shield(run_state.shield, run_state.max_shield)
 	salvage_system.refresh_status()
 	input_controller.select(clampi(int(resume.get("selected_slot", 0)), 0, maxi(turrets.size() - 1, 0)))
 	wave_director.start(first_wave)
@@ -120,6 +135,7 @@ func step(delta: float) -> void:
 	wave_director.tick(delta)
 	enemy_system.tick(delta)
 	grid.rebuild(enemy_system.active)
+	targeting_system.tick(delta)
 	for turret in turrets:
 		turret.tick(delta)
 	projectile_system.tick(delta)
@@ -127,6 +143,8 @@ func step(delta: float) -> void:
 	salvage_system.tick(delta)
 	fx_layer.tick(delta)
 	projectile_layer.queue_redraw()
+	if radar_level > 0:
+		_update_radar()
 	if phase == Phase.RUNNING and run_state.base_hp <= 0.0:
 		_begin_end()
 
@@ -251,8 +269,16 @@ func _build_systems(balance: Dictionary) -> void:
 
 	for turret in turrets:
 		turret.projectiles = projectile_system
+		turret.fx = fx_layer
 		turret.rng = run_state.rng_combat
 		turret.aim_origin = fortress.position
+
+	targeting_system = TargetingSystem.new()
+	targeting_system.name = "TargetingSystem"
+	targeting_system.turrets = turrets
+	targeting_system.grid = grid
+	targeting_system.fortress_center = fortress.position
+	systems.add_child(targeting_system)
 
 	wave_director = WaveDirector.new()
 	wave_director.name = "WaveDirector"
@@ -314,6 +340,27 @@ func _on_wave_cleared(wave: int) -> void:
 		"perks": [],
 		"selected_slot": input_controller.selected_slot,
 	})
+
+
+## Radar: edge warnings for groups about to spawn, and the next wave's lineup during the break.
+func _update_radar() -> void:
+	var contacts: Array[Vector2i] = []
+	var lookahead := float(DataRegistry.balance["radar"]["lookahead"])
+	for group in wave_director.upcoming(lookahead):
+		contacts.append(Vector2i(group.edge, roundi(group.edge_offset * 1000.0)))
+	hud.set_radar_contacts(contacts)
+
+
+func _on_wave_phase_changed(wave: int, wave_phase: int) -> void:
+	if radar_level <= 0 or wave_phase != WaveDirector.Phase.BREAK:
+		return
+	var counts := {}
+	for group in wave_director.generator.generate(wave + 1, run_state.run_seed):
+		counts[group.enemy_id] = int(counts.get(group.enemy_id, 0)) + group.count
+	var parts := PackedStringArray()
+	for id: String in counts:
+		parts.append("%s ×%d" % [tr(str(DataRegistry.enemy(id)["name_key"])), counts[id]])
+	hud.show_preview(", ".join(parts))
 
 
 ## A Landing Craft reached the base: a random working turret stops for `seconds`.

@@ -110,6 +110,13 @@ adb install -r build/iron-harbor-debug.apk                  # USB-connected phon
   together with their mechanics in M5/M6.
 - **Screens** switch only through `SceneRouter` (paths are constants there); battles start with
   `SceneRouter.start_battle(sector, resume)`, which fills `GameState.pending_run`.
+- **Weapons by projectile kind.** `projectile` is bullet, shell, missile, torpedo, lob, beam or rail;
+  `DataValidator.KIND_STATS` lists the base stats each kind needs (the laser has no fire_rate, so
+  it has no Fire Rate track). Extra weapon fields: `salvo`, `pierce`, `projectile_turn`,
+  `heat_capacity`, `cooldown`, `charge_time` and `unlock` (`best_wave`, `cost`). Weapons are
+  unlocked only through `GameState.unlock_weapon()`.
+- **Aim.** A finger's aim angle is measured from the fortress center; Auto-Targeting and aim
+  assist aim from the turret itself at an enemy (`Turret.target_angle()`).
 - **New behaviors** go into both `EnemySystem._make_behavior()` and `DataValidator.BEHAVIORS`.
 - **Ranges are measured from the fortress center**, like every distance in the design (engage
   distances, weapon ranges). Turrets sit off center, so shots and the aim line end on the range
@@ -176,8 +183,16 @@ tools/      run_tests.sh, balance simulator, debug menu
   Salvage) with effect now → next; and the main menu (continue, play, Shipyard, SK/EN toggle,
   quit confirm on back), sector select (sector 1 playable, 2–4 shown locked) and results screens.
   The pause menu offers resume / abandon run. The Loadout tab uses ◀ ▶ buttons instead of drag and
-  drop. Waiting for the on-device check.
-- [ ] M5 – Full arsenal and bestiary
+  drop. Checked on the designer's phone.
+- [x] M5 – Full arsenal and bestiary. Includes all 7 weapons (missiles home in and retarget,
+  torpedoes pierce and hit Submerged, depth charges are lobbed to the aim point, the laser is a
+  heat-limited beam, the railgun charges and hits everything in line), weapon unlocks in the
+  Arsenal tab, all 12 wave enemies with shields, the frigate aura, submarine surfacing, bombs,
+  mines, missiles and turret knock-out, and elites (wave 15+). Also Shield Generator,
+  Auto-Targeting (unselected turrets fire at 20–70 % of their rate at the threat closest to the
+  fortress), aim assist, Radar (edge arrows and next-wave preview) and Dual Command (a second
+  finger aims the previously selected turret). Unlock costs, the new specials and the numbers the
+  design leaves open are first guesses for M8. Waiting for the on-device check.
 - [ ] M6 – Bosses, perks, sectors
 - [ ] M7 – Polish
 - [ ] M8 – Balance and release

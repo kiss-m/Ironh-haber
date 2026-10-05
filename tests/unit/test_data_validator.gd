@@ -59,8 +59,8 @@ func test_unknown_loot_table_and_resource() -> void:
 
 func test_unknown_loadout_weapon() -> void:
 	var data := _data()
-	data["balance"]["starting_loadout"] = ["railgun"]
-	assert_string_contains(_problems(data), "unknown weapon 'railgun'")
+	data["balance"]["starting_loadout"] = ["gatling"]
+	assert_string_contains(_problems(data), "unknown weapon 'gatling'")
 
 
 func test_formations_keep_groups_behind_their_anchor() -> void:
@@ -73,3 +73,15 @@ func test_formations_keep_groups_behind_their_anchor() -> void:
 			assert_true(offset.x <= 0.0, "%s offset %s" % [formation, offset])
 	var line := Formations.offsets("line", 3, {"spacing": 60}, rng)
 	assert_eq(line[0].distance_to(line[1]), 60.0)
+
+
+func test_projectile_kinds_need_their_own_stats() -> void:
+	var data := _data()
+	data["weapons"]["laser"]["base"].erase("heat_capacity")
+	data["weapons"]["railgun"]["base"].erase("charge_time")
+	data["weapons"]["missile_launcher"]["projectile"] = "plasma"
+	var problems := _problems(data)
+	assert_string_contains(problems, "'laser': base.heat_capacity must be greater than 0")
+	assert_string_contains(problems, "'railgun': base.charge_time must be greater than 0")
+	assert_string_contains(problems, "unknown projectile 'plasma'")
+	assert_false(problems.contains("'laser': base.fire_rate"), "a beam has no fire rate")

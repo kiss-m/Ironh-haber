@@ -3,7 +3,8 @@ extends Control
 ## Shipyard, the hub between runs (GAME_DESIGN.md sections 8 and 12): resource bar and the tabs
 ## Arsenal (per-weapon upgrade tracks and tier-ups), Loadout (weapons per turret slot), Fortress
 ## and Salvage. Each upgrade card shows its level, effect now → next and cost, and is disabled
-## while it cannot be bought. Weapon unlocks join the Arsenal in M5.
+## while it cannot be bought. Weapons not unlocked yet are listed below with their requirement
+## and an unlock button.
 ##
 ## The Loadout tab uses ◀ ▶ buttons per slot instead of the design's drag and drop for now.
 
@@ -96,6 +97,9 @@ func _refresh() -> void:
 					var key := "weapon.%s.%s" % [weapon_id, track_id]
 					if GameState.upgrades.tracks.has(key):
 						_content.add_child(_card(key))
+			for weapon_id: String in DataRegistry.weapons:
+				if not weapon_id in GameState.unlocked_weapons():
+					_content.add_child(_unlock_card(weapon_id))
 		Tab.LOADOUT:
 			_build_loadout()
 		Tab.FORTRESS, Tab.SALVAGE:
@@ -136,11 +140,49 @@ func _card(key: String) -> Control:
 	var text := tr("BUTTON_BUY")
 	match block:
 		Upgrades.Block.LOCKED:
-			text = tr("UPGRADE_LOCKED") % track.unlock_wave
+			if track.unlock_bosses > 0:
+				text = tr("UPGRADE_LOCKED_BOSSES") % track.unlock_bosses
+			else:
+				text = tr("UPGRADE_LOCKED") % track.unlock_wave
 		Upgrades.Block.NEEDS_TIER:
 			text = tr("UPGRADE_NEEDS_TIER")
 	var button := UiKit.button(text, buy.bind(key), UiKit.SMALL_SIZE, block == Upgrades.Block.NONE)
 	button.name = "Buy"
+	button.disabled = block != Upgrades.Block.NONE
+	side.add_child(button)
+	return card
+
+
+## Unlocks `weapon_id` and redraws. Returns true on success.
+func unlock(weapon_id: String) -> bool:
+	var done := GameState.unlock_weapon(weapon_id)
+	_refresh()
+	return done
+
+
+func _unlock_card(weapon_id: String) -> Control:
+	var def := DataRegistry.weapon(weapon_id)
+	var block := GameState.weapon_unlock_block(weapon_id)
+	var card := UiKit.panel()
+	card.name = "Unlock_" + weapon_id
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 20)
+	card.add_child(row)
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(info)
+	info.add_child(UiKit.label(tr(str(def["name_key"])), UiKit.HEADING_SIZE, UiKit.MUTED_COLOR))
+	info.add_child(UiKit.label(tr(str(def["name_key"]) + "_DESC"), UiKit.SMALL_SIZE, UiKit.MUTED_COLOR))
+	var side := VBoxContainer.new()
+	side.custom_minimum_size.x = 330.0
+	side.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_child(side)
+	side.add_child(UiKit.resource_row(GameState.weapon_unlock_cost(weapon_id), UiKit.SMALL_SIZE))
+	var text := tr("BUTTON_UNLOCK")
+	if block == Upgrades.Block.LOCKED:
+		text = tr("UPGRADE_LOCKED") % int(def.get("unlock", {}).get("best_wave", 0))
+	var button := UiKit.button(text, unlock.bind(weapon_id), UiKit.SMALL_SIZE, block == Upgrades.Block.NONE)
+	button.name = "Unlock"
 	button.disabled = block != Upgrades.Block.NONE
 	side.add_child(button)
 	return card

@@ -79,6 +79,19 @@ func groups() -> Array[WaveGenerator.Group]:
 	return _groups
 
 
+## Groups of the current wave that spawn within `lookahead` seconds (all of them during PREPARE),
+## for the Radar's edge warnings.
+func upcoming(lookahead: float) -> Array[WaveGenerator.Group]:
+	var result: Array[WaveGenerator.Group] = []
+	if phase == Phase.PREPARE:
+		result.assign(_groups)
+	elif phase == Phase.ACTIVE:
+		for i in range(_next_group, _groups.size()):
+			if _groups[i].time - _elapsed <= lookahead:
+				result.append(_groups[i])
+	return result
+
+
 func _prepare(next_wave: int) -> void:
 	wave = next_wave
 	run_state.wave = wave

@@ -83,3 +83,29 @@ ENEMY_LANDING_CRAFT,Výsadkový čln,Landing Craft
 ENEMY_MISSILE_CORVETTE,Raketová korveta,Missile Corvette
 ENEMY_MINE,Mína,Mine
 ENEMY_MISSILE,Raketa,Missile
+BANNER_NEXT_WAVE,Radar: %s,Radar: %s
+BUTTON_UNLOCK,Odomknúť,Unlock
+UPGRADE_LOCKED_BOSSES,Po %d. bossovi,After boss %d
+EFFECT_ON,Áno,On
+EFFECT_OFF,Nie,Off
+UPGRADE_AUTO_TARGETING,Automatické mierenie,Auto-Targeting
+UPGRADE_DUAL_COMMAND,Dvojité velenie,Dual Command
+UPGRADE_RADAR,Radar,Radar
+UPGRADE_SHIELD_GENERATOR,Generátor štítu,Shield Generator
+UPGRADE_LASER_HEAT,Chladenie (výdrž lúča),Cooling (beam time)
+UPGRADE_MISSILE_SALVO,Salva (rakiet naraz),Salvo (missiles per shot)
+UPGRADE_MORTAR_SPLASH,Polomer výbuchu,Blast radius
+UPGRADE_RAIL_CHARGE,Rýchlejšie nabíjanie,Faster charge
+UPGRADE_TORPEDO_PIERCE,Prieraznosť,Pierce
+WEAPON_MISSILE_LAUNCHER,Raketomet,Missile Launcher
+WEAPON_TORPEDO_TUBE,Torpédomet,Torpedo Tube
+WEAPON_DEPTH_CHARGE_MORTAR,Mínomet hlbinných náloží,Depth Charge Mortar
+WEAPON_LASER,Laser,Laser
+WEAPON_RAILGUN,Railgun,Railgun
+WEAPON_MACHINE_GUN_DESC,"Rýchla paľba, hladina aj vzduch.","Rapid fire, surface and air."
+WEAPON_NAVAL_CANNON_DESC,Ťažké granáty s výbuchom.,Heavy shells with splash.
+WEAPON_MISSILE_LAUNCHER_DESC,"Navádzané rakety, hlavne proti vzduchu.","Homing missiles, best against air."
+WEAPON_TORPEDO_TUBE_DESC,Prestrelí lode na hladine aj pod ňou.,Pierces ships on and below the surface.
+WEAPON_DEPTH_CHARGE_MORTAR_DESC,"Nálož na cieľový bod, zasiahne ponorky.",Lobbed charge that hits submarines.
+WEAPON_LASER_DESC,"Súvislý lúč, prehrieva sa.",Continuous beam that overheats.
+WEAPON_RAILGUN_DESC,Nabitý výstrel cez celú líniu.,Charged shot through the whole line.
