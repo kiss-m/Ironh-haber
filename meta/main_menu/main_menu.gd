@@ -10,6 +10,8 @@ func _ready() -> void:
 	var column := UiKit.screen(self)
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
 	column.add_child(UiKit.label("Iron Harbor", 128, UiKit.TEXT_COLOR, HORIZONTAL_ALIGNMENT_CENTER))
+	if Sandbox.enabled():
+		column.add_child(UiKit.label(tr("SANDBOX_BANNER"), UiKit.TEXT_SIZE, UiKit.BAD_COLOR, HORIZONTAL_ALIGNMENT_CENTER))
 	var best := GameState.best_wave(GameState.DEFAULT_SECTOR)
 	if best > 0:
 		column.add_child(UiKit.label(tr("MENU_BEST_WAVE") % best, UiKit.TEXT_SIZE, UiKit.MUTED_COLOR,

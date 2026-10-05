@@ -378,6 +378,7 @@ func _take_pending_run() -> Dictionary:
 	var pending := GameState.pending_run
 	GameState.pending_run = {}
 	sector_id = str(pending.get("sector", sector_id))
+	first_wave = int(pending.get("start_wave", first_wave))
 	if not pending.has("wave"):
 		return {}
 	run_seed = int(pending["seed"])

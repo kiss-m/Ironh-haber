@@ -109,3 +109,5 @@ WEAPON_TORPEDO_TUBE_DESC,Prestrelí lode na hladine aj pod ňou.,Pierces ships o
 WEAPON_DEPTH_CHARGE_MORTAR_DESC,"Nálož na cieľový bod, zasiahne ponorky.",Lobbed charge that hits submarines.
 WEAPON_LASER_DESC,"Súvislý lúč, prehrieva sa.",Continuous beam that overheats.
 WEAPON_RAILGUN_DESC,Nabitý výstrel cez celú líniu.,Charged shot through the whole line.
+SANDBOX_START_WAVE,Vlna %d,Wave %d
+SANDBOX_BANNER,TESTOVACIA VERZIA – samostatné uloženie,TEST BUILD – separate save

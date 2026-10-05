@@ -20,3 +20,9 @@ func start_battle(sector_id: String, resume := false) -> void:
 	if not resume:
 		GameState.data["active_run"] = null
 	goto(BATTLE)
+
+
+## Starts a new run at `wave` instead of wave 1 (test build only, see Sandbox).
+func start_battle_at(sector_id: String, wave: int) -> void:
+	start_battle(sector_id)
+	GameState.pending_run["start_wave"] = wave

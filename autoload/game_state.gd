@@ -36,6 +36,8 @@ func load_game() -> void:
 	data = SaveStore.new(save_path).read()
 	if data.is_empty():
 		data = SaveMigrator.defaults()
+	if Sandbox.enabled():
+		Sandbox.apply(data, DataRegistry.balance["sandbox"], DataRegistry.weapons.keys(), DEFAULT_SECTOR)
 	_apply_language()
 	_refresh_stats()
 

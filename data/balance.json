@@ -101,5 +101,11 @@
   },
   "radar": {
     "lookahead": 3
+  },
+  "sandbox": {
+    "resources": { "credits": 200000, "steel": 20000, "electronics": 5000, "cores": 50 },
+    "best_wave": 50,
+    "bosses": 1,
+    "start_waves": [1, 8, 15, 22, 28, 32, 38]
   }
 }

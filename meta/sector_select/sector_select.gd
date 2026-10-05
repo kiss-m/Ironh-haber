@@ -26,6 +26,21 @@ func _notification(what: int) -> void:
 		SceneRouter.goto(SceneRouter.MAIN_MENU)
 
 
+## Test build: buttons to start a run at a later wave.
+func _start_waves(id: String) -> Control:
+	var grid := GridContainer.new()
+	grid.name = "StartWaves"
+	grid.columns = 4
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 12)
+	for wave: Variant in DataRegistry.balance["sandbox"]["start_waves"]:
+		var button := UiKit.button(tr("SANDBOX_START_WAVE") % int(wave),
+				SceneRouter.start_battle_at.bind(id, int(wave)), UiKit.SMALL_SIZE)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(button)
+	return grid
+
+
 func _card(id: String, sector: Dictionary) -> Control:
 	var unlocked := GameState.sector_unlocked(id)
 	var card := UiKit.panel(UiKit.PANEL_COLOR if unlocked else UiKit.PANEL_LOCKED_COLOR)
@@ -43,6 +58,8 @@ func _card(id: String, sector: Dictionary) -> Control:
 		var play := UiKit.button(tr("MENU_PLAY"), SceneRouter.start_battle.bind(id), UiKit.HEADING_SIZE, true)
 		play.name = "Play"
 		box.add_child(play)
+		if Sandbox.enabled():
+			box.add_child(_start_waves(id))
 	else:
 		var unlock: Dictionary = sector["unlock"]
 		var after: Dictionary = DataRegistry.sectors[str(unlock["sector"])]

@@ -19,6 +19,7 @@ anything in it**.
 tools/run_tests.sh                                          # import + GUT suite; non-zero on failure or load error
 godot --headless --export-debug "Android" build/iron-harbor-debug.apk
 adb install -r build/iron-harbor-debug.apk                  # USB-connected phone
+godot --headless --export-debug "Android Sandbox" build/iron-harbor-test-debug.apk  # test build
 ```
 
 - Use `tools/run_tests.sh`, not the bare `gut_cmdln.gd` command. GUT skips a test script that fails
@@ -115,6 +116,11 @@ adb install -r build/iron-harbor-debug.apk                  # USB-connected phon
   it has no Fire Rate track). Extra weapon fields: `salvo`, `pierce`, `projectile_turn`,
   `heat_capacity`, `cooldown`, `charge_time` and `unlock` (`best_wave`, `cost`). Weapons are
   unlocked only through `GameState.unlock_weapon()`.
+- **Test build.** The "Android Sandbox" preset adds the `sandbox` feature tag and installs as a
+  separate app (`com.matej.ironharbor.sandbox`, "Iron Harbor TEST") with its own save. `Sandbox`
+  (`core/sandbox.gd`, numbers in `balance.json` → sandbox) tops up resources, unlocks all weapons,
+  sets best wave 50 and one boss kill on load, and the sector screen offers starting at later
+  waves. It is the only exception to the SalvageSystem-only resources rule.
 - **Aim.** A finger's aim angle is measured from the fortress center; Auto-Targeting and aim
   assist aim from the turret itself at an enemy (`Turret.target_angle()`).
 - **New behaviors** go into both `EnemySystem._make_behavior()` and `DataValidator.BEHAVIORS`.
