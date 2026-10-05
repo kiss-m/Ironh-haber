@@ -14,6 +14,8 @@ var run_state: RunState
 var scaling: WaveScaling
 var stats: StatResolver
 var mark_radius := 0.0
+## Elites (section 5) multiply the loot and always drop electronics.
+var elite_loot_multiplier := 1.0
 
 var _pool: ObjectPool
 var _roller: LootRoller
@@ -49,8 +51,9 @@ func float_time() -> float:
 
 
 ## Drops the loot of `table_id` for an enemy of `wave` at `at`.
-func drop(table_id: String, wave: int, at: Vector2) -> void:
-	var drops := _roller.roll(table_id, scaling.loot_multiplier(wave), run_state.rng_loot)
+func drop(table_id: String, wave: int, at: Vector2, elite := false) -> void:
+	var multiplier := scaling.loot_multiplier(wave) * (elite_loot_multiplier if elite else 1.0)
+	var drops := _roller.roll(table_id, multiplier, run_state.rng_loot, elite)
 	for resource_type: int in drops:
 		var offset := Vector2(run_state.rng_loot.randf_range(-_scatter, _scatter),
 				run_state.rng_loot.randf_range(-_scatter, _scatter))
@@ -163,4 +166,4 @@ func _merge_into(crate: LootDrop) -> void:
 func _on_enemy_killed(enemy: Node2D, at: Vector2) -> void:
 	var source := enemy as Enemy
 	if source != null and source.loot_table != "":
-		drop(source.loot_table, source.wave, at)
+		drop(source.loot_table, source.wave, at, source.elite != Enemy.Elite.NONE)

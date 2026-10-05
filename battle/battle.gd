@@ -75,6 +75,7 @@ func _ready() -> void:
 		run_state.elapsed = float(resume.get("time", 0.0))
 		run_state.add_banked(resume.get("banked", {}))
 	EventBus.wave_cleared.connect(_on_wave_cleared)
+	EventBus.turret_disable_requested.connect(_on_turret_disable_requested)
 	var slot_names := PackedStringArray()
 	for turret in turrets:
 		slot_names.append(tr(turret.name_key))
@@ -215,6 +216,7 @@ func _build_systems(balance: Dictionary) -> void:
 	loot_system.scaling = generator.scaling
 	loot_system.stats = stats
 	loot_system.setup(loot_layer, DataRegistry.loot_tables, balance["loot"])
+	loot_system.elite_loot_multiplier = float(balance["elites"]["loot_multiplier"])
 	systems.add_child(loot_system)
 
 	salvage_system = SalvageSystem.new()
@@ -312,6 +314,16 @@ func _on_wave_cleared(wave: int) -> void:
 		"perks": [],
 		"selected_slot": input_controller.selected_slot,
 	})
+
+
+## A Landing Craft reached the base: a random working turret stops for `seconds`.
+func _on_turret_disable_requested(seconds: float) -> void:
+	var working: Array[Turret] = []
+	for turret in turrets:
+		if not turret.is_disabled():
+			working.append(turret)
+	if not working.is_empty():
+		working[run_state.rng_combat.randi() % working.size()].disable_for(seconds)
 
 
 ## Applies GameState.pending_run (and clears it). Returns the snapshot to continue, or {}.

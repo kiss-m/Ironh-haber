@@ -76,5 +76,21 @@
     "radius": 24,
     "dock_tap_radius": 90
   },
-  "max_mounts_per_weapon": 2
+  "max_mounts_per_weapon": 2,
+  "shields": {
+    "regen_delay": 3,
+    "regen_rate": 0.1
+  },
+  "elites": {
+    "from_wave": 15,
+    "base_chance": 0.02,
+    "per_wave": 0.005,
+    "max_chance": 0.35,
+    "loot_multiplier": 3,
+    "fast_speed": 1.4,
+    "regen_per_second": 0.02,
+    "shield_fraction": 0.5,
+    "split_into": "raider_skiff",
+    "split_count": 2
+  }
 }

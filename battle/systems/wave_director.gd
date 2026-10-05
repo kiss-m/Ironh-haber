@@ -7,7 +7,8 @@ extends Node
 ##
 ## Each wave's groups come from WaveGenerator (deterministic per run seed + wave). Groups spawn just
 ## outside their edge of the visible area, in their formation, facing the fortress. Perk choices
-## after every 5th wave (M6) and boss waves (M6) are not in yet.
+## after every 5th wave (M6) and boss waves (M6) are not in yet. Wave enemies roll for elite
+## modifiers as they spawn.
 
 enum Phase { IDLE, PREPARE, ACTIVE, CLEANUP, BREAK }
 
@@ -108,7 +109,10 @@ func _spawn_group(group: WaveGenerator.Group) -> void:
 			_formation_params.get(group.formation, {}), run_state.rng_waves)
 	for offset in offsets:
 		var at := anchor + forward * offset.x + forward.orthogonal() * offset.y
-		enemies.spawn(group.enemy_id, at, wave)
+		var enemy := enemies.spawn(group.enemy_id, at, wave)
+		var elite := EliteRules.roll(wave, enemies.elite_config, run_state.rng_elites)
+		if enemy != null and elite != Enemy.Elite.NONE:
+			enemy.make_elite(elite, enemies.elite_config)
 
 
 ## A point just outside the given edge of the visible area; `offset` runs -1 .. 1 along the edge.

@@ -75,3 +75,11 @@ UPGRADE_FLOTATION,Plaváky koristi,Flotation foam
 LOADOUT_HINT,Každú zbraň možno namontovať najviac %d×. Ďalšie miesta pre veže kúpiš v záložke Pevnosť.,Each weapon can be mounted at most %d times. Buy more turret slots in the Fortress tab.
 LOADOUT_SLOT,Miesto %d: %s,Slot %d: %s
 LOADOUT_EMPTY,prázdne,empty
+ENEMY_SUBMARINE,Ponorka,Submarine
+ENEMY_BOMBER,Bombardér,Bomber
+ENEMY_MINELAYER,Kladač mín,Minelayer
+ENEMY_SHIELD_FRIGATE,Štítová fregata,Shield Frigate
+ENEMY_LANDING_CRAFT,Výsadkový čln,Landing Craft
+ENEMY_MISSILE_CORVETTE,Raketová korveta,Missile Corvette
+ENEMY_MINE,Mína,Mine
+ENEMY_MISSILE,Raketa,Missile

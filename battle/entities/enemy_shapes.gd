@@ -23,6 +23,22 @@ const HULLS := {
 			Vector2(0.8, 0.3)],
 	"hunter": [Vector2(1.4, 0.0), Vector2(0.4, -0.55), Vector2(-0.6, -0.4), Vector2(-1.1, -0.55),
 			Vector2(-0.9, 0.0), Vector2(-1.1, 0.55), Vector2(-0.6, 0.4), Vector2(0.4, 0.55)],
+	"submarine": [Vector2(1.3, 0.0), Vector2(1.0, -0.3), Vector2(-1.1, -0.3), Vector2(-1.4, 0.0),
+			Vector2(-1.1, 0.3), Vector2(1.0, 0.3)],
+	"bomber": [Vector2(1.1, 0.0), Vector2(0.3, -0.2), Vector2(0.1, -1.2), Vector2(-0.3, -1.2),
+			Vector2(-0.4, -0.2), Vector2(-1.0, -0.5), Vector2(-1.0, 0.5), Vector2(-0.4, 0.2),
+			Vector2(-0.3, 1.2), Vector2(0.1, 1.2), Vector2(0.3, 0.2)],
+	"minelayer": [Vector2(1.1, 0.0), Vector2(0.7, -0.5), Vector2(-1.1, -0.65), Vector2(-1.1, 0.65),
+			Vector2(0.7, 0.5)],
+	"frigate": [Vector2(1.4, 0.0), Vector2(0.9, -0.42), Vector2(-1.1, -0.42), Vector2(-1.2, 0.0),
+			Vector2(-1.1, 0.42), Vector2(0.9, 0.42)],
+	"landing_craft": [Vector2(0.9, -0.7), Vector2(-1.0, -0.7), Vector2(-1.0, 0.7), Vector2(0.9, 0.7)],
+	"corvette": [Vector2(1.5, 0.0), Vector2(0.8, -0.38), Vector2(-1.1, -0.38), Vector2(-1.1, 0.38),
+			Vector2(0.8, 0.38)],
+	"mine": [Vector2(1.0, 0.0), Vector2(0.7, -0.7), Vector2(0.0, -1.0), Vector2(-0.7, -0.7),
+			Vector2(-1.0, 0.0), Vector2(-0.7, 0.7), Vector2(0.0, 1.0), Vector2(0.7, 0.7)],
+	"missile": [Vector2(1.3, 0.0), Vector2(0.4, -0.35), Vector2(-1.0, -0.35), Vector2(-1.3, -0.7),
+			Vector2(-1.3, 0.7), Vector2(-1.0, 0.35), Vector2(0.4, 0.35)],
 }
 
 ## Accent drawn on deck: [offset along the hull in radius units, size in radius units, color].
@@ -34,6 +50,14 @@ const ACCENTS := {
 	"drone": [-0.2, 0.25, Color("7a3b10")],
 	"torpedo": [0.9, 0.2, Color("e0664f")],
 	"hunter": [0.0, 0.3, Color("8e24aa")],
+	"submarine": [0.3, 0.22, Color("1b3a3a")],
+	"bomber": [0.4, 0.2, Color("7a3b10")],
+	"minelayer": [-0.5, 0.35, Color("2b2b2b")],
+	"frigate": [0.0, 0.32, Color("4dd0e1")],
+	"landing_craft": [-0.3, 0.4, Color("6d4c41")],
+	"corvette": [0.2, 0.25, Color("e0664f")],
+	"mine": [0.0, 0.45, Color("c62828")],
+	"missile": [1.0, 0.2, Color("ffeb3b")],
 }
 
 

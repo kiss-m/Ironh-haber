@@ -31,3 +31,5 @@ signal turret_selected(slot: int)
 signal boat_status(state: int, cargo: int, capacity: int, respawn_left: int)
 ## M4: Repair Crews healed the base.
 signal base_repaired(hp_left: float)
+## M5: a Landing Craft reached the base and knocks out a random turret for `seconds`.
+signal turret_disable_requested(seconds: float)

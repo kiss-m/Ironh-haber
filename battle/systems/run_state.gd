@@ -17,10 +17,11 @@ var regen := 0.0
 ## Resources unloaded by the salvage boat this run, by name.
 var banked: Dictionary = {}
 ## One stream per feature, all derived from the run seed, so a change in one feature never shifts
-## another's random outcomes. Elite and perk streams join them in later milestones.
+## another's random outcomes. The perk stream joins them in M6.
 var rng_waves := RandomNumberGenerator.new()
 var rng_combat := RandomNumberGenerator.new()
 var rng_loot := RandomNumberGenerator.new()
+var rng_elites := RandomNumberGenerator.new()
 
 
 func start(p_seed: int, p_max_hp: float) -> void:
@@ -28,6 +29,7 @@ func start(p_seed: int, p_max_hp: float) -> void:
 	rng_waves.seed = hash([p_seed, "waves"])
 	rng_combat.seed = hash([p_seed, "combat"])
 	rng_loot.seed = hash([p_seed, "loot"])
+	rng_elites.seed = hash([p_seed, "elites"])
 	max_hp = p_max_hp
 	base_hp = p_max_hp
 	wave = 0

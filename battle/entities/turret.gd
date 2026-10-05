@@ -11,6 +11,7 @@ const BASE_RADIUS := 40.0
 const BASE_COLOR := Color("2b3d4b")
 const RIM_COLOR := Color("c9d6df")
 const SELECTED_COLOR := Color("ffd36b")
+const DISABLED_COLOR := Color("e0664f")
 const BARREL_COLOR := Color("c9d6df")
 const AIM_LINE_COLOR := Color(1.0, 1.0, 1.0, 0.45)
 const AIM_LINE_WIDTH := 4.0
@@ -38,6 +39,8 @@ var aim_origin := Vector2.ZERO
 var aiming := false
 var aim_point := Vector2.ZERO
 var enabled := true
+## Seconds left knocked out by a Landing Craft (section 5): no turning, no firing.
+var disabled_time := 0.0
 var projectiles: ProjectileSystem
 var rng: RandomNumberGenerator
 
@@ -110,7 +113,23 @@ func reach(from: Vector2, direction: Vector2) -> float:
 	return maxf(-along + sqrt(maxf(along * along - outside, 0.0)), 0.0)
 
 
+## Knocks the turret out for `seconds` (Landing Craft contact).
+func disable_for(seconds: float) -> void:
+	disabled_time = maxf(disabled_time, seconds)
+	queue_redraw()
+
+
+func is_disabled() -> bool:
+	return disabled_time > 0.0
+
+
 func tick(delta: float) -> void:
+	if disabled_time > 0.0:
+		disabled_time -= delta
+		if disabled_time <= 0.0:
+			queue_redraw()
+		_cadence.tick(delta, false, fire_interval)
+		return
 	if aiming and enabled:
 		rotation = wrapf(rotate_toward(rotation, target_angle(), turn_speed * delta), -PI, PI)
 		queue_redraw()
@@ -146,3 +165,7 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, BASE_RADIUS, BASE_COLOR)
 	draw_arc(Vector2.ZERO, BASE_RADIUS, 0.0, TAU, 48, SELECTED_COLOR if selected else RIM_COLOR,
 			8.0 if selected else 4.0, true)
+	if disabled_time > 0.0:
+		var x := BASE_RADIUS * 0.6
+		draw_line(Vector2(-x, -x), Vector2(x, x), DISABLED_COLOR, 8.0)
+		draw_line(Vector2(-x, x), Vector2(x, -x), DISABLED_COLOR, 8.0)

@@ -5,8 +5,8 @@ extends RefCounted
 ##   amount = base amount from the enemy's loot table × L(w) × sector multiplier × perk multiplier,
 ##   rounded up
 ##
-## Credits always drop; steel, electronics and cores drop with the table's chance. Elites (3× loot,
-## always electronics) arrive in M5, sector multipliers in M6.
+## Credits always drop; steel, electronics and cores drop with the table's chance. Elites drop 3×
+## loot (part of `multiplier`) and always electronics. Sector multipliers arrive in M6.
 
 enum ResourceType { CREDITS, STEEL, ELECTRONICS, CORES }
 
@@ -26,7 +26,7 @@ static func resource_from_name(resource_name: String) -> int:
 
 ## Returns {ResourceType: amount} with only the resources that drop. `multiplier` is
 ## L(w) × sector × perk multipliers.
-func roll(table_id: String, multiplier: float, rng: RandomNumberGenerator) -> Dictionary:
+func roll(table_id: String, multiplier: float, rng: RandomNumberGenerator, always_electronics := false) -> Dictionary:
 	var drops := {}
 	if not _tables.has(table_id):
 		push_error("Unknown loot table '%s'" % table_id)
@@ -38,7 +38,8 @@ func roll(table_id: String, multiplier: float, rng: RandomNumberGenerator) -> Di
 			continue
 		var base := 0.0
 		if entry is Dictionary:
-			if rng.randf() >= float(entry.get("chance", 1.0)):
+			var forced := always_electronics and resource == ResourceType.ELECTRONICS
+			if rng.randf() >= float(entry.get("chance", 1.0)) and not forced:
 				continue
 			base = float(entry.get("amount", 0.0))
 		else:

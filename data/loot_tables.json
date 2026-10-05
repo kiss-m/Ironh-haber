@@ -1,7 +1,9 @@
 {
-  "light_small":  { "credits": 2,  "steel": { "chance": 0.25, "amount": 1 }, "electronics": { "chance": 0.04, "amount": 1 } },
-  "light_medium": { "credits": 5,  "steel": { "chance": 0.25, "amount": 2 }, "electronics": { "chance": 0.04, "amount": 1 } },
-  "light_large":  { "credits": 7,  "steel": { "chance": 0.25, "amount": 2 }, "electronics": { "chance": 0.04, "amount": 1 } },
-  "air_small":    { "credits": 2,  "steel": { "chance": 0.25, "amount": 1 }, "electronics": { "chance": 0.10, "amount": 1 } },
-  "armored":      { "credits": 12, "steel": { "chance": 0.60, "amount": 3 }, "electronics": { "chance": 0.04, "amount": 1 } }
+  "light_small": { "credits": 2, "steel": { "chance": 0.25, "amount": 1 }, "electronics": { "chance": 0.04, "amount": 1 } },
+  "light_medium": { "credits": 5, "steel": { "chance": 0.25, "amount": 2 }, "electronics": { "chance": 0.04, "amount": 1 } },
+  "light_large": { "credits": 7, "steel": { "chance": 0.25, "amount": 2 }, "electronics": { "chance": 0.04, "amount": 1 } },
+  "air_small": { "credits": 2, "steel": { "chance": 0.25, "amount": 1 }, "electronics": { "chance": 0.1, "amount": 1 } },
+  "armored": { "credits": 12, "steel": { "chance": 0.6, "amount": 3 }, "electronics": { "chance": 0.04, "amount": 1 } },
+  "air_large": { "credits": 8, "steel": { "chance": 0.25, "amount": 2 }, "electronics": { "chance": 0.1, "amount": 1 } },
+  "heavy": { "credits": 15, "steel": { "chance": 0.6, "amount": 3 }, "electronics": { "chance": 0.04, "amount": 2 } }
 }

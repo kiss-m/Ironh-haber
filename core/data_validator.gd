@@ -3,11 +3,19 @@ extends RefCounted
 ## Checks the loaded data files (GAME_DESIGN.md section 10: missing ids, unknown references,
 ## negative numbers) and returns readable messages. An empty result means the data is valid.
 
-const BEHAVIORS: PackedStringArray = ["ram", "ranged_stop", "hunter"]
-const ATTACK_TYPES: PackedStringArray = ["contact", "gun", "cannon", "torpedo"]
-const RANGED_ATTACKS: PackedStringArray = ["gun", "cannon", "torpedo"]
+const BEHAVIORS: PackedStringArray = ["ram", "ranged_stop", "hunter", "fly_over", "submarine"]
+const ATTACK_TYPES: PackedStringArray = ["contact", "gun", "cannon", "torpedo", "missile", "mine", "bomb", "none"]
+const RANGED_ATTACKS: PackedStringArray = ["gun", "cannon", "torpedo", "missile", "mine"]
+const LAUNCH_ATTACKS: PackedStringArray = ["torpedo", "missile", "mine"]
+## Behavior parameters each behavior needs.
+const BEHAVIOR_PARAMS := {
+	"ranged_stop": ["engage_distance"],
+	"submarine": ["engage_distance", "submerged_time", "surfaced_time"],
+	"fly_over": ["bomb_distance"],
+}
 const PROJECTILES: PackedStringArray = ["bullet", "shell"]
-const VISUALS: PackedStringArray = ["skiff", "patrol_boat", "drone", "torpedo_boat", "gunboat", "torpedo", "hunter"]
+const VISUALS: PackedStringArray = ["skiff", "patrol_boat", "drone", "torpedo_boat", "gunboat", "torpedo", "hunter",
+		"submarine", "bomber", "minelayer", "frigate", "landing_craft", "corvette", "mine", "missile"]
 const WEAPON_STATS: PackedStringArray = ["damage", "fire_rate", "range", "turn_speed", "projectile_speed"]
 const WAVE_SECTIONS: PackedStringArray = ["scaling", "featured", "edges", "timeline", "formations", "lifecycle", "spawn"]
 
@@ -118,8 +126,18 @@ static func _check_enemy(id: String, def: Dictionary, enemies: Dictionary, loot_
 		problems.append("%s: attack needs a damage" % where)
 	if attack_type in RANGED_ATTACKS and float(attack.get("interval", 0.0)) <= 0.0:
 		problems.append("%s: a %s attack needs an interval greater than 0" % [where, attack_type])
-	if attack_type == "torpedo" and not enemies.has(str(attack.get("projectile", ""))):
-		problems.append("%s: torpedo attack references unknown enemy '%s'" % [where, attack.get("projectile")])
+	if attack_type in LAUNCH_ATTACKS and not enemies.has(str(attack.get("projectile", ""))):
+		problems.append("%s: %s attack references unknown enemy '%s'" % [where, attack_type, attack.get("projectile")])
+	if attack_type == "bomb" and float(attack.get("radius", 0.0)) <= 0.0:
+		problems.append("%s: a bomb attack needs a radius greater than 0" % where)
+	var params: Dictionary = def.get("behavior_params", {})
+	for param: String in BEHAVIOR_PARAMS.get(str(def.get("behavior", "")), []):
+		if not params.has(param):
+			problems.append("%s: behavior_params needs \"%s\"" % [where, param])
+	if def.has("aura"):
+		for key in ["radius", "shield", "interval"]:
+			if float(def["aura"].get(key, 0.0)) <= 0.0:
+				problems.append("%s: aura.%s must be greater than 0" % [where, key])
 	if def.has("first_wave") != def.has("budget_cost"):
 		problems.append("%s: wave enemies need both first_wave and budget_cost" % where)
 	if def.has("loot_table") and not loot_tables.has(str(def["loot_table"])):

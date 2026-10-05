@@ -1,7 +1,8 @@
 class_name BehaviorRangedStop
 extends EnemyBehavior
 ## "ranged_stop": approaches the fortress, stops at its engage distance and orbits slowly while
-## attacking on an interval (Patrol Boat, Torpedo Boat, Armored Gunboat; GAME_DESIGN.md section 5).
+## attacking on an interval (Patrol Boat, Torpedo Boat, Armored Gunboat, Minelayer, Shield Frigate,
+## Missile Corvette; GAME_DESIGN.md section 5).
 ## EnemySystem carries out the attack when `attack_ready` is set.
 
 ## How strongly an orbiting enemy is pulled back to its engage distance (per second).
@@ -25,6 +26,17 @@ func on_spawn(enemy: Enemy, rng: RandomNumberGenerator) -> void:
 
 
 func tick(enemy: Enemy, delta: float) -> void:
+	_steer(enemy)
+	if enemy.state != Enemy.State.ENGAGE:
+		return
+	enemy.attack_timer -= delta
+	if enemy.attack_timer <= 0.0:
+		enemy.attack_timer += enemy.attack_interval
+		enemy.attack_ready = true
+
+
+## Approach until the engage distance, then orbit at it.
+func _steer(enemy: Enemy) -> void:
 	var offset := enemy.position - target
 	var distance := offset.length()
 	var outward := offset / distance if distance > 0.0 else Vector2.RIGHT
@@ -36,7 +48,3 @@ func tick(enemy: Enemy, delta: float) -> void:
 	var tangent := outward.orthogonal() * enemy.orbit_direction * orbit_speed
 	var correction := -outward * (distance - engage_distance) * RADIUS_CORRECTION
 	enemy.velocity = (tangent + correction).limit_length(enemy.speed)
-	enemy.attack_timer -= delta
-	if enemy.attack_timer <= 0.0:
-		enemy.attack_timer += enemy.attack_interval
-		enemy.attack_ready = true
