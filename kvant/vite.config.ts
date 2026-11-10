@@ -88,6 +88,8 @@ export default defineConfig({
     }),
   ],
   test: {
+    // Day boundaries are local time. Pin the zone so the tests mean the same on every machine.
+    env: { TZ: 'Europe/Prague' },
     projects: [
       {
         extends: true,

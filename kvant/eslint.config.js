@@ -131,6 +131,12 @@ export default defineConfig([
     },
   },
 
+  // Tests index into fixtures they have just built, so non-null assertions are fair there.
+  {
+    files: ['**/*.test.{ts,tsx}', 'src/test/**/*.ts'],
+    rules: { '@typescript-eslint/no-non-null-assertion': 'off' },
+  },
+
   // Code that runs in Node.
   {
     files: ['scripts/**/*.ts', 'vite.config.ts'],
