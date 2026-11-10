@@ -1,0 +1,381 @@
+{
+  "schemaVersion": 1,
+  "packId": "ako-veci-funguju",
+  "packVersion": 1,
+  "language": "sk",
+  "category": {
+    "id": "ako-veci-funguju",
+    "name": "Ako veci fungujú",
+    "attribute": "W",
+    "description": "Technika, ktorú používaš každý deň, vysvetlená bez zbytočných vzorcov.",
+    "color": "#2EC4B6",
+    "icon": "lightbulb",
+    "defaultDifficulty": 2
+  },
+  "topics": [
+    {
+      "id": "ako-veci-funguju.v-kuchyni",
+      "name": "Technika v kuchyni",
+      "order": 1,
+      "prerequisites": [],
+      "description": "Mikrovlnka, indukcia, chladnička a tlakový hrniec."
+    },
+    {
+      "id": "ako-veci-funguju.signaly",
+      "name": "Signály okolo nás",
+      "order": 2,
+      "prerequisites": [],
+      "description": "GPS, Wi-Fi, Bluetooth, NFC a optické vlákno."
+    }
+  ],
+  "cards": [
+    {
+      "id": "ako-veci-funguju.v-kuchyni.objav-mikrovlnky",
+      "topicId": "ako-veci-funguju.v-kuchyni",
+      "type": "did_you_know",
+      "difficulty": 1,
+      "order": 1,
+      "title": "Mikrovlnku prezradila roztopená tyčinka",
+      "body": "Inžinier Percy Spencer pracoval v roku 1945 s magnetrónom pre radary a všimol si, že sa mu vo vrecku roztopila tyčinka. Skúsil to znova s kukuricou a tá začala pukať. Jeho firma Raytheon si ohrev mikrovlnami dala patentovať a o dva roky predala prvú mikrovlnnú rúru. Bola vysoká ako dospelý človek a určená pre reštaurácie.",
+      "recall": {
+        "q": "Ako bol objavený mikrovlnný ohrev?",
+        "a": "Percy Spencer si v roku 1945 pri práci s magnetrónom všimol, že sa mu vo vrecku roztopila tyčinka."
+      },
+      "tags": ["história", "mikrovlny"]
+    },
+    {
+      "id": "ako-veci-funguju.v-kuchyni.mikrovlnka",
+      "topicId": "ako-veci-funguju.v-kuchyni",
+      "type": "concept",
+      "difficulty": 2,
+      "order": 2,
+      "title": "Ako ohrieva mikrovlnka",
+      "body": "Magnetrón vyrába mikrovlny s frekvenciou približne 2,45 GHz. Ich elektrické pole mení smer miliardy ráz za sekundu a molekuly vody, ktoré sú elektricky polárne, sa mu snažia stále natáčať. Trením o okolité molekuly sa ich pohyb mení na teplo. Ohrieva sa teda priamo jedlo, nie vzduch v rúre. Kovová mriežka v dvierkach má otvory oveľa menšie než vlnová dĺžka, preto vlny neprepustí von.",
+      "simple": "Mikrovlny rozkmitajú vodu v jedle a tá sa trením zohreje. Rúra sama horúca nie je.",
+      "terms": {
+        "en": "microwave oven, magnetron",
+        "de": "der Mikrowellenherd, das Magnetron"
+      },
+      "recall": {
+        "q": "Čo sa v jedle ohrieva mikrovlnami?",
+        "a": "Hlavne molekuly vody, ktoré sa natáčajú v striedavom poli a trením vytvárajú teplo."
+      },
+      "quiz": {
+        "question": "Prečo sa suchý porcelánový tanier v mikrovlnke sám takmer neohreje?",
+        "options": [
+          "Lebo je biely a vlny odráža",
+          "Lebo neobsahuje vodu ani iné polárne molekuly",
+          "Lebo je príliš ťažký"
+        ],
+        "correctIndex": 1,
+        "explanation": "Mikrovlny ohrievajú najmä látky s polárnymi molekulami, hlavne vodu. Suchá keramika ich prepúšťa a zohreje sa až od jedla."
+      },
+      "tags": ["mikrovlny", "teplo"]
+    },
+    {
+      "id": "ako-veci-funguju.v-kuchyni.mytus-zvnutra-von",
+      "topicId": "ako-veci-funguju.v-kuchyni",
+      "type": "myth",
+      "difficulty": 1,
+      "order": 3,
+      "title": "Ohrieva mikrovlnka jedlo zvnútra von?",
+      "statement": "Mikrovlnka ohrieva jedlo zvnútra smerom von.",
+      "isTrue": false,
+      "explanation": "Mikrovlny preniknú do jedla len asi jeden až dva centimetre. Stred väčšieho kusu sa ohrieva až vedením tepla z vonkajších vrstiev, preto býva studený.",
+      "tags": ["mikrovlny", "teplo"]
+    },
+    {
+      "id": "ako-veci-funguju.v-kuchyni.indukcna-doska",
+      "topicId": "ako-veci-funguju.v-kuchyni",
+      "type": "concept",
+      "difficulty": 2,
+      "order": 4,
+      "title": "Indukčná varná doska",
+      "body": "Pod sklokeramickou platňou je cievka, ktorou tečie striedavý prúd s vysokou frekvenciou. Jej meniace sa magnetické pole indukuje v dne hrnca vírivé prúdy a tie ho ohrievajú. Teplo teda vzniká priamo v hrnci, platňa sa zohreje len od neho. Treba na to riad s feromagnetickým dnom, na ktorom drží magnet. Hliníkový alebo medený hrniec bez oceľovej vložky zostane studený.",
+      "simple": "Indukcia nehreje platňu, ale rovno dno hrnca, a to len také, na ktorom drží magnet.",
+      "terms": { "en": "induction hob", "de": "das Induktionskochfeld" },
+      "recall": {
+        "q": "Kde vzniká teplo pri indukčnom varení?",
+        "a": "Priamo v dne hrnca, kde magnetické pole cievky indukuje vírivé prúdy."
+      },
+      "tags": ["indukcia", "elektromagnetizmus"]
+    },
+    {
+      "id": "ako-veci-funguju.v-kuchyni.kviz-hrniec-na-indukciu",
+      "topicId": "ako-veci-funguju.v-kuchyni",
+      "type": "quiz",
+      "difficulty": 2,
+      "order": 5,
+      "title": "Ktorý hrniec na indukciu",
+      "question": "Ako najrýchlejšie zistíš, či bude hrniec fungovať na indukčnej doske?",
+      "options": [
+        "Priložíš k jeho dnu magnet",
+        "Odvážiš ho",
+        "Naleješ doň vodu a sleduješ bubliny",
+        "Pozrieš, či má sklenenú pokrievku"
+      ],
+      "correctIndex": 0,
+      "explanation": "Indukcia potrebuje feromagnetické dno. Ak na ňom magnet pevne drží, hrniec sa bude zohrievať.",
+      "tags": ["indukcia", "prakticky"]
+    },
+    {
+      "id": "ako-veci-funguju.v-kuchyni.chladnicka",
+      "topicId": "ako-veci-funguju.v-kuchyni",
+      "type": "example",
+      "difficulty": 2,
+      "order": 6,
+      "title": "Chladnička je tepelné čerpadlo",
+      "body": "Chladnička teplo neničí, len ho presúva. Chladivo sa vo výparníku vnútri odparuje pri nízkom tlaku a pritom odoberá teplo potravinám. Kompresor paru stlačí, tá sa zohreje, v kondenzátore na vonkajšej stene skvapalnie a odovzdá teplo kuchyni. Preto býva chladnička zvonka teplá. Otvorená chladnička kuchyňu neochladí, naopak ju mierne ohreje.",
+      "recall": {
+        "q": "Prečo otvorená chladnička kuchyňu neochladí?",
+        "a": "Teplo len presúva zvnútra von do tej istej miestnosti a kompresor pridá ďalšie."
+      },
+      "tags": ["tepelné čerpadlo", "teplo"]
+    },
+    {
+      "id": "ako-veci-funguju.v-kuchyni.tlakovy-hrniec",
+      "topicId": "ako-veci-funguju.v-kuchyni",
+      "type": "concept",
+      "difficulty": 2,
+      "order": 7,
+      "title": "Tlakový hrniec",
+      "body": "Voda pri bežnom tlaku vrie pri 100 °C a viac sa nezohreje, nech je plameň akýkoľvek. Tlakový hrniec paru nepustí von, tlak v ňom stúpne asi na dvojnásobok atmosférického a bod varu sa posunie približne na 120 °C. Pri vyššej teplote prebiehajú deje pri varení výrazne rýchlejšie, takže mäso alebo strukoviny sú hotové za zlomok času.",
+      "simple": "Pod tlakom vrie voda až pri vyššej teplote a horúcejšia voda varí rýchlejšie.",
+      "terms": { "en": "pressure cooker", "de": "der Schnellkochtopf" },
+      "recall": {
+        "q": "Prečo tlakový hrniec varí rýchlejšie?",
+        "a": "Vyšší tlak zvýši bod varu vody asi na 120 °C a pri vyššej teplote sa jedlo varí rýchlejšie."
+      },
+      "tags": ["tlak", "var"]
+    },
+    {
+      "id": "ako-veci-funguju.v-kuchyni.var-vo-vyske",
+      "topicId": "ako-veci-funguju.v-kuchyni",
+      "type": "did_you_know",
+      "difficulty": 2,
+      "order": 8,
+      "title": "V horách vrie voda skôr",
+      "body": "Bod varu vody klesá s tlakom vzduchu. Na Lomnickom štíte vo výške 2 634 m vrie voda už pri približne 91 °C a na vrchole Mount Everestu len pri asi 70 °C. Cestoviny sa tam varia oveľa dlhšie, preto horolezci nosia tlakové hrnce. Je to ten istý jav ako v tlakovom hrnci, len obrátený.",
+      "recall": {
+        "q": "Prečo sa vo vysokých horách varí jedlo dlhšie?",
+        "a": "Pri nižšom tlaku vzduchu vrie voda pri nižšej teplote, takže jedlo sa varí v menej horúcej vode."
+      },
+      "tags": ["tlak", "var"]
+    },
+    {
+      "id": "ako-veci-funguju.v-kuchyni.kilowatthodina",
+      "topicId": "ako-veci-funguju.v-kuchyni",
+      "type": "formula",
+      "difficulty": 2,
+      "order": 9,
+      "title": "Kilowatthodina",
+      "latex": "E = P\\,t",
+      "legend": [
+        { "symbol": "E", "meaning": "spotrebovaná energia", "unit": "kWh" },
+        { "symbol": "P", "meaning": "príkon spotrebiča", "unit": "kW" },
+        { "symbol": "t", "meaning": "čas prevádzky", "unit": "h" }
+      ],
+      "body": "Elektromer nepočíta výkon, ale energiu: príkon vynásobený časom. Kilowatthodina je energia, ktorú spotrebič s príkonom 1 kW odoberie za jednu hodinu. Podľa nej sa platí účet za elektrinu.",
+      "example": "Rýchlovarná kanvica s príkonom 2 kW zapnutá 3 minúty (0,05 h) spotrebuje 0,1 kWh.",
+      "terms": { "en": "kilowatt-hour", "de": "die Kilowattstunde" },
+      "recall": {
+        "q": "Čo je kilowatthodina?",
+        "a": "Energia, ktorú spotrebič s príkonom 1 kW odoberie za jednu hodinu."
+      },
+      "tags": ["energia", "elektrina"]
+    },
+    {
+      "id": "ako-veci-funguju.v-kuchyni.kviz-spotreba-rury",
+      "topicId": "ako-veci-funguju.v-kuchyni",
+      "type": "quiz",
+      "difficulty": 2,
+      "order": 10,
+      "title": "Koľko zje rúra",
+      "question": "Rúra s príkonom 2,5 kW pečie 2 hodiny. Koľko energie spotrebuje, ak hreje celý čas naplno?",
+      "options": ["1,25 kWh", "2,5 kWh", "4,5 kWh", "5 kWh"],
+      "correctIndex": 3,
+      "explanation": "E = P · t = 2,5 kW · 2 h = 5 kWh. V praxi termostat ohrev vypína, takže skutočná spotreba býva nižšia.",
+      "tags": ["energia", "výpočet"]
+    },
+    {
+      "id": "ako-veci-funguju.signaly.gps",
+      "topicId": "ako-veci-funguju.signaly",
+      "type": "concept",
+      "difficulty": 2,
+      "order": 1,
+      "title": "Ako GPS zistí, kde si",
+      "body": "Každá navigačná družica nepretržite vysiela presný čas a svoju polohu. Prijímač v telefóne zmeria, o koľko signál meškal, a z toho vypočíta vzdialenosť od družice. Tri vzdialenosti by na určenie polohy stačili, keby mal telefón dokonalé hodiny. Nemá ich, preto potrebuje štvrtú družicu a chybu svojich hodín vypočíta ako štvrtú neznámu. Telefón pritom nič nevysiela, iba počúva.",
+      "simple": "Telefón meria, ako dlho k nemu letel signál z niekoľkých družíc, a z toho vypočíta polohu.",
+      "terms": {
+        "en": "satellite navigation, trilateration",
+        "de": "die Satellitennavigation, die Trilateration"
+      },
+      "recall": {
+        "q": "Prečo potrebuje prijímač GPS signál aspoň zo štyroch družíc?",
+        "a": "Tri neznáme sú poloha a štvrtá je chyba hodín prijímača."
+      },
+      "quiz": {
+        "question": "Čo vysiela tvoj telefón družiciam GPS, aby zistil svoju polohu?",
+        "options": [
+          "Svoju približnú polohu",
+          "Žiadosť o výpočet",
+          "Nič, signály družíc iba prijíma"
+        ],
+        "correctIndex": 2,
+        "explanation": "Satelitná navigácia je jednosmerná. Družice vysielajú čas a polohu a všetko ostatné vypočíta prijímač sám."
+      },
+      "tags": ["navigácia", "družice"]
+    },
+    {
+      "id": "ako-veci-funguju.signaly.vzdialenost-z-casu",
+      "topicId": "ako-veci-funguju.signaly",
+      "type": "formula",
+      "difficulty": 2,
+      "order": 2,
+      "title": "Vzdialenosť z meškania signálu",
+      "latex": "d = c\\,\\Delta t",
+      "legend": [
+        { "symbol": "d", "meaning": "vzdialenosť od družice", "unit": "m" },
+        { "symbol": "c", "meaning": "rýchlosť svetla, približne 300 000 km/s", "unit": "m/s" },
+        { "symbol": "\\Delta t", "meaning": "čas, ktorý signál letel", "unit": "s" }
+      ],
+      "body": "Rádiový signál letí rýchlosťou svetla, takže vzdialenosť je čas letu vynásobený touto rýchlosťou. Pri takej rýchlosti rozhodujú miliardtiny sekundy: chyba jednej mikrosekundy znamená chybu 300 metrov. Preto majú družice na palube atómové hodiny.",
+      "example": "Signál, ktorý letel 0,07 s, prešiel 21 000 km.",
+      "recall": {
+        "q": "Ako sa z času letu signálu vypočíta vzdialenosť od družice?",
+        "a": "Vynásobí sa rýchlosťou svetla: d = c·Δt."
+      },
+      "tags": ["navigácia", "rýchlosť svetla"]
+    },
+    {
+      "id": "ako-veci-funguju.signaly.relativita-v-gps",
+      "topicId": "ako-veci-funguju.signaly",
+      "type": "did_you_know",
+      "difficulty": 2,
+      "order": 3,
+      "title": "Hodiny na družiciach idú inak",
+      "body": "Hodiny na družiciach GPS idú rýchlejšie než na Zemi, asi o 38 milióntin sekundy za deň. Slabšia gravitácia ich podľa všeobecnej teórie relativity zrýchľuje, rýchly pohyb ich podľa špeciálnej teórie spomaľuje a prvý efekt prevažuje. Keby sa s tým nepočítalo, chyba polohy by každý deň narástla približne o desať kilometrov.",
+      "recall": {
+        "q": "Prečo treba hodiny na družiciach GPS korigovať?",
+        "a": "Vplyvom relativity idú asi o 38 mikrosekúnd denne rýchlejšie než hodiny na Zemi."
+      },
+      "tags": ["navigácia", "relativita"]
+    },
+    {
+      "id": "ako-veci-funguju.signaly.kviz-mikrosekunda",
+      "topicId": "ako-veci-funguju.signaly",
+      "type": "quiz",
+      "difficulty": 2,
+      "order": 4,
+      "title": "Mikrosekunda v navigácii",
+      "question": "Hodiny prijímača sa pomýlia o jednu milióntinu sekundy. Akú chybu vzdialenosti to spôsobí?",
+      "options": ["3 metre", "30 metrov", "300 metrov", "3 kilometre"],
+      "correctIndex": 2,
+      "explanation": "Signál letí 300 000 km/s. Za milióntinu sekundy prejde 0,3 km, teda 300 metrov.",
+      "tags": ["navigácia", "výpočet"]
+    },
+    {
+      "id": "ako-veci-funguju.signaly.wifi-pasma",
+      "topicId": "ako-veci-funguju.signaly",
+      "type": "concept",
+      "difficulty": 2,
+      "order": 5,
+      "title": "Wi-Fi a jej pásma",
+      "body": "Wi-Fi prenáša dáta rádiovými vlnami v pásmach 2,4 GHz a 5 GHz, novšie zariadenia aj 6 GHz. Nižšia frekvencia prejde cez steny ľahšie a dosiahne ďalej, ale pásmo je úzke a delí sa oň aj Bluetooth či susedove routery. Vyššia frekvencia ponúka širšie kanály a vyššiu rýchlosť, no múr ju utlmí viac. Pri routeri je preto rýchlejšie pásmo 5 GHz, o dve izby ďalej spoľahlivejšie 2,4 GHz.",
+      "simple": "Pomalšie pásmo dosiahne ďalej, rýchlejšie funguje hlavne blízko routera.",
+      "terms": { "en": "Wi-Fi frequency bands", "de": "das WLAN-Frequenzband" },
+      "recall": {
+        "q": "Aký je hlavný rozdiel medzi pásmami 2,4 GHz a 5 GHz?",
+        "a": "2,4 GHz má väčší dosah cez steny, 5 GHz vyššiu rýchlosť na kratšiu vzdialenosť."
+      },
+      "tags": ["Wi-Fi", "rádiové vlny"]
+    },
+    {
+      "id": "ako-veci-funguju.signaly.mytus-plny-signal",
+      "topicId": "ako-veci-funguju.signaly",
+      "type": "myth",
+      "difficulty": 1,
+      "order": 6,
+      "title": "Znamená plný signál rýchly internet?",
+      "statement": "Plný počet čiarok Wi-Fi zaručuje rýchly internet.",
+      "isTrue": false,
+      "explanation": "Čiarky ukazujú len silu signálu medzi telefónom a routerom. Rýchlosť obmedzí aj preplnený kanál, veľa pripojených zariadení alebo pomalá linka od poskytovateľa.",
+      "tags": ["Wi-Fi", "prakticky"]
+    },
+    {
+      "id": "ako-veci-funguju.signaly.nfc",
+      "topicId": "ako-veci-funguju.signaly",
+      "type": "concept",
+      "difficulty": 2,
+      "order": 7,
+      "title": "NFC: platba priložením",
+      "body": "Čítačka v termináli vytvára slabé magnetické pole s frekvenciou 13,56 MHz. Keď k nej priložíš kartu, pole v jej cievke indukuje prúd, ktorý napája čip. Karta teda nepotrebuje batériu. Odpovedá tak, že mení zaťaženie poľa, a čítačka tieto zmeny číta ako dáta. Dosah je zámerne len pár centimetrov a každá platba používa jednorazový kód, takže odpočutý prenos sa nedá zopakovať.",
+      "simple": "Terminál kartu na pár centimetrov napája aj číta, preto karta nemá batériu.",
+      "terms": {
+        "en": "near-field communication (NFC)",
+        "de": "die Nahfeldkommunikation (NFC)"
+      },
+      "recall": {
+        "q": "Odkiaľ berie bezkontaktná karta energiu?",
+        "a": "Z magnetického poľa čítačky, ktoré v cievke karty indukuje prúd."
+      },
+      "quiz": {
+        "question": "Prečo funguje bezkontaktná karta len na vzdialenosť pár centimetrov?",
+        "options": [
+          "Lebo ju napája pole čítačky, ktoré s odstupom rýchlo slabne",
+          "Lebo má slabú batériu",
+          "Lebo banka dosah obmedzuje cez internet"
+        ],
+        "correctIndex": 0,
+        "explanation": "Karta nemá vlastný zdroj. Energiu berie z poľa čítačky a to je použiteľné len v tesnej blízkosti."
+      },
+      "tags": ["NFC", "indukcia"]
+    },
+    {
+      "id": "ako-veci-funguju.signaly.opticke-vlakno",
+      "topicId": "ako-veci-funguju.signaly",
+      "type": "example",
+      "difficulty": 2,
+      "order": 8,
+      "title": "Svetlo, ktoré nesie internet",
+      "body": "Dáta medzi mestami aj kontinentmi tečú ako záblesky laseru v sklenenom vlákne tenkom ako vlas. Jadro vlákna má vyšší index lomu než jeho plášť, takže svetlo dopadajúce pod malým uhlom sa na rozhraní úplne odráža a zostáva uväznené aj v ohybe. Sklo je také čisté, že signál prejde desiatky kilometrov, kým ho treba zosilniť. Jedno vlákno nesie naraz desiatky farieb svetla, každú s vlastnými dátami.",
+      "recall": {
+        "q": "Prečo svetlo z optického vlákna neunikne ani v ohybe?",
+        "a": "Na rozhraní jadra a plášťa nastáva úplný odraz, lebo jadro má vyšší index lomu."
+      },
+      "tags": ["optika", "internet"]
+    },
+    {
+      "id": "ako-veci-funguju.signaly.bluetooth",
+      "topicId": "ako-veci-funguju.signaly",
+      "type": "concept",
+      "difficulty": 2,
+      "order": 9,
+      "title": "Bluetooth a skákanie po kanáloch",
+      "body": "Bluetooth spája zariadenia na pár metrov v tom istom pásme 2,4 GHz ako Wi-Fi. Aby sa navzájom nerušili, vysielač a prijímač preskakujú medzi desiatkami úzkych kanálov mnohokrát za sekundu v poradí, ktoré si dohodli pri spojení. Rušený kanál jednoducho vynechajú. Úsporná verzia Bluetooth Low Energy vysiela len krátke dávky a väčšinu času spí, preto senzor či hodinky vydržia na malú batériu mesiace.",
+      "simple": "Bluetooth rýchlo skáče medzi kanálmi, aby sa vyhol rušeniu, a jeho úsporná verzia väčšinu času spí.",
+      "terms": {
+        "en": "Bluetooth, frequency hopping",
+        "de": "das Frequenzsprungverfahren"
+      },
+      "recall": {
+        "q": "Ako sa Bluetooth vyhýba rušeniu v preplnenom pásme 2,4 GHz?",
+        "a": "Rýchlo preskakuje medzi mnohými úzkymi kanálmi a rušené kanály vynecháva."
+      },
+      "tags": ["Bluetooth", "rádiové vlny"]
+    },
+    {
+      "id": "ako-veci-funguju.signaly.kviz-bez-baterie",
+      "topicId": "ako-veci-funguju.signaly",
+      "type": "quiz",
+      "difficulty": 2,
+      "order": 10,
+      "title": "Ktorá technológia sa zaobíde bez batérie",
+      "question": "Pri ktorej z týchto technológií môže jedno zo zariadení fungovať úplne bez vlastnej batérie?",
+      "options": ["Wi-Fi", "NFC", "Bluetooth", "GPS"],
+      "correctIndex": 1,
+      "explanation": "Pasívny čip NFC napája magnetické pole čítačky. Wi-Fi, Bluetooth aj prijímač GPS potrebujú vlastný zdroj energie.",
+      "tags": ["NFC", "porovnanie"]
+    }
+  ]
+}

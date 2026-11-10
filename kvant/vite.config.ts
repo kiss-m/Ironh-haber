@@ -76,8 +76,9 @@ export default defineConfig({
       workbox: {
         // Prefixes every cache name, so nothing collides with other apps on the origin.
         cacheId: 'kvant',
-        // The whole app shell is precached: after the first load the app runs offline.
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // The whole app shell and the content packs are precached: after the first load the
+        // app runs offline, and a pack always matches the app version that reads it.
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2,json}'],
         // Only removes precaches of older Workbox versions registered under this scope.
         cleanupOutdatedCaches: true,
         // The worker takes control of the page that installed it. Without this the very first

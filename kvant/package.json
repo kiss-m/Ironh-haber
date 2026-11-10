@@ -8,7 +8,9 @@
     "node": ">=22.22.0"
   },
   "scripts": {
+    "predev": "npm run content:build",
     "dev": "vite",
+    "prebuild": "npm run content:build",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b",
@@ -16,6 +18,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "content:build": "node scripts/content-build.ts",
     "icons": "node scripts/generate-icons.ts",
     "check": "npm run typecheck && npm run lint && npm run test"
   },
