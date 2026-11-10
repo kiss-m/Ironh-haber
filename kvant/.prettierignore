@@ -1,0 +1,7 @@
+dist
+dev-dist
+coverage
+package-lock.json
+
+# The build brief is stored verbatim and must never be reformatted.
+docs/SPEC.md

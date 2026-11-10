@@ -1,0 +1,159 @@
+@import 'tailwindcss';
+@import './fonts.css';
+
+/*
+ * Design tokens.
+ *
+ * Colours are semantic and switch with the theme: components say `bg-surface` or `text-muted`
+ * and never name a hue. Tailwind's default palette is removed so that nothing bypasses them.
+ * Every text colour keeps at least AA contrast (4.5:1) on bg, surface and raised in both themes.
+ */
+@theme {
+  --color-*: initial;
+
+  --font-sans: 'Atkinson Hyperlegible Next Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /*
+   * Type scale in rem, so it follows the system font size. `text-base` is the body size:
+   * 18 px at the default root size. `text-xs` is for short labels only.
+   */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.3;
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.45;
+  --text-base: 1.125rem;
+  --text-base--line-height: 1.55;
+  --text-lg: 1.3125rem;
+  --text-lg--line-height: 1.4;
+  --text-xl: 1.5rem;
+  --text-xl--line-height: 1.3;
+  --text-2xl: 1.875rem;
+  --text-2xl--line-height: 1.2;
+  --text-3xl: 2.375rem;
+  --text-3xl--line-height: 1.1;
+  --text-4xl: 3rem;
+  --text-4xl--line-height: 1.05;
+
+  --animate-quantum: kv-quantum 6s cubic-bezier(0.7, 0, 0.3, 1) infinite;
+
+  @keyframes kv-quantum {
+    0%,
+    22% {
+      transform: translateY(0);
+    }
+    30%,
+    55% {
+      transform: translateY(calc(var(--kv-level-gap) * -1));
+    }
+    63%,
+    88% {
+      transform: translateY(calc(var(--kv-level-gap) * -2));
+    }
+    96%,
+    100% {
+      transform: translateY(0);
+    }
+  }
+}
+
+@theme inline {
+  --color-bg: var(--kv-bg);
+  --color-surface: var(--kv-surface);
+  --color-raised: var(--kv-raised);
+  --color-line: var(--kv-line);
+  --color-fg: var(--kv-fg);
+  --color-muted: var(--kv-muted);
+  /* `accent` is a fill, `accent-fg` is the accent as a text colour, `on-accent` sits on a fill. */
+  --color-accent: var(--kv-accent);
+  --color-accent-fg: var(--kv-accent-fg);
+  --color-on-accent: var(--kv-on-accent);
+  /* One colour per character attribute. */
+  --color-attr-t: var(--kv-attr-t);
+  --color-attr-r: var(--kv-attr-r);
+  --color-attr-b: var(--kv-attr-b);
+  --color-attr-m: var(--kv-attr-m);
+  --color-attr-w: var(--kv-attr-w);
+  --color-attr-j: var(--kv-attr-j);
+}
+
+/* Dark is the default theme. index.html sets data-theme before the first paint. */
+:root {
+  color-scheme: dark;
+  --kv-bg: #0b0d12;
+  --kv-surface: #141821;
+  --kv-raised: #1d2230;
+  --kv-line: #2b3243;
+  --kv-fg: #f1eee6;
+  --kv-muted: #a6afbf;
+  --kv-accent: #ffc247;
+  --kv-accent-fg: #ffc247;
+  --kv-on-accent: #1b1403;
+  --kv-attr-t: #6aa5ff;
+  --kv-attr-r: #ff8266;
+  --kv-attr-b: #3ddc97;
+  --kv-attr-m: #c19cff;
+  --kv-attr-w: #3ccbda;
+  --kv-attr-j: #ff7eb6;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --kv-bg: #f5f2ea;
+  --kv-surface: #fffdf8;
+  --kv-raised: #ebe6da;
+  --kv-line: #d6cfc0;
+  --kv-fg: #14171f;
+  --kv-muted: #535a68;
+  --kv-accent: #ffb829;
+  --kv-accent-fg: #8a5300;
+  --kv-on-accent: #1b1403;
+  --kv-attr-t: #2563d9;
+  --kv-attr-r: #bd3a1b;
+  --kv-attr-b: #09754f;
+  --kv-attr-m: #7446d6;
+  --kv-attr-w: #09707f;
+  --kv-attr-j: #c42a74;
+}
+
+@layer base {
+  /*
+   * The root font size stays unset on purpose. <meta name="text-scale"> and the browser's own
+   * font-size setting scale the root size, and every size in the app is in rem.
+   */
+  html {
+    background-color: var(--kv-bg);
+    /* A vertical swipe is the app's main gesture: no pull-to-refresh, no scroll chaining. */
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--kv-bg);
+    color: var(--kv-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 0.125rem solid var(--kv-accent-fg);
+    outline-offset: 0.125rem;
+    border-radius: 0.25rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
