@@ -2,7 +2,13 @@ import 'fake-indexeddb/auto';
 import Dexie from 'dexie';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CONTENT_TABLES, DB_NAME, USER_TABLES, createDb, db as appDb, type KvantDb } from './db.ts';
+import { GRADE, newSchedule } from '../core/srs.ts';
 import type { CardRow, CardStateRow, DailyRow } from './types.ts';
+
+/** A schedule that is due at the given moment. */
+function dueAt(due: number) {
+  return { ...newSchedule(new Date(0)), due };
+}
 
 function quizCard(id: string, order: number, patch: Partial<CardRow> = {}): CardRow {
   const [categoryId = '', topicSlug = ''] = id.split('.');
@@ -37,6 +43,7 @@ function cardState(cardId: string, patch: Partial<CardStateRow> = {}): CardState
     flagged: null,
     srs: null,
     masteredAt: null,
+    lastAnsweredAt: null,
     ...patch,
   };
 }
@@ -48,6 +55,7 @@ function day(learningDay: string, xp: number): DailyRow {
     newCards: 0,
     answers: 0,
     correct: 0,
+    correctStreak: 0,
     xp,
     activeSeconds: 0,
     goalMet: false,
@@ -142,10 +150,10 @@ describe('cardState indexes', () => {
   beforeEach(async () => {
     await db.cardState.bulkPut([
       cardState('a.t.new'),
-      cardState('a.t.due-early', { srs: { due: 5_000 }, lastSeenAt: 2_000 }),
-      cardState('a.t.due-late', { srs: { due: 9_000 }, lastSeenAt: 3_000 }),
-      cardState('a.t.future', { srs: { due: 50_000 }, lastSeenAt: 4_000 }),
-      cardState('a.t.mastered', { srs: { due: 90_000 }, masteredAt: 7_000 }),
+      cardState('a.t.due-early', { srs: dueAt(5_000), lastSeenAt: 2_000 }),
+      cardState('a.t.due-late', { srs: dueAt(9_000), lastSeenAt: 3_000 }),
+      cardState('a.t.future', { srs: dueAt(50_000), lastSeenAt: 4_000 }),
+      cardState('a.t.mastered', { srs: dueAt(90_000), masteredAt: 7_000 }),
     ]);
   });
 
@@ -179,14 +187,14 @@ describe('logs and daily rows', () => {
     const first = await db.reviewLog.add({
       cardId: 'a.t.x',
       ts: 1_000,
-      rating: 3,
+      rating: GRADE.good,
       mode: 'feed',
       responseMs: 4_200,
     });
     const second = await db.reviewLog.add({
       cardId: 'a.t.y',
       ts: 2_000,
-      rating: 1,
+      rating: GRADE.again,
       mode: 'review',
       responseMs: 9_000,
     });

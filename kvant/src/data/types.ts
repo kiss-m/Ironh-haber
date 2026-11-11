@@ -7,12 +7,14 @@
  */
 import type { BuiltCard, Category, Topic } from '../../shared/schema.ts';
 import type { AttributeCode } from '../../shared/taxonomy.ts';
+import type { LearningDay } from '../core/day.ts';
+import type { DifficultyState } from '../core/difficulty.ts';
+import type { Grade, SrsRecord } from '../core/srs.ts';
+
+export type { LearningDay };
 
 /** Epoch milliseconds. Every stored instant uses this, so indexes sort chronologically. */
 export type Timestamp = number;
-
-/** A learning day as `YYYY-MM-DD`. It runs from 04:00 to 04:00 local time (src/core/day.ts). */
-export type LearningDay = string;
 
 export type ThemeName = 'dark' | 'light';
 
@@ -43,15 +45,6 @@ export interface ContentMetaRow {
 // User state
 // ---------------------------------------------------------------------------------------------
 
-/**
- * A serialised ts-fsrs card. `due` is epoch milliseconds so that the `srs.due` index can
- * range-scan for due reviews. The remaining fields are owned by src/core/srs.ts (Phase 1).
- */
-export interface SrsRecord {
-  due: Timestamp;
-  [field: string]: unknown;
-}
-
 export interface CardStateRow {
   cardId: string;
   firstSeenAt: Timestamp;
@@ -65,33 +58,51 @@ export interface CardStateRow {
   known: boolean;
   /** "Chyba", with an optional note. Cleared automatically when the card's content changes. */
   flagged: { at: Timestamp; note: string } | null;
-  /** Null until the first exposure creates the schedule. */
+  /**
+   * The FSRS schedule (src/core/srs.ts), created by the first exposure. `srs.due` is indexed:
+   * it is the start of the learning day on which the card is due.
+   */
   srs: SrsRecord | null;
   /** Once set the card stays in the Collection. */
   masteredAt: Timestamp | null;
+  /** When the card was last answered, graded or not. Decides "not tested today". */
+  lastAnsweredAt: Timestamp | null;
 }
 
+/** Where a rating came from. */
 export type ReviewMode = 'feed' | 'review' | 'boss';
 
-/** FSRS grade: 1 Again, 2 Hard, 3 Good, 4 Easy. */
-export type ReviewRating = 1 | 2 | 3 | 4;
-
+/** One FSRS rating. Answers to cards on their first showing are not ratings and are not logged. */
 export interface ReviewLogRow {
   /** Auto-incremented. */
   id: number;
   cardId: string;
   ts: Timestamp;
-  rating: ReviewRating;
+  /** 1 Again, 2 Hard, 3 Good, 4 Easy. */
+  rating: Grade;
   mode: ReviewMode;
   responseMs: number;
 }
+
+export type EventType =
+  | 'card_seen'
+  | 'card_read'
+  | 'answer'
+  | 'like'
+  | 'bookmark'
+  | 'known'
+  | 'not_understood'
+  | 'flag'
+  | 'quick_skip'
+  | 'goal_met'
+  | 'level_up';
 
 export interface EventRow {
   /** Auto-incremented. */
   id: number;
   ts: Timestamp;
   learningDay: LearningDay;
-  type: string;
+  type: EventType;
   cardId?: string;
   payload?: unknown;
 }
@@ -106,10 +117,14 @@ export interface DailyQuestState {
 
 export interface DailyRow {
   learningDay: LearningDay;
+  /** Cards worked through: read for at least 3 s, acted on, or answered. Counts toward the goal. */
   cardsSeen: number;
+  /** Cards shown for the first time, read or not. Counts toward the daily cap on new cards. */
   newCards: number;
   answers: number;
   correct: number;
+  /** Correct answers in a row at this moment. Decides the XP multiplier. */
+  correctStreak: number;
   xp: number;
   /** Counted only while the feed or a review is visible, at most 90 s per card. */
   activeSeconds: number;
@@ -131,19 +146,14 @@ export interface TopicAffinityRow {
   affinity: number;
 }
 
-/** Provisional (Phase 1): the adaptive difficulty target of one category. */
-export interface CategoryDifficultyRow {
+/** The adaptive difficulty target of one category (src/core/difficulty.ts). */
+export interface CategoryDifficultyRow extends DifficultyState {
   categoryId: string;
-  /** 1–5, starts at the category's `defaultDifficulty`. */
-  target: number;
-  /** Whether each of the last 20 graded answers was correct, oldest first. */
-  recent: boolean[];
-  answersSinceAdjust: number;
 }
 
 export interface SettingsRow {
   id: 'me';
-  /** categoryId → weight 0–100. */
+  /** categoryId → weight 0–100. A category that is missing or zero is not selected. */
   categoryWeights: Record<string, number>;
   dailyGoal: number;
   newCardCap: number;
