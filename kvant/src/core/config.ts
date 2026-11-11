@@ -48,6 +48,9 @@ export const NEXT_BATCH_LOOKAHEAD = 3;
 /** "Nerozumiem" brings the card back after at least this many other cards. */
 export const REQUEUE_MIN_GAP = 5;
 
+/** A review session takes at most this many due cards, so it stays a finishable set. */
+export const REVIEW_SESSION_SIZE = 20;
+
 export const AFFINITY = {
   initial: 1,
   min: 0.5,

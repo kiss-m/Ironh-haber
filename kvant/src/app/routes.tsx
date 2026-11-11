@@ -1,6 +1,7 @@
 import { Navigate, type RouteObject } from 'react-router';
 import { CharacterScreen } from '../features/character/CharacterScreen.tsx';
 import { CollectionScreen } from '../features/collection/CollectionScreen.tsx';
+import { DoneScreen } from '../features/feed/DoneScreen.tsx';
 import { FeedScreen } from '../features/feed/FeedScreen.tsx';
 import { OnboardingScreen } from '../features/onboarding/OnboardingScreen.tsx';
 import { PathsScreen } from '../features/paths/PathsScreen.tsx';
@@ -16,6 +17,7 @@ export const routes: RouteObject[] = [
     errorElement: <ErrorScreen />,
     children: [
       { path: PATHS.onboarding, element: <OnboardingScreen /> },
+      { path: PATHS.done, element: <DoneScreen /> },
       {
         // The four main screens share the tab bar.
         element: <AppLayout />,

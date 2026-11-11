@@ -1,36 +1,73 @@
-import { BrandMark } from '../../components/ui/BrandMark.tsx';
-import { EnergyLevels } from '../../components/ui/EnergyLevels.tsx';
-import { Screen } from '../../components/ui/Screen.tsx';
+import { useEffect, useRef } from 'react';
 import { sk } from '../../i18n/sk.ts';
-import { AppStatus } from '../settings/AppStatus.tsx';
+import { CardPage } from './CardPage.tsx';
+import { Checkpoint } from './Checkpoint.tsx';
+import { EndPage } from './EndPage.tsx';
+import { FeedStatus } from './FeedStatus.tsx';
+import { Pager, type PagerHandle } from './Pager.tsx';
+import { LevelUp, XpFloat } from './Rewards.tsx';
+import { feedSession as session } from './session.ts';
 
-/** Phase 0 placeholder. Phase 1 replaces it with the vertical card pager. */
+/** The feed: one card per screen, swipe up for the next, a checkpoint after every ten. */
 export function FeedScreen() {
-  return (
-    <Screen>
-      <header className="flex items-center gap-3">
-        <BrandMark className="h-9 w-auto" />
-        <div className="flex flex-col">
-          <span className="font-display text-xl leading-none font-bold tracking-tight">
-            {sk.app.name}
-          </span>
-          <span className="text-xs text-muted">{sk.app.tagline}</span>
-        </div>
-      </header>
+  const state = session.useStore();
+  const pager = useRef<PagerHandle>(null);
 
-      <EnergyLevels />
+  useEffect(() => {
+    session.attach();
+    return () => {
+      session.detach();
+    };
+  }, []);
 
-      <div className="flex flex-col gap-3">
-        <p className="text-xs font-semibold tracking-widest text-accent-fg uppercase">
-          {sk.feed.kicker}
-        </p>
-        <h1 className="font-display text-4xl font-bold tracking-tight text-balance">
-          {sk.feed.heading}
-        </h1>
-        <p className="text-pretty">{sk.feed.body}</p>
+  if (state.status !== 'ready') {
+    return (
+      <div role="status" className="flex h-full items-center justify-center text-muted">
+        {sk.feed.loading}
       </div>
+    );
+  }
 
-      <AppStatus />
-    </Screen>
+  const pages = session.pages(state);
+  const advance = () => pager.current?.goTo(state.pageIndex + 1);
+
+  return (
+    <div className="relative h-full">
+      <h1 className="sr-only">{sk.nav.feed}</h1>
+      <FeedStatus />
+      <XpFloat reward={state.reward} />
+      <Pager
+        ref={pager}
+        label={sk.feed.label}
+        count={pages.length}
+        index={state.pageIndex}
+        onIndexChange={session.setPage}
+        renderPage={(index) => {
+          const page = pages[index];
+          if (!page) return null;
+          if (page.kind === 'card') {
+            return (
+              <CardPage
+                session={session}
+                entry={page.entry}
+                entryIndex={page.entryIndex}
+                onAdvance={advance}
+              />
+            );
+          }
+          if (page.kind === 'checkpoint') {
+            return (
+              <Checkpoint
+                batch={page.batch}
+                stats={state.stats[page.batch - 1]}
+                onContinue={advance}
+              />
+            );
+          }
+          return <EndPage />;
+        }}
+      />
+      <LevelUp level={state.levelUp} onClose={session.dismissLevelUp} />
+    </div>
   );
 }

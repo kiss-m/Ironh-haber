@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../../app/App.tsx';
 import { routes } from '../../app/routes.tsx';
 import { db } from '../../data/db.ts';
+import { feedSession } from '../feed/session.ts';
 import { resetPwaMock } from '../../test/pwaRegisterMock.ts';
 import { resetDb, seedContent } from '../../test/seed.ts';
 
@@ -27,6 +28,7 @@ beforeEach(async () => {
   resetPwaMock();
   await resetDb();
   await seedContent();
+  feedSession.reset();
 });
 
 describe('onboarding', () => {

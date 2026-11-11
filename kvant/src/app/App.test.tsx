@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from '../data/db.ts';
+import { feedSession } from '../features/feed/session.ts';
 import { resetPwaMock } from '../test/pwaRegisterMock.ts';
 import { resetDb, seedContent, seedProfile } from '../test/seed.ts';
 import { App } from './App.tsx';
@@ -36,13 +37,15 @@ beforeEach(async () => {
   await resetDb();
   await seedContent();
   await seedProfile();
+  feedSession.reset();
 });
 
 describe('app shell', () => {
   it('opens on the feed with the four tabs in order', async () => {
     await renderApp();
 
-    expect(heading()).toHaveTextContent('Karty sú na ceste.');
+    expect(heading()).toHaveTextContent('Feed');
+    expect(await screen.findByRole('feed', { name: 'Feed kariet' })).toBeInTheDocument();
     const tabs = tabBar().getAllByRole('link');
     expect(tabs.map((tab) => tab.textContent)).toEqual(['Feed', 'Cesty', 'Zbierka', 'Postava']);
     expect(tabBar().getByRole('link', { name: 'Feed' })).toHaveAttribute('aria-current', 'page');
@@ -69,13 +72,14 @@ describe('app shell', () => {
 
     await user.click(tabBar().getByRole('link', { name: 'Feed' }));
 
-    expect(heading()).toHaveTextContent('Karty sú na ceste.');
+    expect(await screen.findByRole('feed', { name: 'Feed kariet' })).toBeInTheDocument();
+    expect(heading()).toHaveTextContent('Feed');
   });
 
   it('sends an unknown address to the feed', async () => {
     const { router } = await renderApp('/neexistuje');
 
-    expect(heading()).toHaveTextContent('Karty sú na ceste.');
+    expect(heading()).toHaveTextContent('Feed');
     expect(router.state.location.pathname).toBe('/');
   });
 
@@ -143,17 +147,6 @@ describe('error screen', () => {
 
   it('is what the app routes fall back to', () => {
     expect(routes[0]?.errorElement).toBeDefined();
-  });
-});
-
-describe('feed placeholder', () => {
-  it('reports the version and the imported cards', async () => {
-    await renderApp();
-    const status = within(screen.getByRole('region', { name: 'Stav aplikácie' }));
-
-    expect(status.getByText('Verzia').nextElementSibling).toHaveTextContent(/^\d+\.\d+\.\d+$/);
-    expect(await status.findByText('pripravená')).toBeInTheDocument();
-    expect(status.getByText('Karty v databáze').nextElementSibling).toHaveTextContent('60');
   });
 });
 

@@ -1,5 +1,6 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vitest/config';
 import pkg from './package.json' with { type: 'json' };
@@ -13,6 +14,25 @@ const BASE = '/kvant/';
 
 /** The dark theme background (`--kv-bg` in src/styles/index.css), used for the splash screen. */
 const DARK_BACKGROUND = '#0b0d12';
+
+/**
+ * KaTeX's stylesheet lists three formats for each of its 20 fonts. Every browser that can run
+ * this app reads woff2, so the woff and ttf sources are dropped before Vite sees them. Otherwise
+ * 40 font files that nothing ever requests would land in the build.
+ */
+function katexWoff2Only(): Plugin {
+  return {
+    name: 'kvant:katex-woff2-only',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!/katex[^/]*\.css/.test(id)) return null;
+      return code.replace(
+        /,url\([^)]+\.woff\) format\("woff"\),url\([^)]+\.ttf\) format\("truetype"\)/g,
+        '',
+      );
+    },
+  };
+}
 
 export default defineConfig({
   base: BASE,
@@ -31,6 +51,8 @@ export default defineConfig({
               name: 'motion',
               test: /node_modules\/(?:motion|motion-dom|motion-utils|framer-motion)\//,
             },
+            // Only formula cards need KaTeX. On its own it stays out of the first load.
+            { name: 'katex', test: /node_modules\/katex\// },
             { name: 'vendor', test: /node_modules\// },
           ],
         },
@@ -38,6 +60,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    katexWoff2Only(),
     react(),
     tailwindcss(),
     VitePWA({
