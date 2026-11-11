@@ -68,6 +68,9 @@
   --color-accent: var(--kv-accent);
   --color-accent-fg: var(--kv-accent-fg);
   --color-on-accent: var(--kv-on-accent);
+  /* Right and wrong answers, and error messages. Both are safe as text colours. */
+  --color-good: var(--kv-good);
+  --color-bad: var(--kv-bad);
   /* One colour per character attribute. */
   --color-attr-t: var(--kv-attr-t);
   --color-attr-r: var(--kv-attr-r);
@@ -89,6 +92,8 @@
   --kv-accent: #ffc247;
   --kv-accent-fg: #ffc247;
   --kv-on-accent: #1b1403;
+  --kv-good: #5fd98a;
+  --kv-bad: #ff8f85;
   --kv-attr-t: #6aa5ff;
   --kv-attr-r: #ff8266;
   --kv-attr-b: #3ddc97;
@@ -108,6 +113,8 @@
   --kv-accent: #ffb829;
   --kv-accent-fg: #8a5300;
   --kv-on-accent: #1b1403;
+  --kv-good: #0c6e3d;
+  --kv-bad: #b3261e;
   --kv-attr-t: #2563d9;
   --kv-attr-r: #bd3a1b;
   --kv-attr-b: #09754f;

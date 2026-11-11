@@ -107,6 +107,49 @@ export const sk = {
     cards: 'Karty v databáze',
   },
 
+  start: {
+    loading: 'Pripravujem karty…',
+    errorTitle: 'Karty sa nepodarilo načítať.',
+    errorBody:
+      'Pri prvom spustení treba pripojenie na internet. Potom už Kvant funguje aj bez neho.',
+    retry: 'Skúsiť znova',
+  },
+
+  onboarding: {
+    step: (current: number, total: number) => `Krok ${current} z ${total}`,
+    next: 'Ďalej',
+    back: 'Späť',
+    finish: 'Začať',
+    name: {
+      title: 'Ako sa bude volať tvoja postava?',
+      hint: 'Rastie s každou kartou, ktorú prečítaš. Meno sa dá neskôr zmeniť.',
+      label: 'Meno postavy',
+      missing: 'Postava potrebuje meno.',
+    },
+    categories: {
+      title: 'Čo sa chceš učiť?',
+      hint: 'Feed bude miešať karty z kategórií, ktoré vyberieš.',
+      missing: 'Vyber aspoň jednu kategóriu.',
+    },
+    weights: {
+      title: 'Čomu dáš viac priestoru?',
+      hint: 'Posuvník určuje, ako často sa kategória vo feede objaví.',
+    },
+    goal: {
+      title: 'Koľko kariet denne?',
+      hint: 'Po splnení cieľa je na dnes hotovo. Všetko navyše je bonus.',
+    },
+  },
+
+  /** How often a category shows up, as a word for the weight slider. */
+  weight: (weight: number) => (weight <= 30 ? 'občas' : weight <= 60 ? 'bežne' : 'často'),
+
+  goals: {
+    10: { title: '10 kariet', note: 'Krátko, asi 5 minút' },
+    20: { title: '20 kariet', note: 'Akurát, asi 10 minút' },
+    40: { title: '40 kariet', note: 'Naplno, asi 20 minút' },
+  },
+
   error: {
     title: 'Niečo sa pokazilo.',
     body: 'Túto obrazovku sa nepodarilo zobraziť. Tvoj pokrok je uložený v zariadení a ostáva v bezpečí.',

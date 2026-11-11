@@ -2,7 +2,9 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { db } from '../data/db.ts';
 import { resetPwaMock } from '../test/pwaRegisterMock.ts';
+import { resetDb, seedContent, seedProfile } from '../test/seed.ts';
 import { App } from './App.tsx';
 import { ErrorScreen } from './ErrorScreen.tsx';
 import { routes } from './routes.tsx';
@@ -11,9 +13,11 @@ import { useThemeStore } from './theme.ts';
 
 vi.mock('virtual:pwa-register/react', () => import('../test/pwaRegisterMock.ts'));
 
-function renderApp(initialPath = '/') {
+/** Renders the app and waits until the start-up gate has let a screen through. */
+async function renderApp(initialPath = '/') {
   const router = createMemoryRouter(routes, { initialEntries: [initialPath] });
   render(<App router={router} />);
+  await screen.findByRole('heading', { level: 1 });
   return { router, user: userEvent.setup() };
 }
 
@@ -25,15 +29,18 @@ function heading() {
   return screen.getByRole('heading', { level: 1 });
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   resetPwaMock();
   localStorage.clear();
   useThemeStore.getState().setTheme('dark');
+  await resetDb();
+  await seedContent();
+  await seedProfile();
 });
 
 describe('app shell', () => {
-  it('opens on the feed with the four tabs in order', () => {
-    renderApp();
+  it('opens on the feed with the four tabs in order', async () => {
+    await renderApp();
 
     expect(heading()).toHaveTextContent('Karty sú na ceste.');
     const tabs = tabBar().getAllByRole('link');
@@ -46,7 +53,7 @@ describe('app shell', () => {
     ['Zbierka', '/zbierka'],
     ['Postava', '/postava'],
   ])('opens %s from its tab', async (name, path) => {
-    const { router, user } = renderApp();
+    const { router, user } = await renderApp();
 
     await user.click(tabBar().getByRole('link', { name }));
 
@@ -57,7 +64,7 @@ describe('app shell', () => {
   });
 
   it('returns to the feed from another tab', async () => {
-    const { user } = renderApp('/zbierka');
+    const { user } = await renderApp('/zbierka');
     expect(heading()).toHaveTextContent('Zbierka');
 
     await user.click(tabBar().getByRole('link', { name: 'Feed' }));
@@ -65,21 +72,54 @@ describe('app shell', () => {
     expect(heading()).toHaveTextContent('Karty sú na ceste.');
   });
 
-  it('sends an unknown address to the feed', () => {
-    const { router } = renderApp('/neexistuje');
+  it('sends an unknown address to the feed', async () => {
+    const { router } = await renderApp('/neexistuje');
 
     expect(heading()).toHaveTextContent('Karty sú na ceste.');
     expect(router.state.location.pathname).toBe('/');
   });
 
   it('moves the focus into the new screen after a tab change', async () => {
-    const { user } = renderApp();
+    const { user } = await renderApp();
     const main = screen.getByRole('main');
     expect(main).not.toHaveFocus();
 
     await user.click(tabBar().getByRole('link', { name: 'Cesty' }));
 
     expect(main).toHaveFocus();
+  });
+});
+
+describe('start-up gate', () => {
+  it('sends a reader without a character to onboarding', async () => {
+    await db.character.clear();
+    const { router } = await renderApp('/zbierka');
+
+    expect(router.state.location.pathname).toBe('/vitaj');
+    expect(heading()).toHaveTextContent('Ako sa bude volať tvoja postava?');
+    // Onboarding stands alone, without the tab bar.
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+  });
+
+  it('keeps a reader with a character away from onboarding', async () => {
+    const { router } = await renderApp('/vitaj');
+
+    expect(router.state.location.pathname).toBe('/');
+  });
+
+  it('explains a first start without a connection and offers to try again', async () => {
+    await resetDb();
+    const { user } = await renderApp();
+
+    // Nothing is stored and the content cannot be fetched in the test environment.
+    expect(screen.getByRole('alert')).toHaveTextContent('Karty sa nepodarilo načítať.');
+
+    // The content arrives in the meantime, so the second attempt gets through.
+    await seedContent();
+    await seedProfile();
+    await user.click(screen.getByRole('button', { name: 'Skúsiť znova' }));
+
+    expect(await screen.findByRole('navigation', { name: 'Hlavná navigácia' })).toBeInTheDocument();
   });
 });
 
@@ -107,19 +147,19 @@ describe('error screen', () => {
 });
 
 describe('feed placeholder', () => {
-  it('reports the version and an open, empty database', async () => {
-    renderApp();
+  it('reports the version and the imported cards', async () => {
+    await renderApp();
     const status = within(screen.getByRole('region', { name: 'Stav aplikácie' }));
 
     expect(status.getByText('Verzia').nextElementSibling).toHaveTextContent(/^\d+\.\d+\.\d+$/);
     expect(await status.findByText('pripravená')).toBeInTheDocument();
-    expect(status.getByText('Karty v databáze').nextElementSibling).toHaveTextContent('0');
+    expect(status.getByText('Karty v databáze').nextElementSibling).toHaveTextContent('60');
   });
 });
 
 describe('character placeholder', () => {
-  it('lists the six attributes in the order of the taxonomy', () => {
-    renderApp('/postava');
+  it('lists the six attributes in the order of the taxonomy', async () => {
+    await renderApp('/postava');
     const attributes = within(screen.getByRole('region', { name: 'Atribúty' }));
 
     const names = attributes.getAllByRole('listitem').map((item) => item.firstChild?.textContent);
@@ -127,7 +167,7 @@ describe('character placeholder', () => {
   });
 
   it('switches the theme and remembers it under a kvant: key', async () => {
-    const { user } = renderApp('/postava');
+    const { user } = await renderApp('/postava');
     const group = within(screen.getByRole('radiogroup', { name: 'Motív' }));
     expect(group.getByRole('radio', { name: 'Tmavý' })).toBeChecked();
 

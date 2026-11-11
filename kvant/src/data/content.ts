@@ -32,6 +32,11 @@ export function toMixerCard(card: CardRow): MixerCard {
 
 const cache = new WeakMap<KvantDb, { version: string; index: ContentIndex }>();
 
+/** Forgets the cached index. Tests use it after they rewrite the content tables by hand. */
+export function forgetContentIndex(db: KvantDb): void {
+  cache.delete(db);
+}
+
 /** The index for the content that is currently imported. Rebuilt only after an import. */
 export async function loadContentIndex(db: KvantDb): Promise<ContentIndex> {
   const meta = await db.contentMeta.toArray();

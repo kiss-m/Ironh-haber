@@ -7,4 +7,8 @@ export const PATHS = {
   paths: '/cesty',
   collection: '/zbierka',
   character: '/postava',
+  settings: '/nastavenia',
+  onboarding: '/vitaj',
+  review: '/opakovanie',
+  done: '/dnes',
 } as const;

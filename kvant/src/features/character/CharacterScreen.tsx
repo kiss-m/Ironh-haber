@@ -1,19 +1,10 @@
 import { UserRound } from 'lucide-react';
 import { useId } from 'react';
-import { ATTRIBUTE_CODES, type AttributeCode } from '../../../shared/taxonomy.ts';
+import { ATTRIBUTE_CODES } from '../../../shared/taxonomy.ts';
+import { ATTRIBUTE_SWATCH } from '../../components/ui/attributes.ts';
 import { ComingSoon } from '../../components/ui/ComingSoon.tsx';
 import { sk } from '../../i18n/sk.ts';
 import { ThemeSwitch } from '../settings/ThemeSwitch.tsx';
-
-/** Tailwind needs complete class names, so the attribute colours are spelled out here. */
-const ATTRIBUTE_SWATCH: Record<AttributeCode, string> = {
-  T: 'bg-attr-t',
-  R: 'bg-attr-r',
-  B: 'bg-attr-b',
-  M: 'bg-attr-m',
-  W: 'bg-attr-w',
-  J: 'bg-attr-j',
-};
 
 /**
  * Phase 0 placeholder. Phase 3 builds the character sheet. The theme switch lives here only
