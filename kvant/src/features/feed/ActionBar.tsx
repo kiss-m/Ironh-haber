@@ -16,14 +16,14 @@ export interface CardAction {
  */
 export function ActionBar({ actions }: { actions: readonly CardAction[] }) {
   return (
-    <div role="group" aria-label={sk.actions.label} className="flex justify-between gap-1">
+    <div role="group" aria-label={sk.actions.label} className="-mx-2 flex justify-between">
       {actions.map(({ id, label, icon: Icon, pressed, onClick }) => (
         <button
           key={id}
           type="button"
           aria-pressed={pressed}
           onClick={onClick}
-          className={`flex min-h-12 min-w-12 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-0.5 text-[min(0.6875rem,3.2vw)] leading-tight font-semibold transition-transform active:scale-90 ${
+          className={`flex min-h-12 min-w-12 flex-1 flex-col items-center justify-center gap-1 rounded-xl text-[min(0.6875rem,3vw)] leading-tight font-semibold whitespace-nowrap transition-transform active:scale-90 ${
             pressed ? 'text-accent-fg' : 'text-muted'
           }`}
         >

@@ -236,10 +236,10 @@
       "latex": "d = c\\,\\Delta t",
       "legend": [
         { "symbol": "d", "meaning": "vzdialenosť od družice", "unit": "m" },
-        { "symbol": "c", "meaning": "rýchlosť svetla, približne 300 000 km/s", "unit": "m/s" },
+        { "symbol": "c", "meaning": "rýchlosť svetla", "unit": "m/s" },
         { "symbol": "\\Delta t", "meaning": "čas, ktorý signál letel", "unit": "s" }
       ],
-      "body": "Rádiový signál letí rýchlosťou svetla, takže vzdialenosť je čas letu vynásobený touto rýchlosťou. Pri takej rýchlosti rozhodujú miliardtiny sekundy: chyba jednej mikrosekundy znamená chybu 300 metrov. Preto majú družice na palube atómové hodiny.",
+      "body": "Rádiový signál letí rýchlosťou svetla, približne 300 000 km/s, takže vzdialenosť je čas letu vynásobený touto rýchlosťou. Rozhodujú pritom miliardtiny sekundy: chyba jednej mikrosekundy znamená chybu 300 metrov. Preto majú družice na palube atómové hodiny.",
       "example": "Signál, ktorý letel 0,07 s, prešiel 21 000 km.",
       "recall": {
         "q": "Ako sa z času letu signálu vypočíta vzdialenosť od družice?",

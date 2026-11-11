@@ -1,7 +1,7 @@
 import type { FlashcardButton } from '../../core/srs.ts';
 import { sk } from '../../i18n/sk.ts';
 import { Button } from '../ui/Button.tsx';
-import { Callout, CardTitle } from './parts.tsx';
+import { Callout, CardQuestion } from './parts.tsx';
 
 interface FlashcardProps {
   question: string;
@@ -29,7 +29,7 @@ export function Flashcard({
 }: FlashcardProps) {
   return (
     <div className="flex flex-col gap-4">
-      <CardTitle>{question}</CardTitle>
+      <CardQuestion>{question}</CardQuestion>
 
       {revealed ? (
         <>

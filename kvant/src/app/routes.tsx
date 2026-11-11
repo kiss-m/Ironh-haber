@@ -5,6 +5,8 @@ import { DoneScreen } from '../features/feed/DoneScreen.tsx';
 import { FeedScreen } from '../features/feed/FeedScreen.tsx';
 import { OnboardingScreen } from '../features/onboarding/OnboardingScreen.tsx';
 import { PathsScreen } from '../features/paths/PathsScreen.tsx';
+import { ReviewScreen } from '../features/review/ReviewScreen.tsx';
+import { SettingsScreen } from '../features/settings/SettingsScreen.tsx';
 import { AppLayout } from './AppLayout.tsx';
 import { ErrorScreen } from './ErrorScreen.tsx';
 import { PATHS } from './paths.ts';
@@ -18,6 +20,7 @@ export const routes: RouteObject[] = [
     children: [
       { path: PATHS.onboarding, element: <OnboardingScreen /> },
       { path: PATHS.done, element: <DoneScreen /> },
+      { path: PATHS.review, element: <ReviewScreen /> },
       {
         // The four main screens share the tab bar.
         element: <AppLayout />,
@@ -26,6 +29,7 @@ export const routes: RouteObject[] = [
           { path: PATHS.paths, element: <PathsScreen /> },
           { path: PATHS.collection, element: <CollectionScreen /> },
           { path: PATHS.character, element: <CharacterScreen /> },
+          { path: PATHS.settings, element: <SettingsScreen /> },
         ],
       },
       // An unknown hash, for example from an old link, opens the feed.

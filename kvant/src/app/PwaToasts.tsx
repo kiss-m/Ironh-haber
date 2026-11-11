@@ -52,7 +52,7 @@ export function PwaToasts() {
   }, [offlineReady, setOfflineReady]);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+5rem)] z-50 flex justify-center px-4">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+8.75rem)] z-50 flex justify-center px-4">
       <AnimatePresence mode="wait">
         {needRefresh ? (
           <Toast

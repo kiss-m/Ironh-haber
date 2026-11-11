@@ -11,6 +11,15 @@ export function CardTitle({ children }: { children: ReactNode }) {
   );
 }
 
+/** The question of a quiz or a flashcard. Smaller than a title, because it runs to sentences. */
+export function CardQuestion({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="font-display text-lg leading-snug font-semibold tracking-tight text-pretty">
+      {children}
+    </h2>
+  );
+}
+
 /** The running text of a card: 18 px at the default font size. */
 export function CardText({ children }: { children: ReactNode }) {
   return <p className="text-pretty">{children}</p>;

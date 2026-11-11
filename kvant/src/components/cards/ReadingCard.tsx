@@ -21,10 +21,10 @@ export function ReadingCard({ card, showGermanTerms, notUnderstood = false }: Re
 
       {card.type === 'formula' ? (
         <>
-          <div className="overflow-x-auto rounded-2xl bg-surface px-4 py-5 text-xl">
+          <div className="overflow-x-auto rounded-2xl bg-surface px-4 py-3 text-xl">
             <Formula latex={card.latex} display />
           </div>
-          <dl aria-label={sk.cards.legend} className="flex flex-col gap-1.5 text-sm">
+          <dl aria-label={sk.cards.legend} className="flex flex-col gap-1 text-sm">
             {card.legend.map((entry) => (
               <div key={entry.symbol} className="flex items-baseline gap-3">
                 <dt className="w-10 shrink-0 text-base">

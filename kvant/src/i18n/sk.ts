@@ -127,13 +127,78 @@ export const sk = {
 
   character: {
     title: 'Postava',
-    lead: 'Postava rastie s každou kartou. Skúsenosti idú do úrovne aj do jedného zo šiestich atribútov.',
+    level: (level: number) => `Úroveň ${level}`,
+    xp: (into: number, size: number) => `${into} / ${size} XP`,
+    xpLabel: 'Skúsenosti do ďalšej úrovne',
     attributesHeading: 'Atribúty',
+    attributeLevel: (level: number) => `úr. ${level}`,
+    settings: 'Nastavenia',
+    lead: 'Postava rastie s každou kartou. Skúsenosti idú do úrovne aj do jedného zo šiestich atribútov.',
     items: [
-      'Úroveň, hodnosť a trieda podľa toho, čo sa učíš najviac.',
+      'Trieda podľa toho, čo sa učíš najviac.',
       'Ostrosť každého atribútu: ako dobre si pamätáš to, čo už vieš.',
       'Denné úlohy, úspechy a štatistiky.',
     ],
+  },
+
+  ranks: {
+    novacik: 'Nováčik',
+    ucen: 'Učeň',
+    tovaris: 'Tovariš',
+    majster: 'Majster',
+    velmajster: 'Veľmajster',
+    legenda: 'Legenda',
+  },
+
+  review: {
+    title: 'Opakovanie',
+    label: 'Karty na opakovanie',
+    close: 'Zavrieť opakovanie',
+    progress: (current: number, total: number) => `${current} / ${total}`,
+    loading: 'Vyberám karty na opakovanie…',
+    emptyTitle: 'Nič nečaká na opakovanie.',
+    emptyBody: 'Karty sa vrátia, keď príde ich čas.',
+    doneTitle: 'Sada je hotová.',
+    answered: 'Zopakované karty',
+    accuracy: 'Správne odpovede',
+    xp: 'Skúsenosti',
+    remaining: (count: number) =>
+      count === 1
+        ? 'Čaká ešte 1 karta.'
+        : count < 5
+          ? `Čakajú ešte ${count} karty.`
+          : `Čaká ešte ${count} kariet.`,
+    more: 'Ďalšia sada',
+    back: 'Späť do feedu',
+  },
+
+  settings: {
+    title: 'Nastavenia',
+    back: 'Späť na postavu',
+    character: 'Postava',
+    name: 'Meno postavy',
+    goal: 'Denný cieľ',
+    categories: 'Kategórie',
+    categoriesHint: 'Aspoň jedna kategória musí zostať vybraná.',
+    weights: 'Ako často',
+    learning: 'Učenie',
+    newCardCap: 'Nové karty denne',
+    newCardCapHint: 'Viac nových kariet dnes znamená viac opakovaní v ďalších dňoch.',
+    retention: 'Cieľová zapamätateľnosť',
+    retentionHint: 'Vyššia hodnota znamená častejšie opakovanie.',
+    retentionValue: (retention: number) => `${Math.round(retention * 100)} %`,
+    serendipity: 'Niečo iné',
+    serendipityHint: 'Občas ľahká karta z kategórie, ktorú nemáš vybranú.',
+    germanTerms: 'Nemecké termíny',
+    germanTermsHint: 'Pri odborných pojmoch ukázať aj nemecký názov.',
+    appearance: 'Vzhľad',
+    storage: 'Úložisko',
+    storagePersisted: 'Prehliadač tvoje dáta chráni pred automatickým vymazaním.',
+    storageNotPersisted: 'Prehliadač môže dáta vymazať, keď zariadeniu dôjde miesto.',
+    storageUnknown: 'Tento prehliadač nevie povedať, či sú dáta chránené.',
+    storageRequest: 'Požiadať o ochranu dát',
+    on: 'Zapnuté',
+    off: 'Vypnuté',
   },
 
   theme: {

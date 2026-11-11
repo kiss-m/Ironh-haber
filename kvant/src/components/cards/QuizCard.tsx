@@ -1,6 +1,6 @@
 import { Check, X } from 'lucide-react';
 import { sk } from '../../i18n/sk.ts';
-import { Callout, CardTitle } from './parts.tsx';
+import { Callout, CardQuestion } from './parts.tsx';
 
 interface QuizCardProps {
   question: string;
@@ -26,7 +26,7 @@ export function QuizCard({
 
   return (
     <div className="flex flex-col gap-4">
-      <CardTitle>{question}</CardTitle>
+      <CardQuestion>{question}</CardQuestion>
 
       <ul className="flex flex-col gap-2.5">
         {options.map((option, index) => {

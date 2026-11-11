@@ -52,15 +52,16 @@ describe('app shell', () => {
   });
 
   it.each([
-    ['Cesty', '/cesty'],
-    ['Zbierka', '/zbierka'],
-    ['Postava', '/postava'],
-  ])('opens %s from its tab', async (name, path) => {
+    ['Cesty', '/cesty', 'Cesty'],
+    ['Zbierka', '/zbierka', 'Zbierka'],
+    // The character screen is headed by the name of the character.
+    ['Postava', '/postava', 'Skúšobná postava'],
+  ])('opens %s from its tab', async (name, path, title) => {
     const { router, user } = await renderApp();
 
     await user.click(tabBar().getByRole('link', { name }));
 
-    expect(heading()).toHaveTextContent(name);
+    expect(await screen.findByRole('heading', { level: 1, name: title })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(path);
     expect(tabBar().getByRole('link', { name })).toHaveAttribute('aria-current', 'page');
     expect(tabBar().getByRole('link', { name: 'Feed' })).not.toHaveAttribute('aria-current');
@@ -150,17 +151,58 @@ describe('error screen', () => {
   });
 });
 
-describe('character placeholder', () => {
-  it('lists the six attributes in the order of the taxonomy', async () => {
+describe('character', () => {
+  it('shows the name, level and rank of the character', async () => {
+    await db.character.update('me', {
+      totalXp: 300,
+      attributeXp: { T: 250, R: 0, B: 0, M: 0, W: 50, J: 0 },
+    });
     await renderApp('/postava');
-    const attributes = within(screen.getByRole('region', { name: 'Atribúty' }));
 
-    const names = attributes.getAllByRole('listitem').map((item) => item.firstChild?.textContent);
-    expect(names).toEqual(['Technika', 'Riadenie', 'Biznis', 'Myseľ', 'Rozhľad', 'Jazyky']);
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Skúšobná postava' }),
+    ).toBeInTheDocument();
+    // 300 XP: 60 for level 1, 170 for level 2, and 70 into level 3.
+    expect(screen.getByText('Úroveň 3 · Nováčik')).toBeInTheDocument();
+    expect(screen.getByText('70 / 312 XP')).toBeInTheDocument();
   });
 
+  it('lists the six attributes in the order of the taxonomy, each with its level', async () => {
+    await db.character.update('me', {
+      totalXp: 300,
+      attributeXp: { T: 250, R: 0, B: 0, M: 0, W: 50, J: 0 },
+    });
+    await renderApp('/postava');
+    const attributes = within(screen.getByRole('region', { name: 'Atribúty' }));
+    await attributes.findByText('úr. 3');
+
+    const items = attributes.getAllByRole('listitem').map((item) => item.firstChild?.textContent);
+    // 250 XP in an attribute: 30 + 85 for two levels, 135 into the third. 50 XP: level 2.
+    expect(items).toEqual([
+      'Technikaúr. 3',
+      'Riadenieúr. 1',
+      'Biznisúr. 1',
+      'Myseľúr. 1',
+      'Rozhľadúr. 2',
+      'Jazykyúr. 1',
+    ]);
+  });
+
+  it('links to the settings', async () => {
+    const { router, user } = await renderApp('/postava');
+
+    await user.click(screen.getByRole('link', { name: 'Nastavenia' }));
+
+    expect(router.state.location.pathname).toBe('/nastavenia');
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Nastavenia' }),
+    ).toBeInTheDocument();
+  });
+});
+
+describe('settings', () => {
   it('switches the theme and remembers it under a kvant: key', async () => {
-    const { user } = await renderApp('/postava');
+    const { user } = await renderApp('/nastavenia');
     const group = within(screen.getByRole('radiogroup', { name: 'Motív' }));
     expect(group.getByRole('radio', { name: 'Tmavý' })).toBeChecked();
 
@@ -171,5 +213,86 @@ describe('character placeholder', () => {
     expect(document.documentElement.dataset.theme).toBe('light');
     expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('light');
     expect(Object.keys(localStorage)).toEqual(['kvant:theme']);
+  });
+
+  it('saves the daily goal, the new-card cap and the retention at once', async () => {
+    const { user } = await renderApp('/nastavenia');
+
+    await user.click(screen.getByRole('radio', { name: /40 kariet/ }));
+    await user.click(
+      within(screen.getByRole('radiogroup', { name: 'Nové karty denne' })).getByRole('radio', {
+        name: '20',
+      }),
+    );
+    await user.click(screen.getByRole('radio', { name: '95 %' }));
+
+    await vi.waitFor(async () => {
+      expect(await db.settings.get('me')).toMatchObject({
+        dailyGoal: 40,
+        newCardCap: 20,
+        desiredRetention: 0.95,
+      });
+    });
+  });
+
+  it('switches serendipity and German terms off', async () => {
+    const { user } = await renderApp('/nastavenia');
+
+    await user.click(screen.getByRole('switch', { name: 'Niečo iné' }));
+    await user.click(screen.getByRole('switch', { name: 'Nemecké termíny' }));
+
+    await vi.waitFor(async () => {
+      expect(await db.settings.get('me')).toMatchObject({
+        serendipity: false,
+        showGermanTerms: false,
+      });
+    });
+    expect(screen.getByRole('switch', { name: 'Niečo iné' })).not.toBeChecked();
+  });
+
+  it('removes a category from the feed but never the last one', async () => {
+    const { user } = await renderApp('/nastavenia');
+    const weights = async () => Object.keys((await db.settings.get('me'))!.categoryWeights).sort();
+
+    await user.click(await screen.findByRole('checkbox', { name: /Robotika/ }));
+    await vi.waitFor(async () => {
+      expect(await weights()).toEqual(['ako-veci-funguju', 'fyzika-mechanika']);
+    });
+    // Its slider goes with it.
+    expect(screen.queryByRole('slider', { name: /Robotika/ })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('checkbox', { name: /Fyzika a mechanika/ }));
+    await vi.waitFor(async () => {
+      expect(await weights()).toEqual(['ako-veci-funguju']);
+    });
+
+    await user.click(screen.getByRole('checkbox', { name: /Ako veci fungujú/ }));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(await weights()).toEqual(['ako-veci-funguju']);
+    expect(screen.getByRole('checkbox', { name: /Ako veci fungujú/ })).toBeChecked();
+  });
+
+  it('renames the character', async () => {
+    const { user } = await renderApp('/nastavenia');
+    // The field is filled in once the character has been read from the database.
+    const input = await screen.findByDisplayValue('Skúšobná postava');
+    expect(input).toHaveAccessibleName('Meno postavy');
+
+    await user.clear(input);
+    await user.type(input, 'Ada');
+    await user.tab();
+
+    await vi.waitFor(async () => {
+      expect((await db.character.get('me'))?.name).toBe('Ada');
+    });
+  });
+
+  it('reports the version and the imported cards', async () => {
+    await renderApp('/nastavenia');
+    const status = within(screen.getByRole('region', { name: 'Stav aplikácie' }));
+
+    expect(status.getByText('Verzia').nextElementSibling).toHaveTextContent(/^\d+\.\d+\.\d+$/);
+    expect(await status.findByText('pripravená')).toBeInTheDocument();
+    expect(status.getByText('Karty v databáze').nextElementSibling).toHaveTextContent('60');
   });
 });
