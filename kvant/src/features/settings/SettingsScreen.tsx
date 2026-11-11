@@ -12,7 +12,9 @@ import { loadContentIndex } from '../../data/content.ts';
 import { db } from '../../data/db.ts';
 import { updateSettings } from '../../data/profile.ts';
 import { isPersisted, requestPersistence } from '../../data/storage.ts';
+import type { SettingsRow } from '../../data/types.ts';
 import { sk } from '../../i18n/sk.ts';
+import { feedSession } from '../feed/session.ts';
 import { AppStatus } from './AppStatus.tsx';
 import { CategoryPicker } from './CategoryPicker.tsx';
 import { GoalPicker } from './GoalPicker.tsx';
@@ -118,10 +120,22 @@ export function SettingsScreen() {
     .map((category) => category.id)
     .filter((id) => (settings.categoryWeights[id] ?? 0) > 0);
 
+  /**
+   * Saves a setting that changes what the feed serves. The cards already queued were mixed with
+   * the old value, so the feed starts over and the change shows on the very next card.
+   */
+  function saveMix(
+    patch: Partial<Pick<SettingsRow, 'categoryWeights' | 'newCardCap' | 'serendipity'>>,
+  ): void {
+    void updateSettings(db, patch).then(() => {
+      feedSession.reset();
+    });
+  }
+
   function selectCategories(ids: string[]): void {
     // A feed needs something to draw from, so the last category cannot be switched off.
     if (ids.length === 0) return;
-    void updateSettings(db, {
+    saveMix({
       categoryWeights: Object.fromEntries(
         ids.map((id) => [id, settings.categoryWeights[id] ?? DEFAULT_CATEGORY_WEIGHT]),
       ),
@@ -178,11 +192,9 @@ export function SettingsScreen() {
         <WeightSliders
           categories={categories.filter((category) => selected.includes(category.id))}
           weights={settings.categoryWeights}
-          onChange={(id, weight) =>
-            void updateSettings(db, {
-              categoryWeights: { ...settings.categoryWeights, [id]: weight },
-            })
-          }
+          onChange={(id, weight) => {
+            saveMix({ categoryWeights: { ...settings.categoryWeights, [id]: weight } });
+          }}
         />
       </Section>
 
@@ -192,7 +204,9 @@ export function SettingsScreen() {
           hint={sk.settings.newCardCapHint}
           options={NEW_CARD_CAPS}
           value={settings.newCardCap}
-          onChange={(newCardCap) => void updateSettings(db, { newCardCap })}
+          onChange={(newCardCap) => {
+            saveMix({ newCardCap });
+          }}
         />
         <Choice
           label={sk.settings.retention}
@@ -205,7 +219,9 @@ export function SettingsScreen() {
           label={sk.settings.serendipity}
           hint={sk.settings.serendipityHint}
           checked={settings.serendipity}
-          onChange={(serendipity) => void updateSettings(db, { serendipity })}
+          onChange={(serendipity) => {
+            saveMix({ serendipity });
+          }}
         />
         <Toggle
           label={sk.settings.germanTerms}

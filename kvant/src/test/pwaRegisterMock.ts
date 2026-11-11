@@ -2,9 +2,8 @@ import { vi } from 'vitest';
 
 /**
  * A stand-in for `virtual:pwa-register/react`. The real module registers a service worker, which
- * jsdom does not have. Tests set the flags and assert on the spies.
- *
- *   vi.mock('virtual:pwa-register/react', () => import('../test/pwaRegisterMock.ts'));
+ * jsdom does not have. setup.ts puts it in place for every UI test. Tests set the flags and
+ * assert on the spies.
  */
 export const pwa = {
   needRefresh: false,

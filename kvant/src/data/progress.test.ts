@@ -312,6 +312,31 @@ describe('recordAnswer on a retrieval', () => {
     expect(await db.categoryDifficulty.get('ako-veci-funguju')).toBeUndefined();
   });
 
+  it('rates a card at most once per learning day', async () => {
+    await recordAnswer(db, answer(A1, { correct: false, grade: GRADE.again }), NEXT_DAY);
+    const rated = (await db.cardState.get(A1))!.srs;
+
+    // The feed and a review session can both hold the card. The second answer is practice.
+    const later = new Date(NEXT_DAY.getTime() + 60 * 60 * 1000);
+    const second = await recordAnswer(db, answer(A1, { mode: 'review' }), later);
+
+    expect(second.xp).toBe(10);
+    const state = await db.cardState.get(A1);
+    expect(state?.srs).toEqual(rated);
+    expect(state?.lastAnsweredAt).toBe(later.getTime());
+    expect(await db.reviewLog.count()).toBe(1);
+    const answers = await db.events.where('type').equals('answer').toArray();
+    expect(answers.map((event) => (event.payload as { grade: unknown }).grade)).toEqual([
+      GRADE.again,
+      null,
+    ]);
+
+    // On the next learning day the card is rated again.
+    await recordAnswer(db, answer(A1), utc('2026-11-12T18:00:00'));
+    expect(await db.reviewLog.count()).toBe(2);
+    expect((await db.cardState.get(A1))?.srs?.reps).toBe(2);
+  });
+
   it('labels reviews done in a review session', async () => {
     await recordAnswer(db, answer(A1, { mode: 'review' }), NEXT_DAY);
 

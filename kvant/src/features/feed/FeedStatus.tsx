@@ -2,18 +2,22 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router';
 import { PATHS } from '../../app/paths.ts';
+import { useLearningDay } from '../../app/useLearningDay.ts';
 import { characterProgress } from '../../core/character.ts';
-import { learningDay } from '../../core/day.ts';
 import { db } from '../../data/db.ts';
 import { sk } from '../../i18n/sk.ts';
 import { useSettings } from '../settings/useSettings.ts';
+import { useDaily } from './useDaily.ts';
 
 const RADIUS = 13;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-/** How many reviews are due right now. */
+/** How many reviews are due right now. Cards become due when a learning day starts. */
 export function useDueCount(): number {
-  return useLiveQuery(() => db.cardState.where('srs.due').belowOrEqual(Date.now()).count()) ?? 0;
+  const day = useLearningDay();
+  return (
+    useLiveQuery(() => db.cardState.where('srs.due').belowOrEqual(Date.now()).count(), [day]) ?? 0
+  );
 }
 
 /**
@@ -22,7 +26,7 @@ export function useDueCount(): number {
  */
 export function FeedStatus() {
   const settings = useSettings();
-  const daily = useLiveQuery(() => db.daily.get(learningDay(new Date())));
+  const daily = useDaily();
   const character = useLiveQuery(() => db.character.get('me'));
   const due = useDueCount();
 

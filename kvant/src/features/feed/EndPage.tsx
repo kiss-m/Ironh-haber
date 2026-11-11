@@ -1,17 +1,15 @@
-import { useLiveQuery } from 'dexie-react-hooks';
 import { useNavigate } from 'react-router';
 import { PATHS } from '../../app/paths.ts';
 import { Button } from '../../components/ui/Button.tsx';
-import { learningDay } from '../../core/day.ts';
-import { db } from '../../data/db.ts';
 import { sk } from '../../i18n/sk.ts';
 import { useSettings } from '../settings/useSettings.ts';
+import { useDaily } from './useDaily.ts';
 
 /** The last page of the feed, when there is nothing more to learn right now. */
 export function EndPage() {
   const navigate = useNavigate();
   const settings = useSettings();
-  const daily = useLiveQuery(() => db.daily.get(learningDay(new Date())));
+  const daily = useDaily();
   const capReached = (daily?.newCards ?? 0) >= settings.newCardCap;
 
   return (

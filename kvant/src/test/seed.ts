@@ -44,8 +44,14 @@ export async function resetDb(): Promise<void> {
   forgetContentIndex(db);
 }
 
-export async function seedContent(now: Date = new Date()): Promise<void> {
-  await importContent(db, sourceOf(seedPacks()), now);
+/** Imports packs into the app database: the real seed packs unless others are given. */
+export async function seedContent(
+  now: Date = new Date(),
+  packs: BuiltPack[] = seedPacks(),
+): Promise<void> {
+  const result = await importContent(db, sourceOf(packs), now);
+  const broken = result.failed[0];
+  if (broken) throw new Error(`Pack ${broken.packId} did not import: ${broken.reason}`);
 }
 
 export async function seedProfile(

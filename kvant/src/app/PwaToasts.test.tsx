@@ -4,8 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { pwa, resetPwaMock } from '../test/pwaRegisterMock.ts';
 import { PwaToasts } from './PwaToasts.tsx';
 
-vi.mock('virtual:pwa-register/react', () => import('../test/pwaRegisterMock.ts'));
-
 beforeEach(() => {
   resetPwaMock();
 });

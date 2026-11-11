@@ -1,20 +1,35 @@
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PATHS } from '../../app/paths.ts';
+import { useLearningDay } from '../../app/useLearningDay.ts';
 import { Button } from '../../components/ui/Button.tsx';
 import { Screen } from '../../components/ui/Screen.tsx';
-import { learningDay, nextLearningDayStart } from '../../core/day.ts';
+import { nextLearningDayStart } from '../../core/day.ts';
 import { db } from '../../data/db.ts';
 import { sk } from '../../i18n/sk.ts';
 import { Figure } from './Checkpoint.tsx';
+import { useDaily } from './useDaily.ts';
 
 /** "Na dnes stačí": a calm look at what today brought, and nothing that pulls the reader back. */
 export function DoneScreen() {
   const navigate = useNavigate();
-  const daily = useLiveQuery(() => db.daily.get(learningDay(new Date())));
-  const tomorrow = useLiveQuery(() =>
-    db.cardState.where('srs.due').belowOrEqual(nextLearningDayStart(new Date()).getTime()).count(),
+  const day = useLearningDay();
+  const [openedOn] = useState(day);
+  const daily = useDaily();
+  const tomorrow = useLiveQuery(
+    () =>
+      db.cardState
+        .where('srs.due')
+        .belowOrEqual(nextLearningDayStart(new Date()).getTime())
+        .count(),
+    [day],
   );
+
+  // This screen closes a day. Left open into the next one, it has nothing true to say any more.
+  useEffect(() => {
+    if (day !== openedOn) void navigate(PATHS.feed, { replace: true });
+  }, [day, openedOn, navigate]);
 
   return (
     <div className="flex min-h-dvh flex-col">

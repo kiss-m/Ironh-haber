@@ -9,7 +9,7 @@
  * The store holds only what the screen renders. Timers and per-visit counters live outside it.
  */
 import { create, type StoreApi, type UseBoundStore } from 'zustand';
-import { quizOf } from '../../core/cards.ts';
+import { isAnsweredOnSight, quizOf } from '../../core/cards.ts';
 import {
   ACTIVE_SECONDS_CAP,
   BATCH_SIZE,
@@ -17,6 +17,7 @@ import {
   READ_DWELL_MS,
   REVIEW_SESSION_SIZE,
 } from '../../core/config.ts';
+import { learningDay, learningDayStart, type LearningDay } from '../../core/day.ts';
 import {
   buildBatch,
   buildReviewQueue,
@@ -57,7 +58,6 @@ import {
   type Reward,
 } from '../../data/progress.ts';
 import { buildSnapshot } from '../../data/snapshot.ts';
-import { CARD_LOAD } from '../../../shared/schema.ts';
 
 export type SessionKind = 'feed' | 'review';
 
@@ -192,6 +192,8 @@ export function createSession(kind: SessionKind): Session {
   let attached = false;
   let extending: Promise<void> | null = null;
   let rewardId = 0;
+  /** The learning day the queue was started on. A queue does not carry over into the next day. */
+  let startedOn: LearningDay | null = null;
   /** Bumped by reset(), so that work started before a reset does not write into the new session. */
   let generation = 0;
 
@@ -277,23 +279,36 @@ export function createSession(kind: SessionKind): Session {
 
   /** Counts a card as read: once per showing, and only for readings, not for retrievals. */
   async function creditRead(entryIndex: number): Promise<void> {
+    const startedIn = generation;
     const entry = get().entries[entryIndex];
     const visit = visitOf(entryIndex);
     if (!entry || visit.counted || isRetrieval(entry.source)) return;
     visit.counted = true;
     const newCard = isFirstReading(entry.source);
     const reward = await recordRead(db, entry.cardId, new Date(), { newCard });
+    if (startedIn !== generation) return;
     applyReward(entryIndex, reward, true);
     if (newCard) {
       const title = await titleOf(entry.cardId);
-      if (title) patchStats(entryIndex, (stats) => stats.newTitles.push(title));
+      if (title && startedIn === generation) {
+        patchStats(entryIndex, (stats) => stats.newTitles.push(title));
+      }
     }
   }
 
-  /** The reader did something on the card, which by itself makes a reading count. */
-  function acted(entryIndex: number): Promise<void> {
+  /**
+   * Runs an action of the reader on a card: stores it, then lets the action count as reading
+   * the card. What is stored stays stored, but if the session was reset while that took place,
+   * the entry index means another card by now and nothing more is done with it.
+   */
+  async function act(entryIndex: number, store: (cardId: string) => Promise<void>): Promise<void> {
+    const startedIn = generation;
+    const entry = get().entries[entryIndex];
+    if (!entry) return;
+    await store(entry.cardId);
+    if (startedIn !== generation) return;
     visitOf(entryIndex).acted = true;
-    return creditRead(entryIndex);
+    await creditRead(entryIndex);
   }
 
   // ---- Building the queue -------------------------------------------------------------------
@@ -326,7 +341,9 @@ export function createSession(kind: SessionKind): Session {
 
     const snapshot = await buildSnapshot(db, now, {
       previous: entries.slice(-3),
-      pending: entries.slice(furthest + 1),
+      // The card on screen counts as queued too. Its showing may not be recorded yet, and a
+      // question the reader is looking at should not come back as a quiz a few cards later.
+      pending: entries.slice(Math.max(furthest, 0)),
       easier,
     });
     const batch = buildBatch(snapshot, now, Math.random);
@@ -350,10 +367,50 @@ export function createSession(kind: SessionKind): Session {
 
   /** Builds the next stretch of the queue. Calls that overlap share one run. */
   function extend(): Promise<void> {
-    extending ??= buildMore().finally(() => {
-      extending = null;
-    });
+    if (!extending) {
+      const run = buildMore().finally(() => {
+        // A reset may have started another run meanwhile. That one is not this run's to clear.
+        if (extending === run) extending = null;
+      });
+      extending = run;
+    }
     return extending;
+  }
+
+  /**
+   * Takes the retrievals of the given cards out of the part of the queue that was not shown
+   * yet. A card that has just been answered is not asked again a few cards later.
+   */
+  function dropWaiting(answered: ReadonlySet<string>): void {
+    const { entries } = get();
+    const kept = entries.filter(
+      (entry, index) =>
+        index <= furthest || !isRetrieval(entry.source) || !answered.has(entry.cardId),
+    );
+    if (kept.length < entries.length) set({ entries: kept });
+  }
+
+  /**
+   * Looks for retrievals that are still waiting although their card was answered today, which
+   * happens when a review session gets to the card first, and takes them out of the queue.
+   */
+  async function dropAnsweredElsewhere(): Promise<void> {
+    const startedIn = generation;
+    const waiting = get()
+      .entries.slice(furthest + 1)
+      .filter((entry) => isRetrieval(entry.source));
+    if (waiting.length === 0) return;
+
+    const dayStart = learningDayStart(learningDay(new Date())).getTime();
+    const states = await db.cardState.bulkGet(waiting.map((entry) => entry.cardId));
+    if (startedIn !== generation) return;
+    const answered = new Set<string>();
+    for (const state of states) {
+      if (state && state.lastAnsweredAt !== null && state.lastAnsweredAt >= dayStart) {
+        answered.add(state.cardId);
+      }
+    }
+    dropWaiting(answered);
   }
 
   // ---- Showing and leaving cards ------------------------------------------------------------
@@ -401,17 +458,18 @@ export function createSession(kind: SessionKind): Session {
     }
   }
 
-  /** The reader moved on from a card. A reading left almost at once counts as skipped. */
+  /**
+   * The reader moved on from a card. A reading left almost at once counts as skipped. A quiz or
+   * a myth that was left unanswered does not: passing on a question says nothing about the topic.
+   */
   async function leave(entryIndex: number): Promise<void> {
     stopWatching(entryIndex);
     const entry = get().entries[entryIndex];
     const visit = visits.get(entryIndex);
     if (!entry || !visit || visit.counted || visit.acted || isRetrieval(entry.source)) return;
     if (visit.visibleMs >= QUICK_SKIP_MS) return;
-    const card = (await loadContentIndex(db)).cardById.get(entry.cardId);
-    if (card && CARD_LOAD[card.type] !== 'interactive') {
-      await recordQuickSkip(db, entry.cardId, new Date());
-    }
+    const card = await db.cards.get(entry.cardId);
+    if (card && !isAnsweredOnSight(card)) await recordQuickSkip(db, entry.cardId, new Date());
   }
 
   function enter(pageIndex: number): void {
@@ -426,7 +484,17 @@ export function createSession(kind: SessionKind): Session {
     if (needsNextBatch(state.entries.length, reached)) void extend();
   }
 
+  /** The queue was mixed for a learning day that is over. */
+  function isStale(): boolean {
+    return startedOn !== null && startedOn !== learningDay(new Date());
+  }
+
   function onVisibilityChange(): void {
+    // The app stayed open into a new learning day: yesterday's queue makes way for today's.
+    if (document.visibilityState === 'visible' && isStale()) {
+      reset();
+      return;
+    }
     const entryIndex = currentEntryIndex();
     if (entryIndex === null) return;
     if (document.visibilityState === 'visible') startWatching(entryIndex);
@@ -435,11 +503,27 @@ export function createSession(kind: SessionKind): Session {
 
   async function start(): Promise<void> {
     const startedIn = generation;
+    startedOn = learningDay(new Date());
     set({ status: 'loading' });
     await extend();
     if (startedIn !== generation) return;
     set({ status: 'ready' });
     if (attached) enter(get().pageIndex);
+  }
+
+  function reset(): void {
+    generation += 1;
+    for (const visit of visits.values()) {
+      if (visit.readTimer !== null) clearTimeout(visit.readTimer);
+    }
+    visits = new Map();
+    repeats = [];
+    easier = {};
+    furthest = -1;
+    extending = null;
+    startedOn = null;
+    set({ ...INITIAL });
+    if (attached) void start();
   }
 
   // ---- Answers ------------------------------------------------------------------------------
@@ -451,6 +535,7 @@ export function createSession(kind: SessionKind): Session {
     retrievalGrade: Grade,
     responseMs: number,
   ): Promise<void> {
+    const startedIn = generation;
     const entry = get().entries[entryIndex];
     if (!entry) return;
     const visit = visitOf(entryIndex);
@@ -473,6 +558,9 @@ export function createSession(kind: SessionKind): Session {
       },
       new Date(),
     );
+    if (startedIn !== generation) return;
+    // The next batch may already hold a quiz on this very card, picked while it was unanswered.
+    dropWaiting(new Set([entry.cardId]));
     patchStats(entryIndex, (stats) => {
       stats.answers += 1;
       if (correct) stats.correct += 1;
@@ -480,7 +568,9 @@ export function createSession(kind: SessionKind): Session {
     applyReward(entryIndex, result, countCard);
     if (countCard && isFirstReading(entry.source)) {
       const title = await titleOf(entry.cardId);
-      if (title) patchStats(entryIndex, (stats) => stats.newTitles.push(title));
+      if (title && startedIn === generation) {
+        patchStats(entryIndex, (stats) => stats.newTitles.push(title));
+      }
     }
   }
 
@@ -492,8 +582,14 @@ export function createSession(kind: SessionKind): Session {
     attach() {
       attached = true;
       document.addEventListener('visibilitychange', onVisibilityChange);
-      if (get().status === 'idle') void start();
-      else if (get().status === 'ready') enter(get().pageIndex);
+      if (isStale()) {
+        reset();
+      } else if (get().status === 'idle') {
+        void start();
+      } else if (get().status === 'ready') {
+        enter(get().pageIndex);
+        void dropAnsweredElsewhere();
+      }
     },
 
     detach() {
@@ -513,9 +609,11 @@ export function createSession(kind: SessionKind): Session {
     },
 
     async answerQuiz(entryIndex, choice) {
+      const startedIn = generation;
       const entry = get().entries[entryIndex];
       const card = entry && (await db.cards.get(entry.cardId));
       const quiz = card && quizOf(card);
+      if (startedIn !== generation) return;
       if (!quiz || (get().pages[entryIndex] ?? EMPTY_PAGE).choice !== null) return;
       const correct = choice === quiz.correctIndex;
       const responseMs = visibleTime(visitOf(entryIndex));
@@ -524,8 +622,10 @@ export function createSession(kind: SessionKind): Session {
     },
 
     async answerMyth(entryIndex, verdict) {
+      const startedIn = generation;
       const entry = get().entries[entryIndex];
       const card = entry && (await db.cards.get(entry.cardId));
+      if (startedIn !== generation) return;
       if (card?.type !== 'myth' || (get().pages[entryIndex] ?? EMPTY_PAGE).verdict !== null) {
         return;
       }
@@ -550,67 +650,51 @@ export function createSession(kind: SessionKind): Session {
       await answer(entryIndex, correct, grade, visit.revealedAfterMs ?? visibleTime(visit));
     },
 
-    async like(entryIndex, liked) {
-      const entry = get().entries[entryIndex];
-      if (!entry) return;
-      await setLiked(db, entry.cardId, liked, new Date());
-      await acted(entryIndex);
+    like(entryIndex, liked) {
+      return act(entryIndex, (cardId) => setLiked(db, cardId, liked, new Date()));
     },
 
-    async bookmark(entryIndex, bookmarked) {
-      const entry = get().entries[entryIndex];
-      if (!entry) return;
-      await setBookmarked(db, entry.cardId, bookmarked, new Date());
-      await acted(entryIndex);
+    bookmark(entryIndex, bookmarked) {
+      return act(entryIndex, (cardId) => setBookmarked(db, cardId, bookmarked, new Date()));
     },
 
-    async known(entryIndex) {
-      const entry = get().entries[entryIndex];
-      if (!entry) return;
-      await markKnown(db, entry.cardId, new Date());
-      await acted(entryIndex);
+    known(entryIndex) {
+      return act(entryIndex, (cardId) => markKnown(db, cardId, new Date()));
     },
 
     async notUnderstood(entryIndex) {
+      const startedIn = generation;
       const entry = get().entries[entryIndex];
       if (!entry || (get().pages[entryIndex] ?? EMPTY_PAGE).notUnderstood) return;
       patchPage(entryIndex, { notUnderstood: true });
-      await recordNotUnderstood(db, entry.cardId, new Date());
-      await acted(entryIndex);
+      await act(entryIndex, (cardId) => recordNotUnderstood(db, cardId, new Date()));
 
       // The card comes back later in this session, and its topic eases off for a moment.
       const card = (await loadContentIndex(db)).cardById.get(entry.cardId);
+      const describeEntry = await describe();
+      if (startedIn !== generation) return;
       if (card) easier = { ...easier, [card.topicId]: card.difficulty };
       repeats = [...repeats, scheduleRepeat(entryIndex, entry.cardId)];
-      const placed = placeRepeats(get().entries, repeats, await describe(), get().exhausted);
+      const placed = placeRepeats(get().entries, repeats, describeEntry, get().exhausted);
       repeats = placed.waiting;
       set({ entries: placed.entries });
     },
 
     async flag(entryIndex, note) {
+      // Taking a flag back is tidying up, not engaging with the card.
+      if (note !== null) {
+        await act(entryIndex, (cardId) => setFlag(db, cardId, note, new Date()));
+        return;
+      }
       const entry = get().entries[entryIndex];
-      if (!entry) return;
-      await setFlag(db, entry.cardId, note, new Date());
-      if (note !== null) await acted(entryIndex);
+      if (entry) await setFlag(db, entry.cardId, null, new Date());
     },
 
     dismissLevelUp() {
       set({ levelUp: null });
     },
 
-    reset() {
-      generation += 1;
-      for (const visit of visits.values()) {
-        if (visit.readTimer !== null) clearTimeout(visit.readTimer);
-      }
-      visits = new Map();
-      repeats = [];
-      easier = {};
-      furthest = -1;
-      extending = null;
-      set({ ...INITIAL });
-      if (attached) void start();
-    },
+    reset,
   };
 }
 

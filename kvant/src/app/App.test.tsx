@@ -1,26 +1,16 @@
-import { render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from '../data/db.ts';
 import { feedSession } from '../features/feed/session.ts';
 import { resetPwaMock } from '../test/pwaRegisterMock.ts';
+import { renderApp } from '../test/renderApp.tsx';
 import { resetDb, seedContent, seedProfile } from '../test/seed.ts';
 import { App } from './App.tsx';
 import { ErrorScreen } from './ErrorScreen.tsx';
 import { routes } from './routes.tsx';
 import { THEME_STORAGE_KEY } from './storageKeys.ts';
 import { useThemeStore } from './theme.ts';
-
-vi.mock('virtual:pwa-register/react', () => import('../test/pwaRegisterMock.ts'));
-
-/** Renders the app and waits until the start-up gate has let a screen through. */
-async function renderApp(initialPath = '/') {
-  const router = createMemoryRouter(routes, { initialEntries: [initialPath] });
-  render(<App router={router} />);
-  await screen.findByRole('heading', { level: 1 });
-  return { router, user: userEvent.setup() };
-}
 
 function tabBar() {
   return within(screen.getByRole('navigation', { name: 'Hlavná navigácia' }));
@@ -270,6 +260,51 @@ describe('settings', () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(await weights()).toEqual(['ako-veci-funguju']);
     expect(screen.getByRole('checkbox', { name: /Ako veci fungujú/ })).toBeChecked();
+  });
+
+  it.each([
+    ['the serendipity switch', () => screen.getByRole('switch', { name: 'Niečo iné' })],
+    ['a category', () => screen.getByRole('checkbox', { name: /Robotika/ })],
+    [
+      'the new-card cap',
+      () =>
+        within(screen.getByRole('radiogroup', { name: 'Nové karty denne' })).getByRole('radio', {
+          name: '20',
+        }),
+    ],
+  ])('starts the feed over after %s changes what it serves', async (_name, control) => {
+    const { router, user } = await renderApp();
+    await screen.findByRole('article');
+    expect(feedSession.useStore.getState().entries).toHaveLength(10);
+
+    await act(() => router.navigate('/nastavenia'));
+    await screen.findByRole('checkbox', { name: /Robotika/ });
+    await user.click(control());
+
+    // The queue was mixed with the old setting. The next visit to the feed builds a new one.
+    await waitFor(() => {
+      expect(feedSession.useStore.getState()).toMatchObject({ status: 'idle', entries: [] });
+    });
+  });
+
+  it('leaves the feed alone when a setting does not change the mix', async () => {
+    const { router, user } = await renderApp();
+    await screen.findByRole('article');
+    const queued = feedSession.useStore.getState().entries;
+
+    await act(() => router.navigate('/nastavenia'));
+    await user.click(await screen.findByRole('radio', { name: /40 kariet/ }));
+    await user.click(screen.getByRole('radio', { name: '95 %' }));
+    await user.click(screen.getByRole('switch', { name: 'Nemecké termíny' }));
+
+    await vi.waitFor(async () => {
+      expect(await db.settings.get('me')).toMatchObject({
+        dailyGoal: 40,
+        desiredRetention: 0.95,
+        showGermanTerms: false,
+      });
+    });
+    expect(feedSession.useStore.getState()).toMatchObject({ status: 'ready', entries: queued });
   });
 
   it('renames the character', async () => {

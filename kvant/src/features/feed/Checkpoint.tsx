@@ -1,12 +1,10 @@
-import { useLiveQuery } from 'dexie-react-hooks';
 import { useNavigate } from 'react-router';
 import { PATHS } from '../../app/paths.ts';
 import { Button } from '../../components/ui/Button.tsx';
-import { learningDay } from '../../core/day.ts';
-import { db } from '../../data/db.ts';
 import { sk } from '../../i18n/sk.ts';
 import { useSettings } from '../settings/useSettings.ts';
 import type { StretchStats } from './session.ts';
+import { useDaily } from './useDaily.ts';
 
 interface CheckpointProps {
   /** Which stretch of ten this closes, counting from 1. */
@@ -32,7 +30,7 @@ export function Figure({ label, value }: { label: string; value: string }) {
 export function Checkpoint({ batch, stats, onContinue }: CheckpointProps) {
   const navigate = useNavigate();
   const settings = useSettings();
-  const daily = useLiveQuery(() => db.daily.get(learningDay(new Date())));
+  const daily = useDaily();
   const goalReached = stats?.goalReached ?? false;
   const titles = stats?.newTitles ?? [];
 

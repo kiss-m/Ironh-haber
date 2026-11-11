@@ -1,15 +1,13 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter } from 'react-router';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { App } from '../../app/App.tsx';
 import { routes } from '../../app/routes.tsx';
 import { db } from '../../data/db.ts';
 import { feedSession } from '../feed/session.ts';
 import { resetPwaMock } from '../../test/pwaRegisterMock.ts';
 import { resetDb, seedContent } from '../../test/seed.ts';
-
-vi.mock('virtual:pwa-register/react', () => import('../../test/pwaRegisterMock.ts'));
 
 async function openOnboarding() {
   const router = createMemoryRouter(routes, { initialEntries: ['/'] });
@@ -52,7 +50,8 @@ describe('onboarding', () => {
     await user.click(next());
 
     expect(heading()).toHaveTextContent('Čo sa chceš učiť?');
-    const groups = screen.getAllByRole('group');
+    // The categories come from the database, a moment after the step opens.
+    const groups = await screen.findAllByRole('group');
     expect(
       groups.map((group) => within(group).getByText(/^(Technika|Rozhľad)$/).textContent),
     ).toEqual(['Technika', 'Rozhľad']);
@@ -66,7 +65,7 @@ describe('onboarding', () => {
     const { user } = await openOnboarding();
     await user.type(screen.getByRole('textbox', { name: 'Meno postavy' }), 'Ada');
     await user.click(next());
-    for (const box of screen.getAllByRole('checkbox')) await user.click(box);
+    for (const box of await screen.findAllByRole('checkbox')) await user.click(box);
 
     await user.click(next());
 
@@ -81,7 +80,7 @@ describe('onboarding', () => {
     await user.click(next());
 
     // Leave robotics out.
-    await user.click(screen.getByRole('checkbox', { name: /Robotika/ }));
+    await user.click(await screen.findByRole('checkbox', { name: /Robotika/ }));
     await user.click(next());
 
     expect(heading()).toHaveTextContent('Čomu dáš viac priestoru?');
@@ -119,7 +118,7 @@ describe('onboarding', () => {
     const { user } = await openOnboarding();
     await user.type(screen.getByRole('textbox', { name: 'Meno postavy' }), 'Ada');
     await user.click(next());
-    await user.click(screen.getByRole('checkbox', { name: /Robotika/ }));
+    await user.click(await screen.findByRole('checkbox', { name: /Robotika/ }));
 
     await user.click(screen.getByRole('button', { name: 'Späť' }));
     expect(screen.getByRole('textbox', { name: 'Meno postavy' })).toHaveValue('Ada');

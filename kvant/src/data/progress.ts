@@ -13,7 +13,7 @@ import type { AttributeCode } from '../../shared/taxonomy.ts';
 import { applyAffinity, type AffinitySignal } from '../core/affinity.ts';
 import { characterProgress } from '../core/character.ts';
 import { AFFINITY, XP } from '../core/config.ts';
-import { learningDay } from '../core/day.ts';
+import { learningDay, learningDayStart } from '../core/day.ts';
 import { initialDifficulty, recordGradedAnswer } from '../core/difficulty.ts';
 import { GRADE, isMastered, isReviewed, newSchedule, review, type Grade } from '../core/srs.ts';
 import { answerXp, nextCorrectStreak } from '../core/xp.ts';
@@ -39,6 +39,10 @@ export interface AnswerInput {
   /**
    * The FSRS grade when the answer is a retrieval. Null for an answer given the first time a
    * card is shown: that is an exposure, not a review, and leaves the schedule alone.
+   *
+   * A card is rated at most once per learning day, because the schedule works in whole days.
+   * A second retrieval on the same day (the feed and a review session can both hold the card)
+   * counts as practice: it earns its XP and leaves the schedule alone.
    */
   grade: Grade | null;
   mode: ReviewMode;
@@ -231,13 +235,13 @@ export function recordAnswer(db: KvantDb, input: AnswerInput, now: Date): Promis
     const settings = await loadSettings(db);
     let mastered = false;
 
-    if (input.grade !== null) {
-      state.srs = review(
-        state.srs ?? newSchedule(now),
-        input.grade,
-        now,
-        settings.desiredRetention,
-      );
+    const dayStart = learningDayStart(learningDay(now)).getTime();
+    const lastReview = state.srs?.lastReview ?? null;
+    const ratedToday = lastReview !== null && lastReview >= dayStart;
+    const grade = ratedToday ? null : input.grade;
+
+    if (grade !== null) {
+      state.srs = review(state.srs ?? newSchedule(now), grade, now, settings.desiredRetention);
       if (state.masteredAt === null && isMastered(state.srs)) {
         state.masteredAt = now.getTime();
         mastered = true;
@@ -245,7 +249,7 @@ export function recordAnswer(db: KvantDb, input: AnswerInput, now: Date): Promis
       await db.reviewLog.add({
         cardId: input.cardId,
         ts: now.getTime(),
-        rating: input.grade,
+        rating: grade,
         mode: input.mode,
         responseMs: input.responseMs,
       });
@@ -278,7 +282,7 @@ export function recordAnswer(db: KvantDb, input: AnswerInput, now: Date): Promis
 
     await log(db, now, 'answer', input.cardId, {
       correct: input.correct,
-      grade: input.grade,
+      grade,
       mode: input.mode,
       responseMs: input.responseMs,
     });
