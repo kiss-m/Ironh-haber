@@ -65,9 +65,13 @@ export function OnboardingScreen() {
       setError(sk.onboarding.name.missing);
       return;
     }
-    if (step === 'categories' && selected.length === 0) {
-      setError(sk.onboarding.categories.missing);
-      return;
+    if (step === 'categories') {
+      // The list comes from the database. A tap that beats it is not an empty selection.
+      if (categories === undefined) return;
+      if (selected.length === 0) {
+        setError(sk.onboarding.categories.missing);
+        return;
+      }
     }
     setError(null);
     if (stepIndex < STEPS.length - 1) setStepIndex(stepIndex + 1);

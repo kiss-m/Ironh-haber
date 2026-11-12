@@ -28,11 +28,6 @@ const attributeDomains: Record<AttributeCode, string> = {
 };
 
 export const sk = {
-  app: {
-    name: 'Kvant',
-    tagline: 'Jedna karta, jedna myšlienka.',
-  },
-
   nav: {
     label: 'Hlavná navigácia',
     feed: 'Feed',
@@ -52,7 +47,6 @@ export const sk = {
   feed: {
     label: 'Feed kariet',
     loading: 'Miešam karty…',
-    next: 'Ďalšia karta',
     goal: (seen: number, goal: number) => `Dnes ${seen} z ${goal} kariet`,
     goalMet: 'Denný cieľ je splnený',
     level: (level: number) => `Úroveň ${level}`,
@@ -102,7 +96,6 @@ export const sk = {
             ? `Zajtra čakajú ${count} opakovania.`
             : `Zajtra čaká ${count} opakovaní.`,
     back: 'Späť do feedu',
-    empty: 'Dnes ešte nič.',
   },
 
   paths: {
@@ -133,7 +126,6 @@ export const sk = {
     attributesHeading: 'Atribúty',
     attributeLevel: (level: number) => `úr. ${level}`,
     settings: 'Nastavenia',
-    lead: 'Postava rastie s každou kartou. Skúsenosti idú do úrovne aj do jedného zo šiestich atribútov.',
     items: [
       'Trieda podľa toho, čo sa učíš najviac.',
       'Ostrosť každého atribútu: ako dobre si pamätáš to, čo už vieš.',
@@ -197,8 +189,6 @@ export const sk = {
     storageNotPersisted: 'Prehliadač môže dáta vymazať, keď zariadeniu dôjde miesto.',
     storageUnknown: 'Tento prehliadač nevie povedať, či sú dáta chránené.',
     storageRequest: 'Požiadať o ochranu dát',
-    on: 'Zapnuté',
-    off: 'Vypnuté',
   },
 
   theme: {

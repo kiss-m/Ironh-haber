@@ -39,27 +39,6 @@
   --text-3xl--line-height: 1.1;
   --text-4xl: min(3rem, 14.5vw);
   --text-4xl--line-height: 1.05;
-
-  --animate-quantum: kv-quantum 6s cubic-bezier(0.7, 0, 0.3, 1) infinite;
-
-  @keyframes kv-quantum {
-    0%,
-    22% {
-      transform: translateY(0);
-    }
-    30%,
-    55% {
-      transform: translateY(calc(var(--kv-level-gap) * -1));
-    }
-    63%,
-    88% {
-      transform: translateY(calc(var(--kv-level-gap) * -2));
-    }
-    96%,
-    100% {
-      transform: translateY(0);
-    }
-  }
 }
 
 @theme inline {
