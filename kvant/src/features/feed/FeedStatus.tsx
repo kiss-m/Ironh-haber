@@ -37,7 +37,7 @@ export function FeedStatus() {
   const level = characterProgress(character?.totalXp ?? 0).level;
 
   return (
-    <div className="pointer-events-none absolute top-[calc(env(safe-area-inset-top)+0.75rem)] right-4 z-10 flex h-10 items-center gap-2">
+    <div className="top-row pointer-events-none absolute top-[calc(env(safe-area-inset-top)+0.75rem)] right-4 z-10 flex h-10 items-center gap-2">
       <div
         role="img"
         aria-label={done ? sk.feed.goalMet : sk.feed.goal(seen, goal)}
@@ -81,13 +81,16 @@ export function FeedStatus() {
       </span>
 
       {due > 0 ? (
+        // The chip is 40 px high. The link around it gives the finger its 48.
         <Link
           to={PATHS.review}
           aria-label={sk.feed.due(due)}
-          className="pointer-events-auto flex h-10 items-center gap-1 rounded-xl bg-accent px-2.5 text-xs font-bold text-on-accent tabular-nums"
+          className="pointer-events-auto flex min-h-[48px] min-w-[48px] items-center justify-end"
         >
-          <RotateCcw aria-hidden="true" className="size-4" />
-          {due}
+          <span className="flex h-10 items-center gap-1 rounded-xl bg-accent px-2.5 text-xs font-bold text-on-accent tabular-nums">
+            <RotateCcw aria-hidden="true" className="size-4" />
+            {due}
+          </span>
         </Link>
       ) : null}
     </div>

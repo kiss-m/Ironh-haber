@@ -341,7 +341,8 @@ describe('the checkpoint', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Na dnes stačí.' })).toBeVisible();
     expect(router.state.location.pathname).toBe('/dnes');
     await expectFigure('Karty', '2');
-    await expectFigure('Z toho nové', '10');
+    // Ten cards were shown, two of them were read: the other eight were swiped past.
+    await expectFigure('Z toho nové', '2');
     await expectFigure('Skúsenosti', '+10 XP');
     // Every card seen today comes up for its first review tomorrow.
     expect(await screen.findByText('Zajtra čaká 10 opakovaní.')).toBeInTheDocument();

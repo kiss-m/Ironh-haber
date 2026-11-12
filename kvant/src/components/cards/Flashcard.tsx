@@ -2,6 +2,7 @@ import type { FlashcardButton } from '../../core/srs.ts';
 import { sk } from '../../i18n/sk.ts';
 import { Button } from '../ui/Button.tsx';
 import { Callout, CardQuestion } from './parts.tsx';
+import { useReveal } from './useReveal.ts';
 
 interface FlashcardProps {
   question: string;
@@ -27,12 +28,15 @@ export function Flashcard({
   onReveal,
   onGrade,
 }: FlashcardProps) {
+  // The answer and the grade buttons under it belong together, so both are brought into view.
+  const back = useReveal<HTMLDivElement>(revealed);
+
   return (
     <div className="flex flex-col gap-4">
       <CardQuestion>{question}</CardQuestion>
 
       {revealed ? (
-        <>
+        <div ref={back} className="flex flex-col gap-4">
           <div role="status">
             <Callout label={sk.cards.flashcard.answer}>{answer}</Callout>
           </div>
@@ -61,7 +65,7 @@ export function Flashcard({
               ))}
             </div>
           </div>
-        </>
+        </div>
       ) : (
         <Button className="self-start" onClick={onReveal}>
           {sk.cards.flashcard.reveal}

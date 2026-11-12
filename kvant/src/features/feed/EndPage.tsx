@@ -13,7 +13,7 @@ export function EndPage() {
   const capReached = (daily?.newCards ?? 0) >= settings.newCardCap;
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-xl flex-col justify-center gap-4 px-5">
+    <div className="mx-auto flex h-full w-full max-w-xl flex-col justify-center gap-4 px-gutter">
       <h2 className="font-display text-3xl font-bold tracking-tight text-balance">
         {sk.end.title}
       </h2>

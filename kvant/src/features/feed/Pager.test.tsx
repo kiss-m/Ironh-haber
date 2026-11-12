@@ -7,9 +7,14 @@ import { Pager, type PagerHandle } from './Pager.tsx';
 const PAGE_HEIGHT = 800;
 
 /** jsdom has no layout, so the tests give the scroll area a height and a position. */
-function layOut(element: HTMLElement): { scrollTo: (top: number) => void } {
+function layOut(
+  element: HTMLElement,
+  height: number = PAGE_HEIGHT,
+): { scrollTo: (top: number) => void } {
   let top = 0;
-  Object.defineProperty(element, 'clientHeight', { configurable: true, value: PAGE_HEIGHT });
+  // What a browser reports: the exact height in the rectangle, a rounded one in `clientHeight`.
+  Object.defineProperty(element, 'clientHeight', { configurable: true, value: Math.round(height) });
+  element.getBoundingClientRect = () => new DOMRect(0, 0, 360, height);
   Object.defineProperty(element, 'scrollTop', {
     configurable: true,
     get: () => top,
@@ -74,7 +79,14 @@ function renderedPages(): string[] {
   return screen.getAllByText(/^Strana \d+$/).map((node) => node.textContent);
 }
 
+/** Makes the window look like a browser that sends `scrollend`. jsdom is not one. */
+function supportScrollEnd(): void {
+  Object.defineProperty(window, 'onscrollend', { configurable: true, writable: true, value: null });
+}
+
 afterEach(() => {
+  Reflect.deleteProperty(window, 'onscrollend');
+  vi.restoreAllMocks();
   vi.useRealTimers();
 });
 
@@ -146,6 +158,7 @@ describe('Pager', () => {
   });
 
   it('takes the page the scroll comes to rest on as the current one', () => {
+    supportScrollEnd();
     const onChange = vi.fn();
     render(<Harness onChange={onChange} />);
     const layout = layOut(feed());
@@ -154,6 +167,27 @@ describe('Pager', () => {
     fireEvent(feed(), new Event('scrollend'));
 
     expect(onChange).toHaveBeenCalledExactlyOnceWith(2);
+  });
+
+  it('does not take a finger resting in mid-swipe for a change of page', () => {
+    supportScrollEnd();
+    vi.useFakeTimers();
+    const onChange = vi.fn();
+    render(<Harness onChange={onChange} />);
+    const layout = layOut(feed());
+
+    // Most of the way to the next page, and then the finger holds still for a second.
+    layout.scrollTo(PAGE_HEIGHT * 0.8);
+    fireEvent.scroll(feed());
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(onChange).not.toHaveBeenCalled();
+
+    // Let go: the snap finishes on the next page.
+    layout.scrollTo(PAGE_HEIGHT);
+    fireEvent(feed(), new Event('scrollend'));
+    expect(onChange).toHaveBeenCalledExactlyOnceWith(1);
   });
 
   it('waits for the scroll to settle where the browser sends no scrollend', () => {
@@ -181,7 +215,29 @@ describe('Pager', () => {
     expect(onChange).toHaveBeenCalledExactlyOnceWith(1);
   });
 
+  it('finds the right page when a page is not a whole number of pixels high', () => {
+    // 504.667 px is a real case: a 320 x 568 screen less the tab bar. Rounded to 505 px, the
+    // error grows by a third of a pixel per page.
+    supportScrollEnd();
+    const height = 504.667;
+    const onChange = vi.fn();
+    const handle = createRef<PagerHandle>();
+    render(<Harness count={1000} onChange={onChange} handle={handle} />);
+    const layout = layOut(feed(), height);
+    const scrollTo = vi.spyOn(feed(), 'scrollTo');
+
+    layout.scrollTo(800 * height);
+    fireEvent(feed(), new Event('scrollend'));
+    expect(onChange).toHaveBeenLastCalledWith(800);
+
+    act(() => {
+      handle.current?.goTo(801);
+    });
+    expect(scrollTo).toHaveBeenLastCalledWith({ top: 801 * height, behavior: 'smooth' });
+  });
+
   it('does not report a swipe that was taken back', () => {
+    supportScrollEnd();
     const onChange = vi.fn();
     render(<Harness start={4} onChange={onChange} />);
     const layout = layOut(feed());
@@ -211,7 +267,8 @@ describe('Pager', () => {
     const onChange = vi.fn();
     const handle = createRef<PagerHandle>();
     render(<Harness start={2} onChange={onChange} handle={handle} />);
-    layOut(feed());
+    const layout = layOut(feed());
+    layout.scrollTo(2 * PAGE_HEIGHT);
     const scrollTo = vi.spyOn(feed(), 'scrollTo');
 
     act(() => {
@@ -219,6 +276,30 @@ describe('Pager', () => {
     });
 
     expect(onChange).toHaveBeenCalledExactlyOnceWith(3);
-    expect(scrollTo).toHaveBeenCalledWith({ top: 3 * PAGE_HEIGHT, behavior: 'smooth' });
+    // One smooth scroll, and no jump on top of it while the page is still on its way.
+    expect(scrollTo).toHaveBeenCalledExactlyOnceWith({ top: 3 * PAGE_HEIGHT, behavior: 'smooth' });
+  });
+
+  it('opens on the page it is given', () => {
+    // The feed keeps its place while the reader is on another tab, and comes back to it.
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(
+      new DOMRect(0, 0, 360, PAGE_HEIGHT),
+    );
+    const scrollTo = vi.spyOn(Element.prototype, 'scrollTo');
+
+    render(<Harness start={7} />);
+
+    expect(scrollTo).toHaveBeenCalledExactlyOnceWith({ top: 7 * PAGE_HEIGHT });
+  });
+
+  it('does not scroll when it opens on the first page', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(
+      new DOMRect(0, 0, 360, PAGE_HEIGHT),
+    );
+    const scrollTo = vi.spyOn(Element.prototype, 'scrollTo');
+
+    render(<Harness />);
+
+    expect(scrollTo).not.toHaveBeenCalled();
   });
 });

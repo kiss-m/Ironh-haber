@@ -26,7 +26,8 @@ export function CategoryPicker({ categories, selected, onChange }: CategoryPicke
   return (
     <div className="flex flex-col gap-5">
       {groups.map(({ code, items }) => (
-        <fieldset key={code} className="flex flex-col gap-2">
+        // A fieldset is as wide as its longest word unless told otherwise.
+        <fieldset key={code} className="flex min-w-0 flex-col gap-2">
           <legend className="mb-2 flex items-center gap-2 text-xs font-semibold tracking-widest text-muted uppercase">
             <span
               aria-hidden="true"
@@ -51,7 +52,7 @@ export function CategoryPicker({ categories, selected, onChange }: CategoryPicke
                   }}
                   className="size-5 shrink-0 accent-(--kv-accent)"
                 />
-                <span className="flex min-w-0 flex-col">
+                <span className="flex min-w-0 flex-col wrap-anywhere">
                   <span className="flex items-center gap-2 font-semibold">
                     <span style={{ color: category.color }}>
                       <CategoryIcon name={category.icon} className="size-5" />

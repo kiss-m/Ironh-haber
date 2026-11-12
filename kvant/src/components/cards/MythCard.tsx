@@ -1,5 +1,6 @@
 import { sk } from '../../i18n/sk.ts';
 import { Callout } from './parts.tsx';
+import { useReveal } from './useReveal.ts';
 
 interface MythCardProps {
   statement: string;
@@ -14,6 +15,7 @@ interface MythCardProps {
 export function MythCard({ statement, isTrue, explanation, verdict, onAnswer }: MythCardProps) {
   const answered = verdict !== null;
   const correct = verdict === isTrue;
+  const outcome = useReveal<HTMLDivElement>(answered);
 
   const choice = (value: boolean, label: string) => {
     const isAnswer = value === isTrue;
@@ -32,7 +34,7 @@ export function MythCard({ statement, isTrue, explanation, verdict, onAnswer }: 
         onClick={() => {
           onAnswer(value);
         }}
-        className={`min-h-14 flex-1 rounded-2xl border-2 px-4 py-3 font-display text-lg font-bold transition-transform active:scale-[0.98] ${state}`}
+        className={`min-h-14 flex-1 basis-[7rem] rounded-2xl border-2 px-4 py-3 font-display text-lg font-bold transition-transform active:scale-[0.98] ${state}`}
       >
         {label}
       </button>
@@ -48,13 +50,14 @@ export function MythCard({ statement, isTrue, explanation, verdict, onAnswer }: 
         „{statement.replace(/\.$/, '')}.“
       </h2>
 
-      <div className="flex gap-3">
+      {/* Side by side, or one above the other when a large font leaves no room for both. */}
+      <div className="flex flex-wrap gap-3">
         {choice(true, sk.cards.myth.isTrue)}
         {choice(false, sk.cards.myth.isMyth)}
       </div>
 
       {answered ? (
-        <div role="status">
+        <div ref={outcome} role="status">
           <Callout
             tone={correct ? 'good' : 'bad'}
             label={`${correct ? sk.cards.answerCorrect : sk.cards.answerWrong} · ${

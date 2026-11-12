@@ -87,7 +87,7 @@ export function OnboardingScreen() {
         event.preventDefault();
         next();
       }}
-      className="mx-auto flex min-h-dvh w-full max-w-xl flex-col gap-6 px-5 pt-[calc(env(safe-area-inset-top)+1.5rem)] pb-[calc(env(safe-area-inset-bottom)+1.25rem)]"
+      className="mx-auto flex min-h-dvh w-full max-w-xl flex-col gap-6 px-gutter pt-[calc(env(safe-area-inset-top)+1.5rem)] pb-[calc(env(safe-area-inset-bottom)+1.25rem)]"
     >
       <header className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3">

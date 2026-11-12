@@ -14,7 +14,7 @@ export function XpFloat({ reward }: { reward: { id: number; xp: number } | null 
   return (
     <div
       aria-live="polite"
-      className="pointer-events-none absolute top-[calc(env(safe-area-inset-top)+3.25rem)] right-4 z-10"
+      className="top-row pointer-events-none absolute top-[calc(env(safe-area-inset-top)+3.25rem)] right-4 z-10"
     >
       {reward ? (
         <motion.span

@@ -36,8 +36,10 @@ export function TermsLine({ terms, showGerman }: TermsLineProps) {
   const english = terms?.en;
   const german = showGerman ? terms?.de : undefined;
   if (!english && !german) return null;
+  // German compounds such as "das Wechselwirkungsprinzip" can be wider than a narrow screen
+  // with a large font. They may break, at a syllable where the browser knows the language.
   return (
-    <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
+    <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm wrap-anywhere text-muted hyphens-auto">
       {english ? (
         <span>
           <span className="mr-1.5 text-xs font-semibold tracking-widest">{sk.cards.termEn}</span>

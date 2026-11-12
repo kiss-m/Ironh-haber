@@ -75,9 +75,10 @@ export function CharacterScreen() {
                 key={code}
                 className="flex flex-col gap-2 rounded-2xl border border-line bg-surface px-4 py-3"
               >
-                <span className="flex items-baseline justify-between gap-2">
+                {/* In a narrow tile the level drops under the name as a whole, never in halves. */}
+                <span className="flex flex-wrap items-baseline justify-between gap-x-2">
                   <span className="font-display text-lg font-bold">{sk.attributes[code]}</span>
-                  <span className="text-sm text-muted tabular-nums">
+                  <span className="text-sm whitespace-nowrap text-muted tabular-nums">
                     {sk.character.attributeLevel(progress.level)}
                   </span>
                 </span>

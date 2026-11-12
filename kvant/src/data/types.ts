@@ -121,6 +121,11 @@ export interface DailyRow {
   cardsSeen: number;
   /** Cards shown for the first time, read or not. Counts toward the daily cap on new cards. */
   newCards: number;
+  /**
+   * Those of `cardsSeen` that were new. A new card the reader swiped past is in `newCards` only,
+   * so this is the number a summary can call "of which new".
+   */
+  newCardsRead: number;
   answers: number;
   correct: number;
   /** Correct answers in a row at this moment. Decides the XP multiplier. */

@@ -35,7 +35,7 @@ export function Checkpoint({ batch, stats, onContinue }: CheckpointProps) {
   const titles = stats?.newTitles ?? [];
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-xl flex-col gap-5 overflow-y-auto px-5 pt-[calc(env(safe-area-inset-top)+3.75rem)] pb-5">
+    <div className="mx-auto flex h-full w-full max-w-xl flex-col gap-5 overflow-y-auto px-gutter pt-[calc(env(safe-area-inset-top)+3.75rem)] pb-5">
       <header className="flex flex-col gap-2">
         <p className="text-xs font-semibold tracking-widest text-accent-fg uppercase">
           {sk.checkpoint.kicker(batch)}

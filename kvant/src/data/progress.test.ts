@@ -146,6 +146,19 @@ describe('recordSeen', () => {
 });
 
 describe('recordRead', () => {
+  it('tells new cards that were read from new cards that were only shown', async () => {
+    await recordSeen(db, A1, EVENING);
+    await recordSeen(db, A2, EVENING);
+    await recordSeen(db, W1, EVENING);
+
+    await recordRead(db, A1, EVENING, { newCard: true });
+    await recordAnswer(db, answer(W1, { grade: null, newCard: true }), EVENING);
+    // A second reading of the same card is not a new card again.
+    await recordRead(db, A1, EVENING, { newCard: false });
+
+    expect(await db.daily.get(DAY)).toMatchObject({ newCards: 3, newCardsRead: 2, cardsSeen: 3 });
+  });
+
   it('gives 5 XP for a new card, to the character and to the attribute of the card', async () => {
     await recordSeen(db, A1, EVENING);
     const reward = await recordRead(db, A1, EVENING, { newCard: true });

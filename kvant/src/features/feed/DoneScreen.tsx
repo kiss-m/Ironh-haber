@@ -43,7 +43,7 @@ export function DoneScreen() {
 
         <dl className="divide-y divide-line rounded-2xl border border-line bg-surface px-4">
           <Figure label={sk.done.cards} value={String(daily?.cardsSeen ?? 0)} />
-          <Figure label={sk.done.newCards} value={String(daily?.newCards ?? 0)} />
+          <Figure label={sk.done.newCards} value={String(daily?.newCardsRead ?? 0)} />
           {daily && daily.answers > 0 ? (
             <Figure
               label={sk.done.accuracy}

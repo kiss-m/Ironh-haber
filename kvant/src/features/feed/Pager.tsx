@@ -11,8 +11,20 @@ import {
 /** How many pages on each side of the current one are rendered: about seven in total. */
 const WINDOW = 3;
 
-/** How long scrolling must rest before the page under the finger counts as the current one. */
+/**
+ * Without `scrollend`: how long the scroll events must pause before the page under the finger
+ * counts as the current one.
+ */
 const SETTLE_MS = 120;
+
+/**
+ * The height of one page. Not `clientHeight`, which is rounded to whole pixels: on many phones a
+ * page is a fraction of a pixel taller or shorter than that, and over a long feed the rounding
+ * error would add up to a wrong page.
+ */
+function pageHeight(element: HTMLElement): number {
+  return element.getBoundingClientRect().height;
+}
 
 export interface PagerHandle {
   /** Moves to a page, as a swipe would. */
@@ -38,8 +50,12 @@ interface PagerProps {
  */
 export function Pager({ ref, label, count, index, onIndexChange, renderPage }: PagerProps) {
   const container = useRef<HTMLDivElement>(null);
-  const settleTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const indexRef = useRef(index);
+  /**
+   * The page this pager itself last moved to, by a swipe or by `goTo`. An index that differs
+   * from it was set from outside, and only then does the scroll position have to follow.
+   */
+  const ownIndex = useRef<number | null>(null);
 
   useEffect(() => {
     indexRef.current = index;
@@ -47,9 +63,11 @@ export function Pager({ ref, label, count, index, onIndexChange, renderPage }: P
 
   const settle = useCallback(() => {
     const element = container.current;
-    if (!element || element.clientHeight === 0) return;
-    const resting = Math.round(element.scrollTop / element.clientHeight);
+    const height = element ? pageHeight(element) : 0;
+    if (!element || height === 0) return;
+    const resting = Math.round(element.scrollTop / height);
     const clamped = Math.min(Math.max(resting, 0), count - 1);
+    ownIndex.current = clamped;
     if (clamped !== indexRef.current) onIndexChange(clamped);
   }, [count, onIndexChange]);
 
@@ -60,10 +78,11 @@ export function Pager({ ref, label, count, index, onIndexChange, renderPage }: P
       if (element) {
         const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         element.scrollTo({
-          top: next * element.clientHeight,
+          top: next * pageHeight(element),
           behavior: smooth ? 'smooth' : 'auto',
         });
       }
+      ownIndex.current = next;
       if (next !== indexRef.current) onIndexChange(next);
     },
     [count, onIndexChange],
@@ -71,31 +90,41 @@ export function Pager({ ref, label, count, index, onIndexChange, renderPage }: P
 
   useImperativeHandle(ref, () => ({ goTo }), [goTo]);
 
-  // Keep the scroll position in step when the index changes from outside, for example on a reset.
+  // Bring the scroll position in step when the index was set from outside: when the screen opens
+  // on a page other than the first, and on a reset. A move of the pager's own is left alone, or
+  // this jump would cut short the smooth scroll that `goTo` has just started.
   useEffect(() => {
     const element = container.current;
-    if (!element || element.clientHeight === 0) return;
-    const resting = Math.round(element.scrollTop / element.clientHeight);
-    if (resting !== index) element.scrollTo({ top: index * element.clientHeight });
+    const height = element ? pageHeight(element) : 0;
+    if (!element || height === 0 || ownIndex.current === index) return;
+    ownIndex.current = index;
+    const resting = Math.round(element.scrollTop / height);
+    if (resting !== index) element.scrollTo({ top: index * height });
   }, [index]);
 
   useEffect(() => {
     const element = container.current;
     if (!element) return;
+
+    // `scrollend` fires once the finger is up and the snap has finished, which is exactly the
+    // moment a page becomes the current one. Where a browser has it, nothing else is needed.
+    if ('onscrollend' in window) {
+      element.addEventListener('scrollend', settle);
+      return () => {
+        element.removeEventListener('scrollend', settle);
+      };
+    }
+
+    // Elsewhere, a pause in the scroll events has to do.
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const onScroll = () => {
-      clearTimeout(settleTimer.current);
-      settleTimer.current = setTimeout(settle, SETTLE_MS);
-    };
-    const onScrollEnd = () => {
-      clearTimeout(settleTimer.current);
-      settle();
+      clearTimeout(timer);
+      timer = setTimeout(settle, SETTLE_MS);
     };
     element.addEventListener('scroll', onScroll, { passive: true });
-    element.addEventListener('scrollend', onScrollEnd);
     return () => {
-      clearTimeout(settleTimer.current);
+      clearTimeout(timer);
       element.removeEventListener('scroll', onScroll);
-      element.removeEventListener('scrollend', onScrollEnd);
     };
   }, [settle]);
 
@@ -118,7 +147,7 @@ export function Pager({ ref, label, count, index, onIndexChange, renderPage }: P
       aria-label={label}
       tabIndex={0}
       onKeyDown={onKeyDown}
-      className="h-full snap-y snap-mandatory overflow-y-auto overscroll-contain [scrollbar-width:none]"
+      className="h-full snap-y snap-mandatory overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none]"
     >
       {Array.from({ length: count }, (_, page) => (
         <section

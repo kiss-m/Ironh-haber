@@ -35,11 +35,12 @@ export function ReviewScreen() {
 
   return (
     <div className="mx-auto flex h-dvh w-full max-w-xl flex-col">
-      <header className="flex items-center justify-between gap-3 px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
+      {/* Three things side by side: like the top row of a card, this does not grow with the font. */}
+      <header className="top-row flex items-center justify-between gap-3 px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
         <Link
           to={PATHS.feed}
           aria-label={sk.review.close}
-          className="flex size-12 items-center justify-center rounded-xl text-muted"
+          className="flex size-12 min-h-[48px] min-w-[48px] items-center justify-center rounded-xl text-muted"
         >
           <X aria-hidden="true" className="size-6" />
         </Link>
@@ -77,7 +78,7 @@ export function ReviewScreen() {
                 );
               }
               return (
-                <div className="flex h-full flex-col justify-center gap-5 px-5">
+                <div className="flex h-full flex-col justify-center gap-5 px-gutter">
                   <h2 className="font-display text-3xl font-bold tracking-tight text-balance">
                     {total === 0 ? sk.review.emptyTitle : sk.review.doneTitle}
                   </h2>

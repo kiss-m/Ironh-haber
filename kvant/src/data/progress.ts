@@ -64,6 +64,7 @@ export function emptyDaily(day: LearningDay): DailyRow {
     learningDay: day,
     cardsSeen: 0,
     newCards: 0,
+    newCardsRead: 0,
     answers: 0,
     correct: 0,
     correctStreak: 0,
@@ -221,6 +222,7 @@ export function recordRead(
       xp: options.newCard ? XP.newCardRead : 0,
       countCard: true,
     });
+    if (options.newCard) daily.newCardsRead += 1;
     await db.daily.put(daily);
     await log(db, now, 'card_read', cardId, { xp: reward.xp });
     return reward;
@@ -266,6 +268,7 @@ export function recordAnswer(db: KvantDb, input: AnswerInput, now: Date): Promis
       xp: answerXp(input.correct, daily.correctStreak) + (input.newCard ? XP.newCardRead : 0),
       countCard: input.countCard,
     });
+    if (input.newCard) daily.newCardsRead += 1;
     await db.daily.put(daily);
 
     const card = await db.cards.get(input.cardId);

@@ -5,6 +5,7 @@ import { Flashcard } from '../../components/cards/Flashcard.tsx';
 import { MythCard } from '../../components/cards/MythCard.tsx';
 import { QuizCard } from '../../components/cards/QuizCard.tsx';
 import { ReadingCard } from '../../components/cards/ReadingCard.tsx';
+import { useReveal } from '../../components/cards/useReveal.ts';
 import { isAnsweredOnSight, quizOf, reviewForm } from '../../core/cards.ts';
 import { isRetrieval, type FeedEntry } from '../../core/mixer.ts';
 import { db } from '../../data/db.ts';
@@ -45,6 +46,7 @@ export function CardPage({ session, entry, entryIndex, onAdvance }: CardPageProp
   const settings = useSettings();
   const [flagOpen, setFlagOpen] = useState(false);
   const [showFull, setShowFull] = useState(false);
+  const fullCard = useReveal<HTMLDivElement>(showFull);
 
   if (!card) {
     return (
@@ -118,81 +120,97 @@ export function CardPage({ session, entry, entryIndex, onAdvance }: CardPageProp
     <article
       aria-label={card.title}
       style={accent}
-      className="flex h-full flex-col bg-[radial-gradient(110%_55%_at_0%_0%,color-mix(in_oklab,var(--cat)_16%,transparent),transparent_70%)] px-5 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-2"
+      className="flex h-full flex-col bg-[radial-gradient(110%_55%_at_0%_0%,color-mix(in_oklab,var(--cat)_16%,transparent),transparent_70%)] px-gutter pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-2"
     >
-      <header className="flex min-h-10 items-center gap-2 pr-40 text-xs font-semibold tracking-widest uppercase">
+      {/* The right side of this row belongs to the status corner of the screen. Category names
+          run to almost thirty letters, so the name may take two lines rather than be cut. */}
+      <header className="top-row flex min-h-10 items-center gap-2 pr-44">
         <span aria-hidden="true" className="size-2.5 shrink-0 rounded-full bg-(--cat)" />
-        <span className="truncate text-muted">{category?.name}</span>
+        <span className="line-clamp-2 text-xs leading-tight font-semibold text-muted">
+          {category?.name}
+        </span>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-3">
-        <p className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-widest uppercase">
-          <span className="text-accent-fg">{sk.cards.type[card.type]}</span>
-          {badge ? (
-            <span className="rounded-full border border-line px-2 py-0.5 text-muted">{badge}</span>
-          ) : null}
-        </p>
-
-        {form === 'reading' ? (
-          <ReadingCard
-            card={card}
-            showGermanTerms={settings.showGermanTerms}
-            notUnderstood={page.notUnderstood}
-          />
-        ) : null}
-
-        {form === 'quiz' && quiz ? (
-          <QuizCard
-            question={quiz.question}
-            options={quiz.options}
-            correctIndex={quiz.correctIndex}
-            explanation={quiz.explanation}
-            chosen={page.choice}
-            onAnswer={(choice) => void session.answerQuiz(entryIndex, choice)}
-          />
-        ) : null}
-
-        {form === 'myth' && card.type === 'myth' ? (
-          <MythCard
-            statement={card.statement}
-            isTrue={card.isTrue}
-            explanation={card.explanation}
-            verdict={page.verdict}
-            onAnswer={(verdict) => void session.answerMyth(entryIndex, verdict)}
-          />
-        ) : null}
-
-        {form === 'flashcard' && 'recall' in card ? (
-          <Flashcard
-            question={card.recall.q}
-            answer={card.recall.a}
-            revealed={page.revealed}
-            grade={page.grade}
-            onReveal={() => {
-              session.reveal(entryIndex);
-            }}
-            onGrade={(grade) => void session.gradeFlashcard(entryIndex, grade)}
-          />
-        ) : null}
-
-        {/* After a retrieval the whole card is one tap away, for a look at what was missed. */}
-        {retrieval && answered && form !== 'myth' && card.type !== 'quiz' ? (
-          <div className="flex flex-col gap-4">
-            <button
-              type="button"
-              aria-expanded={showFull}
-              onClick={() => {
-                setShowFull(!showFull);
-              }}
-              className="min-h-12 self-start text-sm font-semibold text-accent-fg underline underline-offset-4"
-            >
-              {showFull ? sk.cards.hideFullCard : sk.cards.showFullCard}
-            </button>
-            {showFull ? (
-              <ReadingCard card={card} showGermanTerms={settings.showGermanTerms} />
+      <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto scroll-smooth">
+        <div className="flex shrink-0 grow flex-col gap-4 pt-3 pb-6">
+          <p className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-widest uppercase">
+            <span className="text-accent-fg">{sk.cards.type[card.type]}</span>
+            {badge ? (
+              <span className="rounded-full border border-line px-2 py-0.5 text-muted">
+                {badge}
+              </span>
             ) : null}
-          </div>
-        ) : null}
+          </p>
+
+          {form === 'reading' ? (
+            <ReadingCard
+              card={card}
+              showGermanTerms={settings.showGermanTerms}
+              notUnderstood={page.notUnderstood}
+            />
+          ) : null}
+
+          {form === 'quiz' && quiz ? (
+            <QuizCard
+              question={quiz.question}
+              options={quiz.options}
+              correctIndex={quiz.correctIndex}
+              explanation={quiz.explanation}
+              chosen={page.choice}
+              onAnswer={(choice) => void session.answerQuiz(entryIndex, choice)}
+            />
+          ) : null}
+
+          {form === 'myth' && card.type === 'myth' ? (
+            <MythCard
+              statement={card.statement}
+              isTrue={card.isTrue}
+              explanation={card.explanation}
+              verdict={page.verdict}
+              onAnswer={(verdict) => void session.answerMyth(entryIndex, verdict)}
+            />
+          ) : null}
+
+          {form === 'flashcard' && 'recall' in card ? (
+            <Flashcard
+              question={card.recall.q}
+              answer={card.recall.a}
+              revealed={page.revealed}
+              grade={page.grade}
+              onReveal={() => {
+                session.reveal(entryIndex);
+              }}
+              onGrade={(grade) => void session.gradeFlashcard(entryIndex, grade)}
+            />
+          ) : null}
+
+          {/* After a retrieval the whole card is one tap away, for a look at what was missed. */}
+          {retrieval && answered && form !== 'myth' && card.type !== 'quiz' ? (
+            <div className="flex flex-col gap-4">
+              <button
+                type="button"
+                aria-expanded={showFull}
+                onClick={() => {
+                  setShowFull(!showFull);
+                }}
+                className="min-h-12 self-start text-sm font-semibold text-accent-fg underline underline-offset-4"
+              >
+                {showFull ? sk.cards.hideFullCard : sk.cards.showFullCard}
+              </button>
+              {showFull ? (
+                <div ref={fullCard}>
+                  <ReadingCard card={card} showGermanTerms={settings.showGermanTerms} />
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+        {/* A card longer than the screen scrolls. Its text then fades out at the edge instead
+            of ending in the middle of a line, and the last line clears the fade at the end. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none sticky bottom-0 -mt-6 h-6 shrink-0 bg-linear-to-b from-transparent to-bg"
+        />
       </div>
 
       <ActionBar actions={actions} />

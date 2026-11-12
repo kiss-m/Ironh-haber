@@ -53,7 +53,11 @@ export function Formula({ latex, display = false }: FormulaProps) {
     return <code className={display ? 'block text-center' : undefined}>{latex}</code>;
   }
   // KaTeX builds this markup from the card's own LaTeX, with its default `trust: false`.
+  // `kv-formula` trims the margins of KaTeX's display style (src/styles/index.css).
   return (
-    <span className={display ? 'block' : undefined} dangerouslySetInnerHTML={{ __html: html }} />
+    <span
+      className={display ? 'kv-formula block' : undefined}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   );
 }

@@ -12,7 +12,8 @@ export interface CardAction {
 
 /**
  * The actions under a card. Like the tab bar, it is capped against the system font size: five
- * labelled buttons have to fit across a 360 px screen.
+ * labelled buttons have to fit across a 360 px screen. The buttons share the width evenly, and
+ * their height is 48 px in pixels, not in rem, so an enlarged font cannot push the row apart.
  */
 export function ActionBar({ actions }: { actions: readonly CardAction[] }) {
   return (
@@ -23,7 +24,7 @@ export function ActionBar({ actions }: { actions: readonly CardAction[] }) {
           type="button"
           aria-pressed={pressed}
           onClick={onClick}
-          className={`flex min-h-12 min-w-12 flex-1 flex-col items-center justify-center gap-1 rounded-xl text-[min(0.6875rem,3vw)] leading-tight font-semibold whitespace-nowrap transition-transform active:scale-90 ${
+          className={`flex min-h-[48px] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl text-[min(0.6875rem,3vw)] leading-tight font-semibold whitespace-nowrap transition-transform active:scale-90 ${
             pressed ? 'text-accent-fg' : 'text-muted'
           }`}
         >

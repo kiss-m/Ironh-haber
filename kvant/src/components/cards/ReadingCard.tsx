@@ -2,6 +2,7 @@ import type { Card } from '../../../shared/schema.ts';
 import { sk } from '../../i18n/sk.ts';
 import { Formula } from './Formula.tsx';
 import { Callout, CardText, CardTitle, TermsLine } from './parts.tsx';
+import { useReveal } from './useReveal.ts';
 
 interface ReadingCardProps {
   card: Card;
@@ -15,13 +16,15 @@ interface ReadingCardProps {
  * their own components, because the reader answers them.
  */
 export function ReadingCard({ card, showGermanTerms, notUnderstood = false }: ReadingCardProps) {
+  const simpler = useReveal<HTMLDivElement>(notUnderstood);
+
   return (
     <div className="flex flex-col gap-4">
       <CardTitle>{card.title}</CardTitle>
 
       {card.type === 'formula' ? (
         <>
-          <div className="overflow-x-auto rounded-2xl bg-surface px-4 py-3 text-xl">
+          <div className="overflow-x-auto rounded-2xl bg-surface px-4 py-2.5 text-xl">
             <Formula latex={card.latex} display />
           </div>
           <dl aria-label={sk.cards.legend} className="flex flex-col gap-1 text-sm">
@@ -52,10 +55,12 @@ export function ReadingCard({ card, showGermanTerms, notUnderstood = false }: Re
       ) : null}
 
       {notUnderstood ? (
-        <Callout label={card.type === 'concept' ? sk.cards.simple : undefined}>
-          {card.type === 'concept' ? <p>{card.simple}</p> : null}
-          <p className="text-sm text-muted">{sk.cards.willReturn}</p>
-        </Callout>
+        <div ref={simpler}>
+          <Callout label={card.type === 'concept' ? sk.cards.simple : undefined}>
+            {card.type === 'concept' ? <p>{card.simple}</p> : null}
+            <p className="text-sm text-muted">{sk.cards.willReturn}</p>
+          </Callout>
+        </div>
       ) : null}
 
       {'terms' in card ? <TermsLine terms={card.terms} showGerman={showGermanTerms} /> : null}

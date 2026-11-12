@@ -53,6 +53,7 @@ function day(learningDay: string, xp: number): DailyRow {
     learningDay,
     cardsSeen: 0,
     newCards: 0,
+    newCardsRead: 0,
     answers: 0,
     correct: 0,
     correctStreak: 0,

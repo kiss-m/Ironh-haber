@@ -10,14 +10,16 @@ vi.mock('virtual:pwa-register/react', () => import('./pwaRegisterMock.ts'));
 // Tests never touch the network. The content they need is seeded straight into the database.
 vi.stubGlobal('fetch', () => Promise.reject(new TypeError('The tests have no network.')));
 
-// jsdom has no layout engine and leaves the scrolling methods out. The app only needs
-// `scrollTo` to exist.
-if (!('scrollTo' in Element.prototype)) {
-  Object.defineProperty(Element.prototype, 'scrollTo', {
-    configurable: true,
-    writable: true,
-    value: () => undefined,
-  });
+// jsdom has no layout engine and leaves the scrolling methods out. The app only needs them
+// to exist.
+for (const method of ['scrollTo', 'scrollBy']) {
+  if (!(method in Element.prototype)) {
+    Object.defineProperty(Element.prototype, method, {
+      configurable: true,
+      writable: true,
+      value: () => undefined,
+    });
+  }
 }
 
 // jsdom has no media queries. Nothing matches, which is also what a default browser reports.

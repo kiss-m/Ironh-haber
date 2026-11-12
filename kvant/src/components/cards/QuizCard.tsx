@@ -1,6 +1,7 @@
 import { Check, X } from 'lucide-react';
 import { sk } from '../../i18n/sk.ts';
 import { Callout, CardQuestion } from './parts.tsx';
+import { useReveal } from './useReveal.ts';
 
 interface QuizCardProps {
   question: string;
@@ -23,6 +24,7 @@ export function QuizCard({
 }: QuizCardProps) {
   const answered = chosen !== null;
   const correct = chosen === correctIndex;
+  const verdict = useReveal<HTMLDivElement>(answered);
 
   return (
     <div className="flex flex-col gap-4">
@@ -64,7 +66,7 @@ export function QuizCard({
       </ul>
 
       {answered ? (
-        <div role="status">
+        <div ref={verdict} role="status">
           <Callout
             tone={correct ? 'good' : 'bad'}
             label={correct ? sk.cards.answerCorrect : sk.cards.answerWrong}
