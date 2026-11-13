@@ -1,0 +1,379 @@
+{
+  "schemaVersion": 1,
+  "packId": "robotika",
+  "packVersion": 1,
+  "language": "sk",
+  "category": {
+    "id": "robotika",
+    "name": "Robotika",
+    "attribute": "T",
+    "description": "Kinematika, trajektórie, koboty a bezpečnosť robotických pracovísk.",
+    "color": "#4F8EF7",
+    "icon": "bot",
+    "defaultDifficulty": 3
+  },
+  "topics": [
+    {
+      "id": "robotika.zaklady",
+      "name": "Základy priemyselných robotov",
+      "order": 1,
+      "prerequisites": [],
+      "description": "Stupne voľnosti, typy robotov, pracovný priestor a čísla z katalógu."
+    },
+    {
+      "id": "robotika.kinematika",
+      "name": "Kinematika robota",
+      "order": 2,
+      "prerequisites": ["robotika.zaklady"],
+      "description": "Priama a inverzná kinematika, DH parametre, singularity."
+    }
+  ],
+  "cards": [
+    {
+      "id": "robotika.zaklady.stupne-volnosti",
+      "topicId": "robotika.zaklady",
+      "type": "concept",
+      "difficulty": 2,
+      "order": 1,
+      "title": "Stupne voľnosti",
+      "body": "Stupeň voľnosti je jeden nezávislý pohyb, ktorý mechanizmus dokáže vykonať. Voľné teleso v priestore ich má šesť: tri posuvy a tri rotácie. Typický priemyselný robot má preto šesť osí, aby vedel nástroj dostať do ľubovoľnej polohy aj orientácie vo svojom pracovnom priestore. Robot so štyrmi osami, napríklad SCARA, to nedokáže, no na ukladanie dielov zhora mu to stačí.",
+      "simple": "Každý kĺb pridáva robotu jeden spôsob pohybu. Na úplnú voľnosť ich treba šesť.",
+      "terms": { "en": "degrees of freedom (DOF)", "de": "der Freiheitsgrad" },
+      "recall": {
+        "q": "Prečo má typický priemyselný robot šesť osí?",
+        "a": "Poloha a orientácia telesa v priestore majú spolu šesť stupňov voľnosti: tri posuvy a tri rotácie."
+      },
+      "quiz": {
+        "question": "Koľko stupňov voľnosti treba na ľubovoľnú polohu aj orientáciu nástroja v priestore?",
+        "options": ["Tri", "Štyri", "Šesť", "Sedem"],
+        "correctIndex": 2,
+        "explanation": "Tri stupne určujú polohu a ďalšie tri orientáciu. Siedma os už pridáva len redundanciu."
+      },
+      "tags": ["kinematika", "základy"]
+    },
+    {
+      "id": "robotika.zaklady.unimate",
+      "topicId": "robotika.zaklady",
+      "type": "did_you_know",
+      "difficulty": 1,
+      "order": 2,
+      "title": "Prvý priemyselný robot",
+      "body": "Prvý priemyselný robot Unimate začal pracovať v roku 1961 v závode General Motors v americkom štáte New Jersey. Vyberal horúce odliatky z tlakového lisu, teda robil prácu, ktorá bola pre ľudí nebezpečná a jednotvárna. Program si pamätal na magnetickom bubne. Vychádzal z patentu Georgea Devola na programovateľný manipulátor.",
+      "recall": {
+        "q": "Akú prácu robil prvý priemyselný robot Unimate?",
+        "a": "Od roku 1961 vyberal horúce odliatky z tlakového lisu v závode General Motors."
+      },
+      "tags": ["história", "základy"]
+    },
+    {
+      "id": "robotika.zaklady.typy-robotov",
+      "topicId": "robotika.zaklady",
+      "type": "concept",
+      "difficulty": 2,
+      "order": 3,
+      "title": "Štyri typy robotov, ktoré stretneš najčastejšie",
+      "body": "Kĺbový šesťosový robot je univerzál: zvára, lakuje, manipuluje. SCARA má tri rovnobežné rotačné osi a jeden zvislý posuv, preto je rýchly a tuhý pri montáži zhora. Delta robot visí nad pásom na ľahkých paralelných ramenách a triedi drobné kusy veľkou rýchlosťou. Portálový robot sa pohybuje po troch kolmých lineárnych osiach a zvláda veľké rozmery aj ťažké bremená.",
+      "simple": "Rôzne roboty sú stavané na rôzne úlohy: jeden je všestranný, iný rýchly, ďalší unesie veľa.",
+      "terms": {
+        "en": "articulated, SCARA, delta and gantry robot",
+        "de": "der Knickarmroboter, der SCARA-Roboter, der Deltaroboter, der Portalroboter"
+      },
+      "recall": {
+        "q": "Ktorý typ robota sa hodí na veľmi rýchle triedenie drobných kusov na páse?",
+        "a": "Delta robot s ľahkými paralelnými ramenami."
+      },
+      "tags": ["typy robotov", "základy"]
+    },
+    {
+      "id": "robotika.zaklady.kviz-vyber-robota",
+      "topicId": "robotika.zaklady",
+      "type": "quiz",
+      "difficulty": 2,
+      "order": 4,
+      "title": "Ktorý robot na ktorú úlohu",
+      "question": "Linka ukladá bonbóny z rýchleho pásu do krabičiek, stovky kusov za minútu. Ktorý typ robota je najvhodnejší?",
+      "options": ["Delta robot", "Portálový robot", "Šesťosový kĺbový robot"],
+      "correctIndex": 0,
+      "explanation": "Delta robot má pohony na ráme a hýbe len ľahkými ramenami. Pri malých bremenách preto dosahuje najvyššie zrýchlenia.",
+      "tags": ["typy robotov", "aplikácie"]
+    },
+    {
+      "id": "robotika.zaklady.opakovatelnost-a-presnost",
+      "topicId": "robotika.zaklady",
+      "type": "concept",
+      "difficulty": 3,
+      "order": 5,
+      "title": "Opakovateľnosť nie je presnosť",
+      "body": "Opakovateľnosť hovorí, ako tesne sa robot vracia do toho istého naučeného bodu. Presnosť hovorí, ako blízko príde k bodu zadanému súradnicami, v ktorom ešte nikdy nebol. Priemyselné roboty majú výbornú opakovateľnosť, často v stotinách milimetra, ale presnosť býva aj o rád horšia. Body sa preto tradične učia ručne a pri programovaní offline treba robot kalibrovať. Obe veličiny definuje norma ISO 9283.",
+      "simple": "Robot vie trafiť stále to isté miesto, ale nemusí to byť presne to, ktoré si vypočítal.",
+      "terms": {
+        "en": "repeatability and accuracy",
+        "de": "die Wiederholgenauigkeit, die Absolutgenauigkeit"
+      },
+      "reference": "ISO 9283",
+      "recall": {
+        "q": "Aký je rozdiel medzi opakovateľnosťou a presnosťou robota?",
+        "a": "Opakovateľnosť je návrat do naučeného bodu, presnosť je trafenie bodu zadaného súradnicami."
+      },
+      "quiz": {
+        "question": "Robot sa do naučeného bodu vracia s rozptylom 0,03 mm, ale bod zadaný súradnicami míňa o 0,8 mm. Čo z toho vyplýva?",
+        "options": [
+          "Má dobrú presnosť a zlú opakovateľnosť",
+          "Má dobrú opakovateľnosť a horšiu presnosť",
+          "Má poruchu a treba ho vymeniť"
+        ],
+        "correctIndex": 1,
+        "explanation": "Malý rozptyl návratov je opakovateľnosť. Odchýlka od vypočítaného bodu je presnosť a dá sa zlepšiť kalibráciou."
+      },
+      "tags": ["parametre robota", "meranie"]
+    },
+    {
+      "id": "robotika.zaklady.katalogovy-list",
+      "topicId": "robotika.zaklady",
+      "type": "example",
+      "difficulty": 2,
+      "order": 6,
+      "title": "Čo vyčítaš z katalógového listu",
+      "body": "V katalógu robota rozhodujú ako prvé tri čísla: nosnosť, dosah a opakovateľnosť. Nosnosť 10 kg zahŕňa aj chápadlo, nielen diel. Dosah 1 400 mm sa meria od osi prvého kĺbu po stred zápästia, nie po špičku nástroja. A nosnosť platí len do určitej vzdialenosti ťažiska bremena od príruby, ktorú ukazuje záťažový diagram.",
+      "recall": {
+        "q": "Čo všetko sa počíta do nosnosti robota?",
+        "a": "Diel aj chápadlo či nástroj, a to len do určenej vzdialenosti ťažiska od príruby."
+      },
+      "tags": ["parametre robota", "návrh bunky"]
+    },
+    {
+      "id": "robotika.zaklady.tcp",
+      "topicId": "robotika.zaklady",
+      "type": "concept",
+      "difficulty": 3,
+      "order": 7,
+      "title": "TCP: pracovný bod nástroja",
+      "body": "TCP je bod nástroja, ktorý robot vedie po dráhe: špička zváracej elektródy, stred čeľustí chápadla alebo tryska lepiacej pištole. Riadiaci systém pozná len prírubu, preto mu treba polohu TCP voči nej zadať alebo zmerať. Keď je TCP určený zle, pri otáčaní nástroja okolo bodu špička „pláva“ a dráhy nesedia. Po výmene nástroja alebo po náraze sa preto TCP meria znova.",
+      "simple": "Robot musí vedieť, kde presne má nástroj špičku, inak ňou netrafí.",
+      "terms": { "en": "tool center point (TCP)", "de": "der Werkzeugmittelpunkt (TCP)" },
+      "recall": {
+        "q": "Čo je TCP a prečo ho treba zmerať?",
+        "a": "Pracovný bod nástroja. Riadenie pozná len prírubu, preto potrebuje polohu nástroja voči nej."
+      },
+      "tags": ["nástroj", "programovanie"]
+    },
+    {
+      "id": "robotika.zaklady.mytus-kobot",
+      "topicId": "robotika.zaklady",
+      "type": "myth",
+      "difficulty": 2,
+      "order": 8,
+      "title": "Je kobot bezpečný sám o sebe?",
+      "statement": "Kolaboratívny robot je bezpečný sám o sebe, takže pracovisko s ním netreba posudzovať.",
+      "isTrue": false,
+      "explanation": "Bezpečná musí byť celá aplikácia. Aj pomalý kobot s ostrým nástrojom alebo ťažkým dielom môže zraniť, preto sa riziká posudzujú pre každé pracovisko zvlášť.",
+      "tags": ["koboty", "bezpečnosť"]
+    },
+    {
+      "id": "robotika.zaklady.pracovny-priestor",
+      "topicId": "robotika.zaklady",
+      "type": "concept",
+      "difficulty": 2,
+      "order": 9,
+      "title": "Pracovný priestor",
+      "body": "Pracovný priestor je množina všetkých bodov, ktoré robot dosiahne stredom zápästia. Pri kĺbovom robote pripomína dutú guľu: tesne pri základni a za hranicou dosahu sú miesta, kam sa nedostane. Na okraji priestoru robot bod síce dosiahne, ale už len s obmedzenou orientáciou nástroja. Pri návrhu bunky preto patria kľúčové body do stredu pracovného priestoru, nie na jeho hranicu.",
+      "simple": "Robot nedosiahne všade a na kraji svojho dosahu sa už nevie voľne natáčať.",
+      "terms": { "en": "workspace (work envelope)", "de": "der Arbeitsraum" },
+      "recall": {
+        "q": "Prečo nemajú byť kľúčové body bunky na okraji pracovného priestoru?",
+        "a": "Na okraji robot dosiahne bod len s obmedzenou orientáciou nástroja."
+      },
+      "tags": ["návrh bunky", "základy"]
+    },
+    {
+      "id": "robotika.zaklady.kviz-nosnost",
+      "topicId": "robotika.zaklady",
+      "type": "quiz",
+      "difficulty": 3,
+      "order": 10,
+      "title": "Nosnosť s chápadlom",
+      "question": "Robot má nosnosť 6 kg. Chápadlo váži 1,8 kg a adaptér na prírube 0,4 kg. Aký najťažší diel môže prenášať?",
+      "options": ["2,2 kg", "3,8 kg", "4,2 kg", "6 kg"],
+      "correctIndex": 1,
+      "explanation": "Do nosnosti patrí všetko, čo je upevnené na prírube: 6 − 1,8 − 0,4 = 3,8 kg. Aj to len vtedy, keď ťažisko zostane v medziach záťažového diagramu.",
+      "tags": ["parametre robota", "výpočet"]
+    },
+    {
+      "id": "robotika.kinematika.priama-kinematika",
+      "topicId": "robotika.kinematika",
+      "type": "concept",
+      "difficulty": 3,
+      "order": 1,
+      "title": "Priama kinematika",
+      "body": "Priama kinematika odpovedá na otázku: kde je nástroj, keď poznám uhly všetkých kĺbov? Výpočet je jednoznačný. Postupne sa skladajú transformácie od základne cez jednotlivé články až po prírubu a výsledkom je jedna poloha a orientácia nástroja. Riadiaci systém ju počíta neustále, aby na ovládači zobrazil karteziánske súradnice a strážil hranice pracovného priestoru.",
+      "simple": "Z uhlov kĺbov sa dá presne vypočítať, kde má robot ruku.",
+      "terms": { "en": "forward kinematics", "de": "die Vorwärtskinematik" },
+      "recall": {
+        "q": "Na akú otázku odpovedá priama kinematika?",
+        "a": "Kde je nástroj, ak poznám polohy všetkých kĺbov. Riešenie je vždy jediné."
+      },
+      "tags": ["kinematika", "transformácie"]
+    },
+    {
+      "id": "robotika.kinematika.ptp-a-lin",
+      "topicId": "robotika.kinematika",
+      "type": "example",
+      "difficulty": 2,
+      "order": 2,
+      "title": "Pohyb PTP a pohyb LIN",
+      "body": "Pri presune nad paletu stačí povel PTP: každý kĺb prejde svoju dráhu čo najrýchlejšie a nástroj opíše oblúk, ktorý nikto nepredpisuje. Pri vkladaní dielu do prípravku treba povel LIN. Riadenie pri ňom počíta inverznú kinematiku pre množstvo medzibodov, aby nástroj išiel po priamke. LIN je pomalší a môže naraziť na singularitu, PTP nie.",
+      "recall": {
+        "q": "Kedy použiješ lineárny pohyb namiesto PTP?",
+        "a": "Keď musí nástroj ísť po presnej priamke, napríklad pri vkladaní dielu alebo zváraní."
+      },
+      "tags": ["programovanie", "trajektórie"]
+    },
+    {
+      "id": "robotika.kinematika.inverzna-kinematika",
+      "topicId": "robotika.kinematika",
+      "type": "concept",
+      "difficulty": 3,
+      "order": 3,
+      "title": "Inverzná kinematika",
+      "body": "Inverzná kinematika hľadá opačný smer: aké uhly kĺbov dostanú nástroj do zadanej polohy a orientácie? Úloha je ťažšia a nemá jedinú odpoveď. Šesťosový robot dosiahne ten istý bod zvyčajne viacerými konfiguráciami, napríklad s lakťom hore alebo dole, a mimo pracovného priestoru riešenie neexistuje vôbec. Riadenie preto vyberá konfiguráciu, ktorá je najbližšie k aktuálnej.",
+      "simple": "Na to isté miesto sa robot vie dostať viacerými spôsobmi a musí si jeden vybrať.",
+      "terms": { "en": "inverse kinematics", "de": "die inverse Kinematik" },
+      "recall": {
+        "q": "Prečo je inverzná kinematika ťažšia ako priama?",
+        "a": "Môže mať viac riešení alebo žiadne, kým priama má vždy práve jedno."
+      },
+      "quiz": {
+        "question": "Koľko riešení má inverzná kinematika pre bod, ktorý leží mimo pracovného priestoru robota?",
+        "options": ["Žiadne", "Práve jedno", "Nekonečne veľa"],
+        "correctIndex": 0,
+        "explanation": "Mimo pracovného priestoru robot bod nedosiahne žiadnou kombináciou uhlov kĺbov."
+      },
+      "tags": ["kinematika", "konfigurácie"]
+    },
+    {
+      "id": "robotika.kinematika.dh-parametre",
+      "topicId": "robotika.kinematika",
+      "type": "concept",
+      "difficulty": 3,
+      "order": 4,
+      "title": "Denavitove–Hartenbergove parametre",
+      "body": "Polohu každého článku robota voči predchádzajúcemu opíšeš štyrmi číslami: dĺžka článku a, uhol skrútenia α, posunutie d a uhol kĺbu θ. Pri rotačnom kĺbe sa mení θ, pri posuvnom d. Vynásobením transformačných matíc všetkých kĺbov dostaneš polohu a natočenie nástroja, teda priamu kinematiku.",
+      "simple": "Dohodnutý spôsob, ako štyrmi číslami opísať, ako je každý článok robota pripojený k predošlému.",
+      "terms": { "en": "Denavit–Hartenberg parameters", "de": "Denavit-Hartenberg-Parameter" },
+      "recall": { "q": "Ktorý DH parameter sa mení pri rotačnom kĺbe?", "a": "Uhol kĺbu θ." },
+      "quiz": {
+        "question": "Ktorý DH parameter je premennou posuvného kĺbu?",
+        "options": ["θ (uhol kĺbu)", "d (posunutie)", "a (dĺžka článku)", "α (uhol skrútenia)"],
+        "correctIndex": 1,
+        "explanation": "Posuvný kĺb mení vzdialenosť pozdĺž osi z, teda posunutie d."
+      },
+      "tags": ["kinematika", "transformácie"]
+    },
+    {
+      "id": "robotika.kinematika.kviz-priama-ci-inverzna",
+      "topicId": "robotika.kinematika",
+      "type": "quiz",
+      "difficulty": 3,
+      "order": 5,
+      "title": "Priama, alebo inverzná?",
+      "question": "Programátor zadá robotu cieľ v súradniciach X, Y, Z a orientáciu nástroja. Čo musí riadiaci systém vypočítať, aby tam robot došiel?",
+      "options": ["Priamu kinematiku", "Moment zotrvačnosti článkov", "Inverznú kinematiku"],
+      "correctIndex": 2,
+      "explanation": "Cieľ je zadaný v priestore, ale pohony potrebujú uhly kĺbov. Prevod z polohy nástroja na uhly je inverzná kinematika.",
+      "tags": ["kinematika", "programovanie"]
+    },
+    {
+      "id": "robotika.kinematika.transformacna-matica",
+      "topicId": "robotika.kinematika",
+      "type": "formula",
+      "difficulty": 4,
+      "order": 6,
+      "title": "Homogénna transformačná matica",
+      "latex": "T = \\begin{bmatrix} R & \\vec{p} \\\\ \\vec{0}^{\\,\\mathsf{T}} & 1 \\end{bmatrix}",
+      "legend": [
+        {
+          "symbol": "T",
+          "meaning": "transformácia medzi dvoma súradnicovými systémami, matica 4×4"
+        },
+        { "symbol": "R", "meaning": "rotačná matica 3×3, teda orientácia" },
+        { "symbol": "\\vec{p}", "meaning": "vektor posunutia, teda poloha", "unit": "m" }
+      ],
+      "body": "Jedna matica 4×4 opisuje naraz natočenie aj posunutie súradnicového systému. Transformácie sa skladajú obyčajným násobením matíc, pričom záleží na poradí. Poloha nástroja voči základni je súčin matíc všetkých článkov.",
+      "example": "Pre šesťosový robot: T(základňa→nástroj) = T₁ · T₂ · T₃ · T₄ · T₅ · T₆.",
+      "terms": {
+        "en": "homogeneous transformation matrix",
+        "de": "die homogene Transformationsmatrix"
+      },
+      "recall": {
+        "q": "Čo obsahuje homogénna transformačná matica?",
+        "a": "Rotačnú maticu 3×3 a vektor posunutia, teda orientáciu aj polohu v jednej matici 4×4."
+      },
+      "tags": ["transformácie", "matice"]
+    },
+    {
+      "id": "robotika.kinematika.siedma-os",
+      "topicId": "robotika.kinematika",
+      "type": "did_you_know",
+      "difficulty": 3,
+      "order": 7,
+      "title": "Tvoja paža má o jednu os navyše",
+      "body": "Ľudská paža má od ramena po zápästie sedem stupňov voľnosti, o jeden viac, než treba. Vďaka tomu vieš držať pohár na mieste a pritom hýbať lakťom. Rovnako fungujú sedemosové roboty: ten istý bod dosiahnu nekonečne veľa spôsobmi a lakťom sa vedia vyhnúť prekážke. Daňou je zložitejšia inverzná kinematika, ktorá musí z riešení jedno vybrať.",
+      "recall": {
+        "q": "Akú výhodu má sedemosový robot oproti šesťosovému?",
+        "a": "Je redundantný: drží nástroj na mieste a pritom mení polohu lakťa, napríklad aby obišiel prekážku."
+      },
+      "tags": ["redundancia", "kinematika"]
+    },
+    {
+      "id": "robotika.kinematika.singularity",
+      "topicId": "robotika.kinematika",
+      "type": "concept",
+      "difficulty": 4,
+      "order": 8,
+      "title": "Singularity",
+      "body": "Singularita je poloha, v ktorej robot stratí jeden smer pohybu nástroja. Typický prípad: štvrtá a šiesta os sa dostanú do jednej priamky, lebo piata os je vystretá. Obe potom otáčajú nástrojom rovnako a riadenie nevie, ako medzi ne pohyb rozdeliť. Pri lineárnom pohybe cez takú polohu by niektorý kĺb musel dosiahnuť obrovskú rýchlosť, preto robot spomalí alebo zastane s chybou.",
+      "simple": "V niektorých polohách sa robot „zasekne“, lebo dva kĺby robia to isté a jeden smer pohybu chýba.",
+      "terms": { "en": "kinematic singularity", "de": "die Singularität" },
+      "recall": {
+        "q": "Čo sa deje pri zápästnej singularite šesťosového robota?",
+        "a": "Štvrtá a šiesta os ležia v jednej priamke, robot stratí stupeň voľnosti a kĺby by museli ísť extrémne rýchlo."
+      },
+      "quiz": {
+        "question": "Robot sa pri lineárnom pohybe zastavil s hlásením o singularite. Čo pomôže najspoľahlivejšie?",
+        "options": [
+          "Zvýšiť rýchlosť pohybu",
+          "Znížiť nastavenú nosnosť",
+          "Mierne zmeniť orientáciu nástroja alebo polohu bodu"
+        ],
+        "correctIndex": 2,
+        "explanation": "Singularita závisí od polohy kĺbov. Stačí malá zmena orientácie nástroja alebo dráhy, aby sa piata os nevystrela."
+      },
+      "tags": ["singularity", "kinematika"]
+    },
+    {
+      "id": "robotika.kinematika.mytus-priamka",
+      "topicId": "robotika.kinematika",
+      "type": "myth",
+      "difficulty": 3,
+      "order": 9,
+      "title": "Ide robot medzi bodmi vždy po priamke?",
+      "statement": "Robot sa medzi dvoma naučenými bodmi pohybuje vždy po priamke.",
+      "isTrue": false,
+      "explanation": "Po priamke ide iba pri lineárnom pohybe. Pri pohybe PTP sa interpolujú uhly kĺbov a nástroj opíše krivku, ktorú určí kinematika robota.",
+      "tags": ["trajektórie", "programovanie"]
+    },
+    {
+      "id": "robotika.kinematika.kviz-pocet-dh-parametrov",
+      "topicId": "robotika.kinematika",
+      "type": "quiz",
+      "difficulty": 4,
+      "order": 10,
+      "title": "Koľko čísel opíše jeden článok?",
+      "question": "Koľko Denavitových–Hartenbergových parametrov opisuje vzájomnú polohu dvoch susedných článkov robota?",
+      "options": ["Tri", "Päť", "Šesť", "Štyri"],
+      "correctIndex": 3,
+      "explanation": "Stačia štyri: dĺžka článku a, skrútenie α, posunutie d a uhol kĺbu θ. Všeobecná poloha telesa by ich potrebovala šesť.",
+      "tags": ["kinematika", "transformácie"]
+    }
+  ]
+}

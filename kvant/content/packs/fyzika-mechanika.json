@@ -1,0 +1,387 @@
+{
+  "schemaVersion": 1,
+  "packId": "fyzika-mechanika",
+  "packVersion": 1,
+  "language": "sk",
+  "category": {
+    "id": "fyzika-mechanika",
+    "name": "Fyzika a mechanika",
+    "attribute": "T",
+    "description": "Sily, pohyb a rotácia: základ, na ktorom stojí každý stroj.",
+    "color": "#FF7A59",
+    "icon": "atom",
+    "defaultDifficulty": 3
+  },
+  "topics": [
+    {
+      "id": "fyzika-mechanika.sila-a-pohyb",
+      "name": "Sila a pohyb",
+      "order": 1,
+      "prerequisites": [],
+      "description": "Newtonove zákony, hybnosť a trenie."
+    },
+    {
+      "id": "fyzika-mechanika.rotacia",
+      "name": "Rotačný pohyb a moment sily",
+      "order": 2,
+      "prerequisites": ["fyzika-mechanika.sila-a-pohyb"],
+      "description": "Moment sily, moment zotrvačnosti, výkon na hriadeli a prevody."
+    }
+  ],
+  "cards": [
+    {
+      "id": "fyzika-mechanika.sila-a-pohyb.zotrvacnost",
+      "topicId": "fyzika-mechanika.sila-a-pohyb",
+      "type": "concept",
+      "difficulty": 2,
+      "order": 1,
+      "title": "Zotrvačnosť: prvý Newtonov zákon",
+      "body": "Teleso zostáva v pokoji alebo v rovnomernom priamočiarom pohybe, kým naň nepôsobí výsledná sila. Na udržanie rýchlosti teda silu netreba, treba ju len na jej zmenu. Auto na diaľnici potrebuje motor iba preto, že ho brzdí odpor vzduchu a valenia. Sonda vo vesmíre letí s vypnutým motorom ďalej rovnakou rýchlosťou.",
+      "simple": "Veci sa samy od seba nerozbehnú ani nezastavia. Pohyb mení iba sila.",
+      "terms": { "en": "Newton's first law (law of inertia)", "de": "das Trägheitsgesetz" },
+      "recall": {
+        "q": "Čo hovorí prvý Newtonov zákon?",
+        "a": "Bez výslednej sily teleso zotrváva v pokoji alebo v rovnomernom priamočiarom pohybe."
+      },
+      "quiz": {
+        "question": "Puk kĺže po dokonale hladkom ľade a nepôsobí naň žiadna vodorovná sila. Čo sa stane?",
+        "options": [
+          "Kĺže ďalej stálou rýchlosťou",
+          "Postupne spomalí a zastane",
+          "Začne zrýchľovať"
+        ],
+        "correctIndex": 0,
+        "explanation": "Bez výslednej sily sa rýchlosť nemení. Spomalenie na skutočnom ľade spôsobuje trenie."
+      },
+      "tags": ["Newtonove zákony", "zotrvačnosť"]
+    },
+    {
+      "id": "fyzika-mechanika.sila-a-pohyb.brzdenie-v-aute",
+      "topicId": "fyzika-mechanika.sila-a-pohyb",
+      "type": "example",
+      "difficulty": 2,
+      "order": 2,
+      "title": "Prečo ťa pri brzdení hodí dopredu",
+      "body": "Keď vodič prudko zabrzdí, auto spomaľuje, lebo naň cez pneumatiky pôsobí brzdná sila. Na tvoje telo však nepôsobí, kým ťa nezachytí pás. Pokračuješ preto pôvodnou rýchlosťou a máš pocit, že ťa niečo tlačí dopredu. Žiadna sila smerom dopredu pritom neexistuje, je to čistá zotrvačnosť.",
+      "recall": {
+        "q": "Prečo cestujúceho pri prudkom brzdení „hodí“ dopredu?",
+        "a": "Jeho telo zotrvačnosťou pokračuje pôvodnou rýchlosťou, kým naň nezačne pôsobiť pás."
+      },
+      "tags": ["zotrvačnosť", "doprava"]
+    },
+    {
+      "id": "fyzika-mechanika.sila-a-pohyb.druhy-newtonov-zakon",
+      "topicId": "fyzika-mechanika.sila-a-pohyb",
+      "type": "formula",
+      "difficulty": 2,
+      "order": 3,
+      "title": "Druhý Newtonov zákon",
+      "latex": "\\vec{F} = m\\,\\vec{a}",
+      "legend": [
+        { "symbol": "\\vec{F}", "meaning": "výsledná sila pôsobiaca na teleso", "unit": "N" },
+        { "symbol": "m", "meaning": "hmotnosť telesa", "unit": "kg" },
+        { "symbol": "\\vec{a}", "meaning": "zrýchlenie telesa", "unit": "m/s²" }
+      ],
+      "body": "Zrýchlenie telesa je priamo úmerné výslednej sile a nepriamo úmerné jeho hmotnosti. Má vždy smer výslednej sily. Zákon platí pre výslednicu všetkých síl, nie pre jednu vybranú silu.",
+      "example": "Sila 600 N udelí vozíku s hmotnosťou 200 kg zrýchlenie 3 m/s².",
+      "terms": { "en": "Newton's second law", "de": "das zweite Newtonsche Gesetz" },
+      "recall": {
+        "q": "Ako súvisí sila, hmotnosť a zrýchlenie?",
+        "a": "F = m·a: zrýchlenie je úmerné výslednej sile a nepriamo úmerné hmotnosti."
+      },
+      "tags": ["Newtonove zákony", "sila"]
+    },
+    {
+      "id": "fyzika-mechanika.sila-a-pohyb.kviz-vysledna-sila",
+      "topicId": "fyzika-mechanika.sila-a-pohyb",
+      "type": "quiz",
+      "difficulty": 2,
+      "order": 4,
+      "title": "Dve sily na jednom vozíku",
+      "question": "Na vozík s hmotnosťou 50 kg pôsobí dopredu sila 200 N a proti pohybu trenie 50 N. Aké je jeho zrýchlenie?",
+      "options": ["1 m/s²", "3 m/s²", "4 m/s²", "5 m/s²"],
+      "correctIndex": 1,
+      "explanation": "Rozhoduje výsledná sila: 200 N − 50 N = 150 N. Zrýchlenie je 150 N / 50 kg = 3 m/s².",
+      "tags": ["Newtonove zákony", "výpočet"]
+    },
+    {
+      "id": "fyzika-mechanika.sila-a-pohyb.akcia-a-reakcia",
+      "topicId": "fyzika-mechanika.sila-a-pohyb",
+      "type": "concept",
+      "difficulty": 2,
+      "order": 5,
+      "title": "Akcia a reakcia: tretí Newtonov zákon",
+      "body": "Sily vznikajú vždy vo dvojiciach. Ak teleso A pôsobí na teleso B silou, pôsobí B na A rovnako veľkou silou opačného smeru. Obe sily pôsobia na rôzne telesá, preto sa navzájom nevyrušia. Raketa tlačí spaliny dozadu a spaliny tlačia raketu dopredu. Chodec tlačí zem dozadu a zem tlačí jeho dopredu.",
+      "simple": "Keď do niečoho tlačíš, tlačí to do teba rovnako silno naspäť.",
+      "terms": { "en": "Newton's third law", "de": "das Wechselwirkungsprinzip" },
+      "recall": {
+        "q": "Prečo sa akcia a reakcia navzájom nevyrušia?",
+        "a": "Pôsobia na dve rôzne telesá, nie na to isté."
+      },
+      "tags": ["Newtonove zákony", "sila"]
+    },
+    {
+      "id": "fyzika-mechanika.sila-a-pohyb.mytus-volny-pad",
+      "topicId": "fyzika-mechanika.sila-a-pohyb",
+      "type": "myth",
+      "difficulty": 2,
+      "order": 6,
+      "title": "Padá ťažšie teleso rýchlejšie?",
+      "statement": "Ťažšie teleso padá vo vákuu rýchlejšie ako ľahšie.",
+      "isTrue": false,
+      "explanation": "Tiažová sila rastie s hmotnosťou, ale rovnako rastie aj zotrvačnosť. Zrýchlenie g ≈ 9,81 m/s² je preto pre všetky telesá rovnaké. Rozdiely na Zemi spôsobuje odpor vzduchu.",
+      "tags": ["voľný pád", "gravitácia"]
+    },
+    {
+      "id": "fyzika-mechanika.sila-a-pohyb.hybnost",
+      "topicId": "fyzika-mechanika.sila-a-pohyb",
+      "type": "formula",
+      "difficulty": 3,
+      "order": 7,
+      "title": "Hybnosť",
+      "latex": "\\vec{p} = m\\,\\vec{v}",
+      "legend": [
+        { "symbol": "\\vec{p}", "meaning": "hybnosť telesa", "unit": "kg·m/s" },
+        { "symbol": "m", "meaning": "hmotnosť telesa", "unit": "kg" },
+        { "symbol": "\\vec{v}", "meaning": "rýchlosť telesa", "unit": "m/s" }
+      ],
+      "body": "Hybnosť vyjadruje, aké ťažké je teleso zastaviť. Výsledná sila sa rovná rýchlosti, akou sa hybnosť mení. V izolovanej sústave sa celková hybnosť zachováva, preto sa pri zrážke iba prerozdelí medzi telesá.",
+      "example": "Kamión s hmotnosťou 20 t má pri rýchlosti 20 m/s hybnosť 400 000 kg·m/s.",
+      "terms": { "en": "momentum", "de": "der Impuls" },
+      "recall": {
+        "q": "Čo je hybnosť a kedy sa zachováva?",
+        "a": "Súčin hmotnosti a rýchlosti. Zachováva sa v izolovanej sústave, na ktorú nepôsobia vonkajšie sily."
+      },
+      "tags": ["hybnosť", "zákony zachovania"]
+    },
+    {
+      "id": "fyzika-mechanika.sila-a-pohyb.airbag",
+      "topicId": "fyzika-mechanika.sila-a-pohyb",
+      "type": "did_you_know",
+      "difficulty": 2,
+      "order": 8,
+      "title": "Airbag náraz nezmenší, len ho natiahne",
+      "body": "Pri náraze musí telo stratiť tú istú hybnosť, či má auto airbag, alebo nie. Airbag však predĺži zastavenie hlavy z niekoľkých milisekúnd na desiatky milisekúnd. Sila je zmena hybnosti za čas, takže dlhší čas znamená mnohonásobne menšiu silu. Na rovnakom princípe fungujú aj deformačné zóny karosérie.",
+      "recall": {
+        "q": "Ako airbag zmenšuje silu pôsobiacu na telo?",
+        "a": "Predĺži čas, za ktorý telo stratí hybnosť, a tým zmenší silu."
+      },
+      "tags": ["hybnosť", "bezpečnosť"]
+    },
+    {
+      "id": "fyzika-mechanika.sila-a-pohyb.trenie",
+      "topicId": "fyzika-mechanika.sila-a-pohyb",
+      "type": "concept",
+      "difficulty": 3,
+      "order": 9,
+      "title": "Trenie: statické a šmykové",
+      "body": "Trecia sila pôsobí proti vzájomnému pohybu dotýkajúcich sa plôch. Statické trenie drží teleso na mieste a rastie spolu s ťahom až po svoje maximum. Keď teleso skĺzne, pôsobí menšie šmykové trenie. Preto je ťažšie skriňu rozhýbať ako ju potom tlačiť. Trenie závisí od prítlačnej sily a od materiálov, takmer vôbec od veľkosti styčnej plochy.",
+      "simple": "Kým vec stojí, drží ju trenie pevnejšie, než keď sa už šmýka.",
+      "terms": {
+        "en": "static and kinetic friction",
+        "de": "die Haftreibung, die Gleitreibung"
+      },
+      "recall": {
+        "q": "Ktoré trenie je väčšie, statické alebo šmykové?",
+        "a": "Maximálne statické trenie je väčšie ako šmykové, preto je ťažšie teleso rozhýbať."
+      },
+      "quiz": {
+        "question": "Prečo ABS na mokrej ceste skracuje brzdnú dráhu?",
+        "options": [
+          "Zväčšuje styčnú plochu pneumatík",
+          "Drží kolesá na hranici statického trenia",
+          "Presúva hmotnosť auta na predné kolesá"
+        ],
+        "correctIndex": 1,
+        "explanation": "Koleso, ktoré sa neblokuje, využíva statické trenie. To je väčšie ako šmykové trenie zablokovaného kolesa."
+      },
+      "tags": ["trenie", "sila"]
+    },
+    {
+      "id": "fyzika-mechanika.sila-a-pohyb.kviz-zrazka",
+      "topicId": "fyzika-mechanika.sila-a-pohyb",
+      "type": "quiz",
+      "difficulty": 3,
+      "order": 10,
+      "title": "Zrážka dvoch vozíkov",
+      "question": "Vozík s hmotnosťou 2 kg ide rýchlosťou 3 m/s, narazí do stojaceho vozíka s hmotnosťou 1 kg a spoja sa. Akou rýchlosťou pokračujú?",
+      "options": ["1 m/s", "1,5 m/s", "2 m/s", "3 m/s"],
+      "correctIndex": 2,
+      "explanation": "Hybnosť sa zachováva: 2 kg · 3 m/s = 6 kg·m/s. Spojené vozíky majú 3 kg, teda 6 / 3 = 2 m/s.",
+      "tags": ["hybnosť", "výpočet"]
+    },
+    {
+      "id": "fyzika-mechanika.rotacia.moment-sily",
+      "topicId": "fyzika-mechanika.rotacia",
+      "type": "concept",
+      "difficulty": 2,
+      "order": 1,
+      "title": "Moment sily",
+      "body": "Otáčavý účinok sily závisí nielen od jej veľkosti, ale aj od ramena, teda od kolmej vzdialenosti sily od osi otáčania. Moment sily je ich súčin a meria sa v newtonmetroch. Dlhší kľúč preto povolí skrutku, s ktorou si krátky neporadí. Sila, ktorá mieri priamo do osi, má nulové rameno a neotáča vôbec.",
+      "simple": "Čím ďalej od osi tlačíš, tým ľahšie vecou otočíš.",
+      "terms": { "en": "torque (moment of force)", "de": "das Drehmoment" },
+      "recall": {
+        "q": "Od čoho závisí moment sily?",
+        "a": "Od veľkosti sily a od jej ramena, teda kolmej vzdialenosti od osi otáčania."
+      },
+      "quiz": {
+        "question": "Skrutku treba dotiahnuť momentom 60 N·m. Akou silou treba kolmo tlačiť na koniec kľúča dlhého 0,3 m?",
+        "options": ["18 N", "60 N", "180 N", "200 N"],
+        "correctIndex": 3,
+        "explanation": "M = F · r, teda F = 60 N·m / 0,3 m = 200 N."
+      },
+      "tags": ["moment sily", "rotácia"]
+    },
+    {
+      "id": "fyzika-mechanika.rotacia.klucka-na-dverach",
+      "topicId": "fyzika-mechanika.rotacia",
+      "type": "did_you_know",
+      "difficulty": 2,
+      "order": 2,
+      "title": "Prečo je kľučka na okraji dverí",
+      "body": "Kľučka je čo najďalej od pántov, aby mala tvoja ruka čo najdlhšie rameno. Skús zatlačiť dvere tesne pri pántoch: potrebuješ niekoľkonásobne väčšiu silu, hoci dvere aj pánty sú tie isté. Rovnaký trik využíva páka, kliešte aj volant. Veľký moment vzniká z malej sily na dlhom ramene.",
+      "recall": {
+        "q": "Prečo sa dvere pri pántoch otvárajú ťažko?",
+        "a": "Sila tam má krátke rameno, takže na rovnaký moment treba oveľa väčšiu silu."
+      },
+      "tags": ["moment sily", "páka"]
+    },
+    {
+      "id": "fyzika-mechanika.rotacia.pohybova-rovnica-rotacie",
+      "topicId": "fyzika-mechanika.rotacia",
+      "type": "formula",
+      "difficulty": 3,
+      "order": 3,
+      "title": "Pohybová rovnica rotácie",
+      "latex": "M = J\\,\\varepsilon",
+      "legend": [
+        { "symbol": "M", "meaning": "výsledný moment síl vzhľadom na os", "unit": "N·m" },
+        { "symbol": "J", "meaning": "moment zotrvačnosti telesa", "unit": "kg·m²" },
+        { "symbol": "\\varepsilon", "meaning": "uhlové zrýchlenie", "unit": "rad/s²" }
+      ],
+      "body": "Rotačná obdoba druhého Newtonovho zákona. Moment zotrvačnosti hrá úlohu hmotnosti: čím je väčší, tým väčší moment treba na rovnaké uhlové zrýchlenie. Podľa tejto rovnice sa dimenzuje motor na rozbeh záťaže.",
+      "example": "Motor s momentom 2 N·m roztáča zotrvačník s J = 0,5 kg·m² so zrýchlením 4 rad/s².",
+      "terms": {
+        "en": "equation of rotational motion",
+        "de": "das Grundgesetz der Drehbewegung"
+      },
+      "recall": {
+        "q": "Čo je rotačnou obdobou vzťahu F = m·a?",
+        "a": "M = J·ε: moment síl sa rovná momentu zotrvačnosti krát uhlové zrýchlenie."
+      },
+      "tags": ["rotácia", "moment zotrvačnosti"]
+    },
+    {
+      "id": "fyzika-mechanika.rotacia.kviz-rozlozenie-hmoty",
+      "topicId": "fyzika-mechanika.rotacia",
+      "type": "quiz",
+      "difficulty": 3,
+      "order": 4,
+      "title": "Kde je hmota, tam je zotrvačnosť",
+      "question": "Dve kolesá majú rovnakú hmotnosť aj priemer. Jedno má hmotu sústredenú pri obvode, druhé pri strede. Ktoré sa roztáča ťažšie?",
+      "options": ["To s hmotou pri obvode", "To s hmotou pri strede", "Obe rovnako"],
+      "correctIndex": 0,
+      "explanation": "Moment zotrvačnosti rastie s druhou mocninou vzdialenosti hmoty od osi. Hmota pri obvode preto kladie roztáčaniu väčší odpor.",
+      "tags": ["moment zotrvačnosti", "rotácia"]
+    },
+    {
+      "id": "fyzika-mechanika.rotacia.moment-zotrvacnosti",
+      "topicId": "fyzika-mechanika.rotacia",
+      "type": "concept",
+      "difficulty": 3,
+      "order": 5,
+      "title": "Moment zotrvačnosti",
+      "body": "Moment zotrvačnosti vyjadruje, ako veľmi sa teleso bráni zmene otáčania. Závisí od hmotnosti aj od toho, ako ďaleko od osi je rozložená: každý kúsok hmoty prispieva súčinom svojej hmotnosti a druhej mocniny vzdialenosti od osi. To isté teleso má preto pre rôzne osi rôzny moment zotrvačnosti. Plný valec s hmotnosťou m a polomerom r má okolo svojej osi J = ½·m·r².",
+      "simple": "Ťažké veci ďaleko od osi sa roztáčajú a zastavujú najťažšie.",
+      "terms": { "en": "moment of inertia", "de": "das Trägheitsmoment" },
+      "recall": {
+        "q": "Od čoho závisí moment zotrvačnosti telesa?",
+        "a": "Od hmotnosti a jej rozloženia okolo osi: vzdialenosť od osi sa počíta v druhej mocnine."
+      },
+      "tags": ["moment zotrvačnosti", "rotácia"]
+    },
+    {
+      "id": "fyzika-mechanika.rotacia.pirueta",
+      "topicId": "fyzika-mechanika.rotacia",
+      "type": "example",
+      "difficulty": 3,
+      "order": 6,
+      "title": "Krasokorčuliarka a pirueta",
+      "body": "Krasokorčuliarka začne piruetu s rozpaženými rukami a potom ich pritiahne k telu. Tým zmenší svoj moment zotrvačnosti. Keďže na ňu nepôsobí takmer žiadny vonkajší moment, moment hybnosti sa zachováva a uhlová rýchlosť musí vzrásť. Roztočí sa rýchlejšie bez toho, aby sa znova odrazila. Rovnako zrýchli otáčanie skokan do vody, keď sa zbalí.",
+      "recall": {
+        "q": "Prečo sa krasokorčuliarka po pritiahnutí rúk točí rýchlejšie?",
+        "a": "Zmenší moment zotrvačnosti a moment hybnosti sa zachováva, takže uhlová rýchlosť vzrastie."
+      },
+      "tags": ["moment hybnosti", "zákony zachovania"]
+    },
+    {
+      "id": "fyzika-mechanika.rotacia.vykon-na-hriadeli",
+      "topicId": "fyzika-mechanika.rotacia",
+      "type": "formula",
+      "difficulty": 3,
+      "order": 7,
+      "title": "Výkon na hriadeli",
+      "latex": "P = M\\,\\omega",
+      "legend": [
+        { "symbol": "P", "meaning": "mechanický výkon", "unit": "W" },
+        { "symbol": "M", "meaning": "krútiaci moment", "unit": "N·m" },
+        { "symbol": "\\omega", "meaning": "uhlová rýchlosť", "unit": "rad/s" }
+      ],
+      "body": "Výkon rotujúceho hriadeľa je súčin momentu a uhlovej rýchlosti. Ten istý výkon sa dá dodať ako veľký moment pri nízkych otáčkach alebo malý moment pri vysokých. Otáčky za minútu prepočítaš na rad/s vynásobením 2π/60.",
+      "example": "Motor s momentom 10 N·m pri 3 000 ot/min (314 rad/s) dáva výkon približne 3,1 kW.",
+      "terms": { "en": "shaft power", "de": "die Wellenleistung" },
+      "recall": {
+        "q": "Ako vypočítaš výkon na hriadeli?",
+        "a": "P = M·ω, teda krútiaci moment krát uhlová rýchlosť v rad/s."
+      },
+      "tags": ["výkon", "pohony"]
+    },
+    {
+      "id": "fyzika-mechanika.rotacia.mytus-prevodovka",
+      "topicId": "fyzika-mechanika.rotacia",
+      "type": "myth",
+      "difficulty": 3,
+      "order": 8,
+      "title": "Zvyšuje prevodovka výkon motora?",
+      "statement": "Prevodovka do pomala zvyšuje výkon motora.",
+      "isTrue": false,
+      "explanation": "Prevod do pomala znásobí moment a rovnakým pomerom zníži otáčky. Ich súčin, teda výkon, sa nezväčší. Pre straty trením je na výstupe dokonca o niečo menší.",
+      "tags": ["prevody", "výkon"]
+    },
+    {
+      "id": "fyzika-mechanika.rotacia.redukovana-zotrvacnost",
+      "topicId": "fyzika-mechanika.rotacia",
+      "type": "concept",
+      "difficulty": 4,
+      "order": 9,
+      "title": "Prevod a zotrvačnosť záťaže",
+      "body": "Prevodovka s prevodovým pomerom i zníži otáčky i-krát a rovnako zvýši moment. Mení aj to, akú zotrvačnosť motor „cíti“: moment zotrvačnosti záťaže sa na hriadeľ motora prepočíta delením i². Záťaž za prevodom s i = 10 sa teda motoru javí stokrát ľahšia. Pri návrhu servopohonu sa preto prevod volí tak, aby bola prepočítaná zotrvačnosť záťaže porovnateľná so zotrvačnosťou motora.",
+      "simple": "Cez prevod sa motoru zdá ťažká záťaž oveľa ľahšia na roztočenie.",
+      "terms": { "en": "reflected inertia", "de": "das reduzierte Trägheitsmoment" },
+      "recall": {
+        "q": "Ako sa prepočíta moment zotrvačnosti záťaže na hriadeľ motora?",
+        "a": "Vydelí sa druhou mocninou prevodového pomeru i."
+      },
+      "quiz": {
+        "question": "Záťaž má moment zotrvačnosti 0,8 kg·m² a je za prevodom s pomerom i = 20. Akú zotrvačnosť cíti motor?",
+        "options": ["0,002 kg·m²", "0,04 kg·m²", "0,8 kg·m²", "16 kg·m²"],
+        "correctIndex": 0,
+        "explanation": "Zotrvačnosť sa delí i²: 0,8 / 20² = 0,8 / 400 = 0,002 kg·m²."
+      },
+      "tags": ["prevody", "servopohony"]
+    },
+    {
+      "id": "fyzika-mechanika.rotacia.kviz-moment-z-vykonu",
+      "topicId": "fyzika-mechanika.rotacia",
+      "type": "quiz",
+      "difficulty": 3,
+      "order": 10,
+      "title": "Moment z výkonu a otáčok",
+      "question": "Elektromotor má výkon 1,5 kW pri 1 500 ot/min. Aký je približne jeho krútiaci moment?",
+      "options": ["1 N·m", "4,8 N·m", "9,5 N·m", "95 N·m"],
+      "correctIndex": 2,
+      "explanation": "ω = 1 500 · 2π/60 ≈ 157 rad/s. M = P / ω = 1 500 W / 157 rad/s ≈ 9,5 N·m.",
+      "tags": ["výkon", "výpočet"]
+    }
+  ]
+}

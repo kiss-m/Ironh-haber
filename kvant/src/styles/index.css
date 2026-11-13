@@ -1,0 +1,196 @@
+@import 'tailwindcss';
+@import './fonts.css';
+
+/*
+ * Design tokens.
+ *
+ * Colours are semantic and switch with the theme: components say `bg-surface` or `text-muted`
+ * and never name a hue. Tailwind's default palette is removed so that nothing bypasses them.
+ * Every text colour keeps at least AA contrast (4.5:1) on bg, surface and raised in both themes.
+ */
+@theme {
+  --color-*: initial;
+
+  --font-sans: 'Atkinson Hyperlegible Next Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /*
+   * Type scale in rem, so it follows the system font size. `text-base` is the body size:
+   * 18 px at the default root size. `text-xs` is for short labels only.
+   *
+   * The sizes above the body size are also capped against the width of the screen. Body text
+   * grows with the system font without limit. A title that did the same would, at 200 %, hold
+   * one word per line on a phone. On a 360 px screen the caps are 36, 36, 40, 45 and 52 px,
+   * all above the default sizes, so they only bite once the font is enlarged.
+   */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.3;
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.45;
+  --text-base: 1.125rem;
+  --text-base--line-height: 1.55;
+  --text-lg: min(1.3125rem, 10vw);
+  --text-lg--line-height: 1.4;
+  --text-xl: min(1.5rem, 10vw);
+  --text-xl--line-height: 1.3;
+  --text-2xl: min(1.875rem, 11vw);
+  --text-2xl--line-height: 1.2;
+  --text-3xl: min(2.375rem, 12.5vw);
+  --text-3xl--line-height: 1.1;
+  --text-4xl: min(3rem, 14.5vw);
+  --text-4xl--line-height: 1.05;
+}
+
+@theme inline {
+  --color-bg: var(--kv-bg);
+  --color-surface: var(--kv-surface);
+  --color-raised: var(--kv-raised);
+  --color-line: var(--kv-line);
+  --color-fg: var(--kv-fg);
+  --color-muted: var(--kv-muted);
+  /* `accent` is a fill, `accent-fg` is the accent as a text colour, `on-accent` sits on a fill. */
+  --color-accent: var(--kv-accent);
+  --color-accent-fg: var(--kv-accent-fg);
+  --color-on-accent: var(--kv-on-accent);
+  /* Right and wrong answers, and error messages. Both are safe as text colours. */
+  --color-good: var(--kv-good);
+  --color-bad: var(--kv-bad);
+  /* One colour per character attribute. */
+  --color-attr-t: var(--kv-attr-t);
+  --color-attr-r: var(--kv-attr-r);
+  --color-attr-b: var(--kv-attr-b);
+  --color-attr-m: var(--kv-attr-m);
+  --color-attr-w: var(--kv-attr-w);
+  --color-attr-j: var(--kv-attr-j);
+}
+
+/* Dark is the default theme. index.html sets data-theme before the first paint. */
+:root {
+  color-scheme: dark;
+  --kv-bg: #0b0d12;
+  --kv-surface: #141821;
+  --kv-raised: #1d2230;
+  --kv-line: #2b3243;
+  --kv-fg: #f1eee6;
+  --kv-muted: #a6afbf;
+  --kv-accent: #ffc247;
+  --kv-accent-fg: #ffc247;
+  --kv-on-accent: #1b1403;
+  --kv-good: #5fd98a;
+  --kv-bad: #ff8f85;
+  --kv-attr-t: #6aa5ff;
+  --kv-attr-r: #ff8266;
+  --kv-attr-b: #3ddc97;
+  --kv-attr-m: #c19cff;
+  --kv-attr-w: #3ccbda;
+  --kv-attr-j: #ff7eb6;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --kv-bg: #f5f2ea;
+  --kv-surface: #fffdf8;
+  --kv-raised: #ebe6da;
+  --kv-line: #d6cfc0;
+  --kv-fg: #14171f;
+  --kv-muted: #535a68;
+  --kv-accent: #ffb829;
+  --kv-accent-fg: #8a5300;
+  --kv-on-accent: #1b1403;
+  --kv-good: #0c6e3d;
+  --kv-bad: #b3261e;
+  --kv-attr-t: #2563d9;
+  --kv-attr-r: #bd3a1b;
+  --kv-attr-b: #09754f;
+  --kv-attr-m: #7446d6;
+  --kv-attr-w: #09707f;
+  --kv-attr-j: #c42a74;
+}
+
+@layer base {
+  /*
+   * The root font size stays unset on purpose. <meta name="text-scale"> and the browser's own
+   * font-size setting scale the root size, and every size in the app is in rem.
+   */
+  html {
+    background-color: var(--kv-bg);
+    /* A vertical swipe is the app's main gesture: no pull-to-refresh, no scroll chaining. */
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--kv-bg);
+    color: var(--kv-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /*
+   * A word that is longer than its line breaks, instead of pushing the page sideways. That
+   * takes a much enlarged system font or a very long technical term.
+   */
+  h1,
+  h2,
+  h3,
+  p,
+  li,
+  dt,
+  dd {
+    overflow-wrap: break-word;
+  }
+
+  :focus-visible {
+    outline: 0.125rem solid var(--kv-accent-fg);
+    outline-offset: 0.125rem;
+    border-radius: 0.25rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/*
+ * The side gutter of a screen: 20 px, and no wider when the system font is enlarged. Large text
+ * needs the width more than the margins do.
+ */
+@utility px-gutter {
+  padding-inline: min(1.25rem, 5.5vw);
+}
+
+/*
+ * The top row of a card holds the category name and the status corner side by side. Like the tab
+ * bar, it cannot grow with the system font size, or the two would run into each other. Inside
+ * this class, spacing and the two small text sizes are measured in a rem that is capped against
+ * the width of the screen. 4.6vw is 16.5 px on a 360 px screen, so the cap only bites once the
+ * font is enlarged.
+ */
+@utility top-row {
+  --kv-top-rem: min(1rem, 4.6vw);
+  --spacing: calc(var(--kv-top-rem) / 4);
+  --text-xs: calc(var(--kv-top-rem) * 0.8125);
+  --text-sm: var(--kv-top-rem);
+}
+
+/*
+ * KaTeX sets a display formula with a margin of a whole line above and below it. The formula
+ * block of a card brings its own padding. KaTeX's stylesheet sits in no cascade layer, so a
+ * utility class cannot override it. This rule can: it is outside the layers too, and more
+ * specific.
+ */
+.kv-formula .katex-display {
+  margin-block: 0.25rem;
+}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="sk" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- Lets the system font size scale every rem. The root font size must stay unset. -->
+    <meta name="text-scale" content="scale" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0b0d12" />
+    <meta
+      name="description"
+      content="Mikroučenie namiesto doomscrollingu: jedna karta, jedna myšlienka."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <title>Kvant</title>
+    <script>
+      // Applies the saved theme before the first paint. Keep the key and the colour in sync
+      // with src/app/storageKeys.ts and src/app/theme.ts.
+      try {
+        if (localStorage.getItem('kvant:theme') === 'light') {
+          document.documentElement.dataset.theme = 'light';
+          document.querySelector('meta[name="theme-color"]').content = '#f5f2ea';
+        }
+      } catch (error) {
+        // Storage can be blocked. The default dark theme stays.
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>Kvant potrebuje zapnutý JavaScript.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
